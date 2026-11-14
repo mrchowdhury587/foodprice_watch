@@ -3,9 +3,13 @@ import pandas as pd, yaml
 from .paths import ROOT, RAW, PROC, CONFIG_YAML
 CFG = yaml.safe_load(CONFIG_YAML.read_text())
 def raw(name): return RAW / name
-def panel():
+def panel(version=1):
+    """version=1: the earlier panel (stages S01-S11, unchanged). version=2: the extended panel of stage S22 (config/project.yaml panel_file)."""
     import numpy as np
-    p = pd.read_parquet(PROC / "tcb_v1.0_rebuilt.parquet"); p["log_price"] = np.log(p.Price_Avg); return p
+    if version == 1: path = PROC / "tcb_v1.0_rebuilt.parquet"
+    else:
+        from .project import panel_path; path = panel_path()
+    p = pd.read_parquet(path); p["log_price"] = np.log(p.Price_Avg); return p
 def item_meta():
     m = pd.read_csv(raw("item_meta.csv"))
     for c in ["first_date","last_date"]:

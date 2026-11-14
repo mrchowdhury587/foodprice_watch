@@ -46,6 +46,16 @@ python tools/tcb_append.py --base tcb_dhaka_daily_prices_2021_2026.csv --new CON
 
 Put the new CSV in `MyDrive/FoodPriceWatch/inbox/project/` under the name set in `config/project.yaml` (`price_file`). S00 intake copies it into `data/raw/project/` and records its SHA-256; stage S22 builds the panel from it and checks that every date up to 2026-10-24 is unchanged. `data/raw/` is never edited by hand.
 
+## 5. Audit (work PC, needs openpyxl in `.venv`)
+
+```
+.venv\Scripts\python tools\tcb_audit.py --prices tcb_dhaka_daily_prices_2021_2026_v2.csv --sample audit_sample_2pct.csv --candidates audit_candidates.csv --corrections corrections.csv --originals "%USERPROFILE%\Downloads\TCB_Daily_RMP" --out-dir reports\project\tables
+```
+
+For each of the 1,530 sampled (date, item) rows it opens the original Excel file, finds the row by its Bangla name and unit, and compares today's minimum and maximum with the CSV. It reads the Excel file with openpyxl and does not use the converter, so a converter mistake would show. It measures transcription (file to CSV) only: a number TCB itself typed wrongly cannot be detected this way and stays flagged. Two things it handles: a workbook with spare sheets (the sheet carrying the report date is used) and the list of changed items at the bottom of a sheet (not part of the price table).
+
+Result 2026-11-15: 1,530 of 1,530 rows checked, 0 mismatches (95% upper bound 0.25% of rows); the 5 ginger candidates equal the original files, so they are kept and stay flagged. Three wrong prices planted in a copy were all found.
+
 ## Checks behind these tools (run 2026-11-15 on the work PC)
 
 1. Re-translating `Product_Bangla` and `Unit_Bangla` of all 76,440 rows of the base file with `tcb_convert.py` reproduces `Product` and `Unit` with 0 mismatches.

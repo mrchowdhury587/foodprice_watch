@@ -29,6 +29,20 @@ for name in EXTERNAL:
     if not dst.exists() and src.exists(): dst.parent.mkdir(parents=True, exist_ok=True); shutil.copy2(src, dst); print("copied", name)
     rows.append(dict(path=dst.relative_to(ROOT).as_posix(), source="user-held external", retrieved_at=log.get(name, "unknown"), bytes=dst.stat().st_size if dst.exists() else "",
                      sha256=h(dst) if dst.exists() else "", status="present" if dst.exists() else "MISSING"))
+# optional extra project files of the prediction-system track (config/project.yaml extra_raw_files), e.g. the extended price CSV.
+# Listed only when supplied, so the 32 original files and their check are unaffected. An existing data/raw file is never replaced.
+try:
+    import yaml
+    extra = yaml.safe_load((ROOT / "config/project.yaml").read_text(encoding="utf-8")).get("extra_raw_files", [])
+except Exception as e:
+    extra = []; print("note: config/project.yaml not read, no extra files taken in:", e)
+for name in extra:
+    src, dst = inbox / "project" / name, raw / "project" / name
+    if not dst.exists() and src.exists(): shutil.copy2(src, dst); print("copied", name)
+    if dst.exists():
+        rows.append(dict(path=dst.relative_to(ROOT).as_posix(), source="project file (extended, optional)", retrieved_at=log.get(name, "unknown"), bytes=dst.stat().st_size,
+                         sha256=h(dst), status="present"))
+    else: print("optional file not supplied yet:", name)
 orig = list((inbox / "tcb_originals").glob("*")) if (inbox / "tcb_originals").exists() else []
 man = raw / "MANIFEST.csv"; man.parent.mkdir(parents=True, exist_ok=True)
 with open(man, "w", newline="") as f:
