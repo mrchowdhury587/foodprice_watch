@@ -19,3 +19,8 @@
 - The patch for commit d8f67f0 was not found on the work PC; tools/tcb_convert.py taken from Downloads/BD_Food_Price_Watch.zip (wrapper added), tools/tcb_append.py extended, docs/DATA_COLLECTION.md and tests/test_tools_append.py added.
 - Verified on the work PC: re-translation of all 76,440 rows gives 0 Product/Unit mismatches; base cut at 2026-09-30 plus converter output to 2026-10-24 rebuilds the base file byte for byte; conversion is repeatable.
 - Seen, not yet used: the folder now converts to 1,430 report days (18 new, 2026-10-25 to 2026-11-12, 60 rows each, all names translated). Three of the new dates are a Friday or Saturday (10-30, 10-31, 11-06): to be checked in S22 before the extended file is accepted.
+
+## 2026-11-15 - step 2 (S22) code and work-PC part, branch v2/step-2
+- Extended price file built on the work PC: 77,520 rows, 1,430 report days to 2026-11-12 (sha256 0159e1f4...); earlier rows byte-identical to the base file. The Friday/Saturday dates among the new days are genuine: TCB reports seven days a week and each file heading names its date (serials 265-282).
+- Audit (tools/tcb_audit.py): 1,530 of 1,530 sampled rows checked against the original Excel files, 0 mismatches; the 5 ginger candidates equal the originals (kept, still flagged). Three planted errors were all found.
+- s22_panel.py tested on a scratch copy with the real files: all invariants pass. NOT yet run on Drive: S22 stays pending until the Colab output is pasted.
