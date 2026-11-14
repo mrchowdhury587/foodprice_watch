@@ -19,13 +19,13 @@ File: `reports/project/tables/P2_audit_summary.csv` (detail per value: `P2_audit
 | rows not checked (file or row not found) | 0 |
 | rows with a mismatch | 0 |
 | row error rate | 0.0 |
-| "row error rate, Wilson 95% low" | 0.0 |
-| "row error rate, Wilson 95% high" | 0.0025 |
+| row error rate, Wilson 95% low | 0.0 |
+| row error rate, Wilson 95% high | 0.0025 |
 | price cells checked (Min and Max) | 3060 |
 | price cells with a mismatch | 0 |
 | cell error rate | 0.0 |
-| "cell error rate, Wilson 95% low" | 0.0 |
-| "cell error rate, Wilson 95% high" | 0.00125 |
+| cell error rate, Wilson 95% low | 0.0 |
+| cell error rate, Wilson 95% high | 0.00125 |
 | cells that are hand corrections (not errors) | 0 |
 | rows where the sheet date could not be confirmed | 0 |
 | rows where the CSV differs from the stored sample value | 0 |
