@@ -14,3 +14,8 @@
 - Project reframed as a prediction system; stages S22-S33 appended to state/stages.json; settings in config/project.yaml; AGENTS.md, SPEC.md, DECISIONS.md (D13-D17), DEVIATIONS.md updated; repo URL fixed in README.md and the Colab notebook.
 - Not done: step 1 code (commit d8f67f0 was never pushed; waiting for step1_data_collection.patch from the user).
 - Colab note: DECISIONS.md is one of the S00 hashed outputs, so after pulling, re-run the S00 cell once (it re-finalizes S00) before any new stage.
+
+## 2026-11-15 - step 1 rebuilt on branch v2/step-1 (data collection tools)
+- The patch for commit d8f67f0 was not found on the work PC; tools/tcb_convert.py taken from Downloads/BD_Food_Price_Watch.zip (wrapper added), tools/tcb_append.py extended, docs/DATA_COLLECTION.md and tests/test_tools_append.py added.
+- Verified on the work PC: re-translation of all 76,440 rows gives 0 Product/Unit mismatches; base cut at 2026-09-30 plus converter output to 2026-10-24 rebuilds the base file byte for byte; conversion is repeatable.
+- Seen, not yet used: the folder now converts to 1,430 report days (18 new, 2026-10-25 to 2026-11-12, 60 rows each, all names translated). Three of the new dates are a Friday or Saturday (10-30, 10-31, 11-06): to be checked in S22 before the extended file is accepted.

@@ -6,7 +6,15 @@ converter has turned them into a CSV with the same 16 columns as
 tcb_dhaka_daily_prices_2021_2026.csv.
 
     python tools/tcb_append.py --base OLD.csv --new NEW_DAYS.csv --out COMBINED.csv
+    python tools/tcb_append.py --base OLD.csv --new CONVERTED.csv --out COMBINED.csv --after-last-base-date
 
+* --new may be the direct output of tools/tcb_convert.py: its 5 extra columns
+  (Year, Month, Weekday, Translation, Source_File) are dropped and numbers are
+  written the way the base file writes them (40.0).
+* --after-last-base-date uses only report days later than the last day of OLD.csv.
+  Use it when --new is a full re-conversion of the download folder: earlier days
+  are not compared, so the hand corrections already in OLD.csv are neither
+  reported as conflicts nor undone.
 * Python standard library only.
 * Never changes OLD.csv and never overwrites an existing --out file.
 * Stops (writes nothing) if the new file disagrees with the old one on a row
@@ -23,12 +31,30 @@ import sys
 
 KEY = ("Date", "Product", "Unit")
 PRICE = ("Price_Min", "Price_Max", "Price_Avg")
+CONVERTER_EXTRA = {"Year", "Month", "Weekday", "Translation", "Source_File"}   # written by tools/tcb_convert.py, not kept
+TEXT = {"Date", "Category", "Product", "Unit", "Product_Bangla", "Unit_Bangla"}
 
 
 def read(path):
     with open(path, encoding="utf-8-sig", newline="") as f:
         r = csv.DictReader(f)
         return r.fieldnames, list(r)
+
+
+def base_style(r):
+    """Write numbers the way the base file does (63000 -> 63000.0); text and blanks unchanged."""
+    out = {}
+    for c, v in r.items():
+        v = v or ""
+        if c not in TEXT:
+            v = v.strip()
+            if v:
+                try:
+                    v = repr(float(v))
+                except ValueError:
+                    pass
+        out[c] = v
+    return out
 
 
 def num(s):
@@ -86,13 +112,25 @@ def main():
     ap.add_argument("--new", required=True, help="CSV of newly converted report days")
     ap.add_argument("--out", required=True, help="combined CSV to write (must not exist)")
     ap.add_argument("--allow-new-series", action="store_true", help="accept Product|Unit pairs absent from --base")
+    ap.add_argument("--after-last-base-date", action="store_true",
+                    help="use only rows of --new dated after the last day in --base (for a full re-conversion)")
     a = ap.parse_args()
 
     if os.path.exists(a.out):
         sys.exit(f"STOP: {a.out} already exists; choose a new name (earlier files are never overwritten).")
     bh, base = read(a.base)
     nh, new = read(a.new)
-    if bh != nh:
+    dropped = [c for c in nh if c in CONVERTER_EXTRA and c not in bh]
+    if dropped:
+        nh = [c for c in nh if c not in dropped]
+    new = [base_style({c: r.get(c, "") for c in bh}) for r in new] if sorted(bh) == sorted(nh) else new
+    skipped_old = 0
+    if a.after_last_base_date:
+        last = max(r["Date"] for r in base)
+        kept = [r for r in new if r["Date"] > last]
+        skipped_old = len(new) - len(kept)
+        new = kept
+    if sorted(bh) != sorted(nh):
         sys.exit(f"STOP: column headers differ.\n  base: {bh}\n  new : {nh}")
 
     problems = check_rows(new, "new")
@@ -148,6 +186,10 @@ def main():
     add_dates = sorted({r["Date"] for r in add})
     all_dates = sorted(base_dates | set(add_dates))
     print(f"base rows            : {len(base)}  ({len(base_dates)} report days, last {max(base_dates)})")
+    if dropped:
+        print(f"converter columns dropped: {', '.join(dropped)}")
+    if a.after_last_base_date:
+        print(f"rows on or before the base file's last day (not used): {skipped_old}")
     print(f"rows already present : {identical}")
     print(f"rows added           : {len(add)}  ({len(add_dates)} new report days, {add_dates[0]} to {add_dates[-1]})")
     if new_series:
