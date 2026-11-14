@@ -1,6 +1,6 @@
 {
   "schema": "fpw-stages-v2",
-  "rules": "Agents may change only status, started_at, last_unit, units_done, output_sha256, git_commit, finished_at, notes. Never delete or reorder entries. Status: pending | in_progress | done | blocked | skipped (skipped only by a recorded user decision).",
+  "rules": "Agents may change only status, started_at, last_unit, units_done, output_sha256, git_commit, finished_at, notes. Never delete or reorder entries. Status: pending | in_progress | done | blocked | skipped (skipped only by a recorded user decision). New stages may be appended at the end (S22-S33 added 2026-11-15, docs/PROJECT_PLAN_2026-11-15.md).",
   "stages": [
     {
       "id": "S00",
@@ -337,6 +337,263 @@
         "reports/REVIEW.md"
       ],
       "checks": [],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S22",
+      "title": "Intake + panel on the extended price file, audit",
+      "depends_on": [
+        "S00"
+      ],
+      "outputs": [
+        "data/processed/tcb_v2_rebuilt.parquet",
+        "reports/project/tables/P2_audit.csv"
+      ],
+      "checks": [
+        "rows, series, dates reported",
+        "S01 invariants",
+        "v2 equals v1 up to 2026-10-24",
+        "audit error rate with Wilson 95% CI or not measured"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S23",
+      "title": "Features: kept drivers, exchange rate as input, configurable windows",
+      "depends_on": [
+        "S22"
+      ],
+      "outputs": [
+        "data/processed/features_v2.parquet"
+      ],
+      "checks": [
+        "leakage tests (weather +5 d, FX as-of)",
+        "no inf",
+        "kept columns equal v1 up to 2026-10-24"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S24",
+      "title": "Single-model code (horizon stacking)",
+      "depends_on": [
+        "S23"
+      ],
+      "outputs": [],
+      "checks": [
+        "one model predicts all four horizons",
+        "no target uses a missing or gap-period price"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S25",
+      "title": "Model selection on validation",
+      "depends_on": [
+        "S24"
+      ],
+      "outputs": [
+        "reports/project/tables/P5_model_selection.csv",
+        "state/selection_S25.json"
+      ],
+      "checks": [
+        "one table of validation scores",
+        "winner recorded before the test"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S26",
+      "title": "Optuna tuning of the winner",
+      "depends_on": [
+        "S25"
+      ],
+      "outputs": [
+        "reports/project/tables/P6_tuning_trials.csv",
+        "state/tuning_S26.json"
+      ],
+      "checks": [
+        "all trials saved",
+        "chosen setting confirmed on Oct-Dec 2024"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S27",
+      "title": "Pre-register, test once on 2025-26, full evaluation",
+      "depends_on": [
+        "S26"
+      ],
+      "outputs": [
+        "state/prereg_S27.yaml"
+      ],
+      "checks": [
+        "prereg committed before unsealing",
+        "one unsealing",
+        "evaluation tables and figures",
+        "RESULTS_REGISTER entries"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S28",
+      "title": "Ranges and alerts",
+      "depends_on": [
+        "S27"
+      ],
+      "outputs": [
+        "state/prereg_S28.yaml"
+      ],
+      "checks": [
+        "coverage, recall, false alarms reported",
+        "threshold from 2024 non-event periods"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S29",
+      "title": "Explanation (SHAP at four levels)",
+      "depends_on": [
+        "S28"
+      ],
+      "outputs": [],
+      "checks": [
+        "sign checks",
+        "per-alert breakdown",
+        "wording test"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S30",
+      "title": "Production model and exports",
+      "depends_on": [
+        "S29"
+      ],
+      "outputs": [],
+      "checks": [
+        "forecasts.parquet, alerts.csv, alert_drivers.csv exist with the documented columns"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S31",
+      "title": "Streamlit dashboard",
+      "depends_on": [
+        "S30"
+      ],
+      "outputs": [],
+      "checks": [
+        "runs locally from the three export files; no login, no database"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S32",
+      "title": "Update script",
+      "depends_on": [
+        "S30"
+      ],
+      "outputs": [],
+      "checks": [
+        "end-to-end run on the extended file"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
+    },
+    {
+      "id": "S33",
+      "title": "Docs",
+      "depends_on": [
+        "S30"
+      ],
+      "outputs": [],
+      "checks": [
+        "review by the user"
+      ],
       "status": "pending",
       "started_at": null,
       "last_unit": null,

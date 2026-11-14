@@ -1,6 +1,6 @@
 # Bangladesh Food Price Watch
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mehediparvez/foodprice_watch/blob/main/FoodPriceWatch_Colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/FoodPriceWatch_Colab.ipynb)
 
 Master's project (not a thesis): detect and explain unexplained food price rises in Dhaka, using TCB daily retail prices (63 items, May 2021 – Oct 2026) with world prices, exchange rate, fuel, weather, policy and event drivers.
 

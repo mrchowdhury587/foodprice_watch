@@ -1,0 +1,69 @@
+# config/project.yaml — settings for the prediction-system track (stages S22-S33).
+# config.yaml is frozen: the old run's unit markers record its hash. Every new setting lives here.
+# Source of these values: docs/PROJECT_PLAN_2026-11-15.md. TO_CONFIRM = open question, asked before the step that needs it.
+version: 2
+
+# ---- data (step 2, S22)
+price_file: tcb_dhaka_daily_prices_2021_2026_v2.csv   # data/raw/project/, arrives through inbox/project/
+panel_file: tcb_v2_rebuilt.parquet                    # data/processed/
+base_panel_file: tcb_v1.0_rebuilt.parquet             # the v2 panel must equal this on every date up to base_last_date
+base_last_date: "2026-10-24"
+extra_raw_files: [tcb_dhaka_daily_prices_2021_2026_v2.csv]   # added to MANIFEST by S00 intake when present
+
+# ---- features (step 3, S23)
+features_file: features_v2.parquet
+horizons: [1, 7, 14, 30]                              # report days
+features:
+  lags: [1, 7, 14, 30]                                # log change over the last k reports
+  rolling: [30]                                       # deviation from the k-report mean, k-report volatility
+  rolling_min_periods: 10
+  weather: [wx_bd_tmax_7d, wx_bd_tmean_30d, wx_bd_rain_7d]   # chosen on 2024 by the old run (reports/tables/T3.csv); not re-chosen
+  weather_lag_days: 5
+  fx_strata: [imported_staple, administered, spice]   # exchange rate is a model input for these item groups
+  carry_cap_days: 7                                   # a daily driver older than this is left empty (has_ flag = 0)
+  groups:                                             # used for the driver breakdown (step 9)
+    price_history: [lp, r*, dev*, vol*, rsc, item_code, stratum_code, horizon]
+    calendar: [month, dow, days_to_ramadan, days_to_eid_fitr, days_to_eid_adha, in_ramadan, holiday_next7, days_since_prev_report]
+    weather: [weather_1, weather_2, weather_3]
+    onion_export_measures: [own_export_measure]
+    exchange_rate: [fx_lvl, fx_ch30]
+
+# ---- validation and test (steps 5-7)
+validation:
+  period: TO_CONFIRM                                  # question 2: calendar 2024, or Jul 2023 - Dec 2024
+  tune: ["2024-01-01", "2024-09-30"]
+  confirm: ["2024-10-01", "2024-12-31"]
+test:
+  period: ["2025-01-01", "2026-10-24"]                # same as config.yaml split.test
+  first_cutoff: 808                                   # the same 87 forecast origins as the old run
+  last_cutoff: 1410
+  step: 7
+  refit_every_n_cutoffs: 8
+selection:
+  candidates: TO_CONFIRM                              # question 1
+  tie_margin: 0.01                                    # within this, the simpler model wins
+tuning:
+  trials: 50
+  search:
+    num_leaves: [4, 63]
+    learning_rate: [0.01, 0.1]
+    objective: [l1, huber, l2]
+
+# ---- ranges and alerts (step 8, S28)
+alerts:
+  horizon: 7
+  eval_start: "2023-06-01"
+  refit_every: 30
+  window: 120                                         # last forecast errors per item
+  min_obs: 30
+  levels: [0.9, 0.95, 0.975, 0.99]                    # the level is chosen on 2024 non-event periods only
+  fa_target_per_item_year: 2.0
+  persistence: {k: 3, m: 5}
+  event_window_days: {before_onset: 14, after_peak: 30}
+
+# ---- outputs
+paths:
+  tables: reports/project/tables
+  figures: reports/project/figures
+  exports: outputs/export                             # forecasts.parquet, alerts.csv, alert_drivers.csv (not in git: TCB prices)
+  models: models                                      # not in git
