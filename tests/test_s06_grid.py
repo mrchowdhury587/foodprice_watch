@@ -1,6 +1,6 @@
 from pathlib import Path
 import pandas as pd, pytest, yaml, glob
-R = Path(__file__).resolve().parents[1]; T4 = R/"reports/tables/T4.csv"
+from fpw.paths import ROOT as R, CODE_ROOT; T4 = R/"reports/tables/T4.csv"
 pytestmark = pytest.mark.skipif(not T4.exists(), reason="S06 not scored")
 def test_units_complete():
     if not (R/"outputs/06_lgbm").exists(): pytest.skip("unit files live on Drive, not in this checkout")

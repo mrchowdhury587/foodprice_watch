@@ -87,3 +87,9 @@
 ## 2026-11-15 - simplify repeated notebook shell setup
 - Set working directory and absolute PYTHONPATH once per notebook using Colab magics. Checks/stages now use direct !python commands; package install uses %pip. S00 intake and finalization joined with && to avoid finalizing failed intake. Conditional clone/pull retains its Bash cell.
 - Verified exactly one directory/path setup in each notebook, ordinary Python syntax after excluding Colab magic lines, Bash syntax for clone/pull, and git diff --check. No Colab execution claimed. Stop and review command failures before running later cells.
+
+## 2026-11-15 - main-only GitHub and separate Colab artifact storage
+- Refreshed remote refs and confirmed every extra branch was already an ancestor of main. Deleted seven merged remote branches; local and origin now expose only main (plus origin/HEAD). No unique commits discarded.
+- Notebooks now clone main into a fresh temporary Colab directory; Drive is used only for persistent artifacts. Added FPW_ARTIFACT_ROOT with local-checkout default; code configuration and acceptance tests use CODE_ROOT. Runtime finalization writes Drive state without committing to its old Git checkout; legacy sealed stages are blocked from rerun in this mode.
+- Existing Drive files and old .git are not physically removed because this session cannot access Drive. They are not used for code updates; invalid/conflicted stage ledger stops initialization and needs recovery. No Colab stages run.
+- Verification: full check after storage changes PASS (32 passed, 31 skipped); after final intake/seal/registry adjustments targeted checks PASS (10 passed, 1 skipped). Notebook Python/Bash syntax and temporary main-only clone verified. Environment deviation logged. AGENTS.md review draft remains local.

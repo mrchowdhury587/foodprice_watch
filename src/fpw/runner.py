@@ -4,17 +4,19 @@ Skips done/blocked/skipped stages, refuses to start before its dependencies are 
 command, then finalizes (acceptance tests -> ledger -> PROGRESS.md -> commit). Standard library only.
 """
 import subprocess, sys
-from .paths import ROOT
+from .paths import ROOT, CODE_ROOT
 from .registry import STAGES
 from . import state
 
 
 def sh(cmd: str) -> int:
     print(f"\n$ {cmd}", flush=True)
-    return subprocess.run(cmd, shell=True, cwd=ROOT).returncode
+    return subprocess.run(cmd, shell=True, cwd=CODE_ROOT).returncode
 
 
 def git_commit(msg: str):
+    if ROOT != CODE_ROOT:
+        return  # Runtime state persists on Drive, never in the code checkout.
     subprocess.run("git add -A", shell=True, cwd=ROOT)
     subprocess.run(["git", "commit", "-qm", msg], cwd=ROOT)       # no-op when nothing changed
 
@@ -22,6 +24,8 @@ def git_commit(msg: str):
 def plan(sid: str):
     """The commands this stage would run now (used by --dry and by run)."""
     spec = STAGES[sid]
+    if ROOT != CODE_ROOT and 'prereg' in spec:
+        raise RuntimeError('Sealed legacy stages cannot be rerun in a separate-artifact runtime. Preserve existing seals and results.')
     steps = list(spec.get("before", []))
     if "prereg" in spec and not (ROOT / spec["prereg"][1]).exists():
         steps += [spec["prereg"][0], f"git add -A && git commit -qm '{spec['prereg_commit']}' || true"]

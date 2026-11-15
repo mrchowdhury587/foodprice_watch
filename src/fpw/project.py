@@ -4,9 +4,9 @@ config.yaml stays frozen (the old run's unit markers record its hash), so new se
 `need(key)` stops a stage that depends on a setting still marked TO_CONFIRM.
 """
 import yaml
-from .paths import ROOT, RAW, PROC
+from .paths import ROOT, RAW, PROC, CODE_ROOT
 
-PROJECT_YAML = ROOT / "config/project.yaml"
+PROJECT_YAML = CODE_ROOT / "config/project.yaml"
 PCFG = yaml.safe_load(PROJECT_YAML.read_text(encoding="utf-8"))
 
 

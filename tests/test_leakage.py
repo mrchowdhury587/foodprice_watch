@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 import numpy as np, pandas as pd, pytest
-R = Path(__file__).resolve().parents[1]; sys.path.insert(0, str(R/"src"))
+from fpw.paths import ROOT as R, CODE_ROOT; sys.path.insert(0, str(R/"src"))
 FP = R/"data/processed/features.parquet"
 pytestmark = pytest.mark.skipif(not FP.exists(), reason="S04 not run")
 from fpw import drivers as D

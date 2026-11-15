@@ -1,8 +1,8 @@
 import json, subprocess
 from pathlib import Path
-R = Path(__file__).resolve().parents[1]
+from fpw.paths import ROOT as R, CODE_ROOT
 def _commit_time(path):
-    out = subprocess.run(["git", "log", "-1", "--format=%cI", "--", path], cwd=R, capture_output=True, text=True).stdout.strip(); return out
+    out = subprocess.run(["git", "log", "-1", "--format=%cI", "--", path], cwd=CODE_ROOT, capture_output=True, text=True).stdout.strip(); return out
 def test_seals_after_prereg_commit():
     for s in (R/"state/seals").glob("S*.json"):
         rec = json.loads(s.read_text()); assert len(rec["unsealings"]) == 1, f"{s.name} unsealed {len(rec['unsealings'])}x"

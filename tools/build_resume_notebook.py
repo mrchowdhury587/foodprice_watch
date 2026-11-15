@@ -182,7 +182,7 @@ def git(*args):
     def code(source):
         return dict(cell_type='code', metadata={}, source=source, execution_count=None, outputs=[])
     content = [intro, markdown('## Connect Drive'), code(mount),
-               markdown('## Get the code: clone once, pull on later runs\nThe repository stays on Drive so saved artifacts survive runtime disconnects. An existing nonempty folder without Git needs review before cloning. Stop if Git reports an error; existing conflicts need resolution before continuing. No files are reset.'), code(pull),
+               markdown('## Get main from GitHub into temporary Colab storage\nCode is freshly cloned from main into temporary Colab storage. Drive is used only for persistent artifacts. The old Drive checkout is not pulled or changed.'), code(pull),
                markdown('## Initialize project runtime\nPersistent artifacts are saved under the Drive project folder.'), code(initialization)] + content[3:]
     # Notebook-facing execution uses Colab magics and Python entry points.
     for cell in content:
@@ -258,13 +258,52 @@ def run_python(path, *arguments, module=False):
         elif source.startswith('from pathlib import Path'):
             source = source.replace('os.chdir(ROOT)\n', '').replace("os.environ['PYTHONPATH'] = str(ROOT / 'src')\n", '')
             cell['source'] = '%cd /content/drive/MyDrive/FoodPriceWatch\n%env PYTHONPATH=/content/drive/MyDrive/FoodPriceWatch/src\n' + source
+    # GitHub supplies code; Drive is artifact storage, never a working checkout.
+    for cell in content:
+        if cell['cell_type'] != 'code':
+            continue
+        source = cell['source']
+        if source.startswith('%%bash') and 'REPO_URL=' in source:
+            cell['source'] = """%%bash
+set -e
+CODE_DIR=$(mktemp -d /content/foodprice_watch_code_XXXXXX)
+git clone --single-branch --branch main https://github.com/mrchowdhury587/foodprice_watch.git "$CODE_DIR"
+printf '%s' "$CODE_DIR" > /content/foodprice_watch_code_path
+"""
+        elif source.startswith('%cd '):
+            source = source[source.index('from pathlib import Path'):]
+            source = source.replace('import os, sys, json, hashlib, csv', 'import os, sys, json, hashlib, csv, shutil')
+            source = source.replace("assert (ROOT / 'src/fpw/runner.py').is_file(), 'Repository is missing on Drive'", """CODE_ROOT = Path('/content/foodprice_watch_code_path').read_text().strip()
+CODE_ROOT = Path(CODE_ROOT)
+os.chdir(CODE_ROOT)
+os.environ['PYTHONPATH'] = str(CODE_ROOT / 'src')
+os.environ['FPW_ARTIFACT_ROOT'] = str(ROOT)
+assert (CODE_ROOT / 'src/fpw/runner.py').is_file()
+ROOT.mkdir(parents=True, exist_ok=True)
+# Seed only missing supporting files. Existing Drive results/state stay intact.
+for directory in ['state', 'reports', 'config']:
+    for original in (CODE_ROOT / directory).rglob('*'):
+        if original.is_file():
+            destination = ROOT / original.relative_to(CODE_ROOT)
+            if not destination.exists():
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(original, destination)
+for name in ['DECISIONS.md', 'PROGRESS.md', 'DEVIATIONS.md']:
+    if not (ROOT / name).exists():
+        shutil.copy2(CODE_ROOT / name, ROOT / name)
+try:
+    json.loads((ROOT / 'state/stages.json').read_text())
+except ValueError as error:
+    raise RuntimeError('Drive stage ledger is invalid, possibly due to old merge conflicts. Preserve it and ask for recovery; do not run stages.') from error
+print('Code:', CODE_ROOT, '\\nArtifacts:', ROOT)""")
+            cell['source'] = source.replace("sys.path.insert(0, str(ROOT / 'src'))", "sys.path.insert(0, str(CODE_ROOT / 'src'))")
     assert all('run_python(' not in c['source'] and 'run_unit(' not in c['source'] and 'subprocess' not in c['source'] for c in content)
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     links.append(f'- [{name}.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/{name}.ipynb): {title}')
-index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
+index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. The old Drive checkout is no longer used for code. Preserve it until its unique edits and any conflicted artifact files have been recovered. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then clone the repository if missing or pull updates if it already exists. Code, data and persistent artifacts live under MyDrive/FoodPriceWatch. Package installation, checks and stage execution follow in separate sections. Existing nonempty folders without Git and conflicting Git changes require review; no files are reset. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then clone GitHub main into a fresh temporary Colab directory. Code lives in temporary storage; data, checkpoints, reports and stage state persist under MyDrive/FoodPriceWatch through FPW_ARTIFACT_ROOT. No Git operation runs against the old Drive repository. Keep that folder intact until its conflicting edits and artifacts have been reviewed. Package installation, checks and stage execution follow in separate sections. Invalid Drive ledger files stop initialization. Earlier sealed stages cannot be rerun in this separate-storage mode. Nothing in the old Drive checkout is deleted. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Five numbered notebooks and compatibility indexes generated.')

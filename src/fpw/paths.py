@@ -3,9 +3,11 @@
 Every module and script takes ROOT from here instead of recomputing it.
 """
 from pathlib import Path
+import os
 
-ROOT = Path(__file__).resolve().parents[2]
-CONFIG_YAML = ROOT / "config.yaml"
+CODE_ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(os.environ.get('FPW_ARTIFACT_ROOT', str(CODE_ROOT))).resolve()
+CONFIG_YAML = CODE_ROOT / "config.yaml"
 RAW = ROOT / "data/raw/project"          # read-only, hashed by S00
 RAW_EXTERNAL = ROOT / "data/raw/external"
 PROC = ROOT / "data/processed"

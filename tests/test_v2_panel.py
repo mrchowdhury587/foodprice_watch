@@ -5,8 +5,8 @@ import pytest
 pd = pytest.importorskip("pandas"); np = pytest.importorskip("numpy")
 import yaml
 from fpw import panel as P
-R = Path(__file__).resolve().parents[1]
-PC = yaml.safe_load((R / "config/project.yaml").read_text(encoding="utf-8"))
+from fpw.paths import ROOT as R, CODE_ROOT
+PC = yaml.safe_load((CODE_ROOT / "config/project.yaml").read_text(encoding="utf-8"))
 OUT = R / "data/processed" / PC["panel_file"]
 RAWP = R / "data/raw/project"
 

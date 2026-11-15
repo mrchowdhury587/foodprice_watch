@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 import pandas as pd, numpy as np, pytest
-R = Path(__file__).resolve().parents[1]
+from fpw.paths import ROOT as R, CODE_ROOT
 P = R/"data/processed/tcb_v1.0_rebuilt.parquet"
 pytestmark = pytest.mark.skipif(not P.exists(), reason="S01 not run")
 @pytest.fixture(scope="module")

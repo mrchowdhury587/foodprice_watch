@@ -3,6 +3,7 @@ import csv, json, subprocess, sys
 from pathlib import Path
 from .checkpoint import sha256
 from .state import ROOT, load, save
+from .paths import CODE_ROOT
 ok = True
 man = ROOT / "data/raw/MANIFEST.csv"
 if man.exists():
@@ -18,6 +19,6 @@ for s in d["stages"]:
                 print(f"{s['id']}: output {o} missing/changed -> pending"); s["status"] = "pending"; changed = True; ok = False
 if changed: save(d)
 print({s["id"]: s["status"] for s in d["stages"]})
-r = subprocess.run([sys.executable, "-m", "pytest", "-q", str(ROOT / "tests")], cwd=ROOT)
+r = subprocess.run([sys.executable, "-m", "pytest", "-q", str(CODE_ROOT / "tests")], cwd=CODE_ROOT)
 if r.returncode not in (0, 5): ok = False
 print("CHECK", "PASS" if ok else "FAIL"); sys.exit(0 if ok else 1)

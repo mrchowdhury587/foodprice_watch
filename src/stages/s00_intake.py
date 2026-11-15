@@ -4,6 +4,7 @@ import sys, csv, hashlib, shutil
 from pathlib import Path
 sys.path.insert(0, "src")
 from fpw.state import ROOT, update, load
+from fpw.paths import CODE_ROOT
 EXPECTED = ["TCB_Dhaka_Daily_Prices_2021-2026.xlsx", "audit_candidates.csv", "audit_sample_2pct.csv", "baseline_results_by_group.csv", "bb_fx_reserves_monthly.csv",
     "bb_remittance_monthly.csv", "bd_cyclones_floods.csv", "bd_disruption_events.csv", "bd_fishing_bans.csv", "bd_food_imports_mirror_comtrade_monthly_agg.csv",
     "bd_food_price_shocks.csv", "bd_fuel_price_events.csv", "bd_import_duty_changes.csv", "bd_import_figures_from_secondary_sources.csv", "bd_political_wage_events.csv",
@@ -33,7 +34,7 @@ for name in EXTERNAL:
 # Listed only when supplied, so the 32 original files and their check are unaffected. An existing data/raw file is never replaced.
 try:
     import yaml
-    extra = yaml.safe_load((ROOT / "config/project.yaml").read_text(encoding="utf-8")).get("extra_raw_files", [])
+    extra = yaml.safe_load((CODE_ROOT / "config/project.yaml").read_text(encoding="utf-8")).get("extra_raw_files", [])
 except Exception as e:
     extra = []; print("note: config/project.yaml not read, no extra files taken in:", e)
 for name in extra:

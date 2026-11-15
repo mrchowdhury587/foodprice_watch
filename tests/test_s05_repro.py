@@ -1,6 +1,6 @@
 from pathlib import Path
 import pandas as pd, pytest, hashlib, csv
-R = Path(__file__).resolve().parents[1]; D = R/"outputs/05_baseline/repro_diff_ALL.csv"
+from fpw.paths import ROOT as R, CODE_ROOT; D = R/"outputs/05_baseline/repro_diff_ALL.csv"
 pytestmark = pytest.mark.skipif(not D.exists(), reason="S05 not scored")
 def test_within_tolerance_or_explained():
     d = pd.read_csv(D); bad = d[d["diff"].abs() > 0.02]
