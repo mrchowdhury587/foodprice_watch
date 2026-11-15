@@ -3,3 +3,4 @@
 *.yaml text eol=lf
 Makefile text eol=lf
 *.ipynb text eol=lf
+PROGRESS.md merge=union
