@@ -157,18 +157,24 @@ for name, title, body in groups:
         for sid, description in stages[name]:
             content.append(markdown(f'## {sid}: {description}\n**Not implemented yet.** No execution command is provided. Prerequisites and required decisions must be verified before this stage is implemented.'))
         content.append(markdown('Testing requires committed pre-registration and existing checkpoint enforcement. Do not rerun earlier sealed tests. Keep models, exports and data out of GitHub.'))
-    if name != '00_setup':
-        initialization = """assert (ROOT / 'src/fpw/runner.py').is_file(), 'Repository is missing; mount the existing project Drive folder first'
+    # Replace the old mount/setup prefix with two minimal connection cells.
+    mount = "from google.colab import drive\ndrive.mount('/content/drive')\n"
+    pull = "%%bash\nset -e\ncd /content/drive/MyDrive/FoodPriceWatch\ngit pull --no-rebase origin main\n"
+    initialization = """from pathlib import Path
+import os, sys, subprocess, json, hashlib, csv
+ROOT = Path('/content/drive/MyDrive/FoodPriceWatch')
+assert (ROOT / 'src/fpw/runner.py').is_file(), 'Repository is missing on Drive'
 os.chdir(ROOT)
 os.environ['PYTHONPATH'] = str(ROOT / 'src')
 sys.path.insert(0, str(ROOT / 'src'))
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
 """
-        content.insert(3, dict(cell_type='code', metadata={}, source=initialization, execution_count=None, outputs=[]))
-    if name == '01_data_features':
-        content.insert(3, markdown('## Pull GitHub updates\nThe repository must already exist. Conflicts or diverged history require separate review.'))
-        content.insert(4, dict(cell_type='code', metadata={}, execution_count=None, outputs=[], source="subprocess.run(['git', 'pull', '--ff-only', 'origin', 'main'], cwd=ROOT, check=True)\n"))
+    def code(source):
+        return dict(cell_type='code', metadata={}, source=source, execution_count=None, outputs=[])
+    content = [intro, markdown('## Connect Drive'), code(mount),
+               markdown('## Pull repository updates\nStop if Git reports an error. Resolve conflicts before continuing; no files are reset.'), code(pull),
+               markdown('## Initialize project runtime\nPersistent artifacts are saved under the Drive project folder.'), code(initialization)] + content[3:]
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
@@ -176,5 +182,5 @@ def git(*args):
 index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\n01 mounts Drive and pulls GitHub changes before initializing the runtime and running data stages. The repository must already exist. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then git pull --no-rebase. Package installation, checks and stage execution follow in separate sections. The repository must already exist. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Five numbered notebooks and compatibility indexes generated.')

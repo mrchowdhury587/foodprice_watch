@@ -67,3 +67,7 @@
 ## 2026-11-15 - setup merged into notebook 01
 - User requested removal of separate setup notebook. Removed notebooks/00_setup.ipynb; notebook 01 now mounts Drive, pulls GitHub updates, then initializes packages/helpers and runs data stages. Updated generator, five notebooks, indexes and guide.
 - Verification: exactly five workflow notebooks; all code cells parse. No Colab execution claimed.
+
+## 2026-11-15 - consistent two-cell notebook connection
+- Implemented approved mount-Drive then plain git pull --no-rebase shell cell in all five notebooks. Runtime initialization, package installation, startup checks and stage execution remain separate. Persistent project paths remain on Drive.
+- Verified identical first two code cells in all five notebooks, parsed ordinary Python cells, checked shell cell against specified commands. IPython transformation validation unavailable locally (IPython not installed). No Colab execution or stage completion claimed.
