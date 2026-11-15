@@ -79,3 +79,7 @@
 ## 2026-11-15 - remove notebook subprocess calls
 - Replaced notebook subprocess imports/calls with Bash cells for dependency setup and Python entry points for checks/stages. Underlying pipeline process isolation remains unchanged. Model/data artifacts remain on Drive.
 - Verified no subprocess references in the five generated notebooks; ordinary Python cells parse and git diff --check passes. Colab execution not performed. AGENTS.md review draft left out of this commit.
+
+## 2026-11-15 - direct notebook Python commands
+- Updated all five notebooks to execute checks and stages using visible Bash cells with set -e and direct python commands. S00 runs intake and finalization directly; S22/S23 use python -m fpw.runner to preserve dependency checks. Summaries are separate read-only Python cells; redundant S00 runner call removed.
+- Verification: all ordinary Python cells parse, all Bash cells pass bash -n, no subprocess/run_python/run_unit execution wrappers in generated notebooks; git diff --check passes. No Colab execution claimed. AGENTS.md remains a local review draft.

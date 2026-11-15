@@ -215,6 +215,37 @@ def run_python(path, *arguments, module=False):
             source = source.replace("subprocess.run([sys.executable, 'src/stages/finalize.py', 'S00'], cwd=ROOT, check=True)", "run_python('src/stages/finalize.py', 'S00')")
         assert 'subprocess' not in source
         cell['source'] = source
+    # Execute scripts in fresh Python processes using visible notebook commands.
+    direct = []
+    prefix = '%%bash\nset -e\ncd /content/drive/MyDrive/FoodPriceWatch\nexport PYTHONPATH=src\n'
+    for cell in content:
+        if cell['cell_type'] != 'code':
+            direct.append(cell)
+            continue
+        source = cell['source']
+        if source.startswith("run_python('src/stages/s00_intake.py')"):
+            direct.append(code(prefix + 'python src/stages/s00_intake.py\npython src/stages/finalize.py S00\n'))
+            direct.append(code("summarize_unit('S00')\n"))
+            continue
+        if source.strip() in {"run_unit('S22')", "run_unit('S23')"}:
+            sid = 'S22' if 'S22' in source else 'S23'
+            direct.append(code(prefix + f'python -m fpw.runner {sid}\n'))
+            direct.append(code(f"summarize_unit('{sid}')\n"))
+            continue
+        if "run_python('fpw.check', module=True)" in source:
+            cleanup, summary = source.split("run_python('fpw.check', module=True)", 1)
+            direct.append(code(cleanup))
+            direct.append(code(prefix + 'python -m fpw.check\n'))
+            summary = summary.replace('def run_unit(sid):', 'def summarize_unit(sid):').replace("    from fpw.runner import run\n    assert run(sid) == 0, 'STOP: stage failed'\n", '')
+            direct.append(code(summary.lstrip()))
+            continue
+        source = source.replace('import os, sys, json, hashlib, csv, runpy', 'import os, sys, json, hashlib, csv')
+        if 'def run_python(' in source:
+            source = source.split('def run_python(', 1)[0]
+        cell['source'] = source
+        direct.append(cell)
+    content = direct
+    assert all('run_python(' not in c['source'] and 'run_unit(' not in c['source'] and 'subprocess' not in c['source'] for c in content)
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
