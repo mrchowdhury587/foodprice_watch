@@ -20,4 +20,7 @@ STAGES = {
         run=[f"{PY} src/stages/s23_features.py"],
         outputs=["data/processed/features_v2.parquet", "outputs/23_features/checks.json", "reports/project/tables/P3_driver_inventory.csv"],
         tests=["tests/test_v2_features.py", "tests/test_wording.py"]),
+    "S24": dict(
+        run=[f"{PY} src/stages/s24_model.py"],
+        outputs=["outputs/24_model/checks.json"], tests=["tests/test_ml_design.py"]),
 }
