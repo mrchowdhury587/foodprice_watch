@@ -1,9 +1,8 @@
-# Colab workflow
+# Colab notebook
 
-- [01_data_features.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/01_data_features.ipynb): Intake, panel, audit and features
-- [02_model_training.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/02_model_training.ipynb): Model implementation, selection and tuning
-- [03_evaluation.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/03_evaluation.ipynb): Sealed testing, ranges, alerts and explanations
-- [04_production.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/04_production.ipynb): Production exports, dashboard and updates
-- [05_results_documentation.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/05_results_documentation.ipynb): Results, limitations and documentation
+[run_stage.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/run_stage.ipynb) runs one stage (S00, S22, S23 today; later stages are added to the same notebook as they are implemented).
 
-Notebook 01 starts with two code cells: mount Drive, then clone or pull GitHub main in /content/foodprice_watch. Existing code is updated by fast-forward only; local conflicts stop the update without deleting edits. Code lives in temporary storage; data, checkpoints, reports and stage state persist under MyDrive/FoodPriceWatch through FPW_ARTIFACT_ROOT. No Git operation runs against the old Drive repository. Keep that folder intact until its conflicting edits and artifacts have been reviewed. Package installation, checks and stage execution follow in separate sections. Invalid Drive ledger files stop initialization. Earlier sealed stages cannot be rerun in this separate-storage mode. Nothing in the old Drive checkout is deleted. Only notebook 01 initializes storage, installs packages and runs startup checks. Notebooks 02-05 are planning pages with no executable cells. After reconnecting, initialize the selected notebook again. Future executable notebooks will reuse the same Drive state. Stop after each stage and paste output for review. The planning notebooks mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.
+How it works:
+- Code comes from GitHub `main`, cloned into `/content/foodprice_watch` every session.
+- Google Drive (`MyDrive/FoodPriceWatch`) holds data, outputs, models and stage state only. Set through `FPW_ARTIFACT_ROOT`.
+- Run the cells top to bottom, set `STAGE`, run the stage cell, paste the printed summary back, stop.

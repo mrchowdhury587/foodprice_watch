@@ -1,4 +1,4 @@
-"""Run a stage's acceptance tests and, only if they pass, mark it done in state/stages.json and append PROGRESS.md.
+"""Run a stage's acceptance tests and, only if they pass, mark it done in state/stages.json and append PROGRESS.md (no git commit).
 Usage: python src/stages/finalize.py S01 [note]"""
 import sys, subprocess, time
 sys.path.insert(0, "src")
@@ -14,7 +14,4 @@ if r.returncode != 0: print(f"NOT DONE — {sid} acceptance tests failed"); sys.
 finish(sid, outs, notes=note)
 with open(ROOT / "PROGRESS.md", "a") as f:
     f.write(f"\n## {time.strftime('%Y-%m-%d %H:%M')} — stage {sid} — finalized\n- Verified: pytest {' '.join(tests)} → pass\n" + (f"- Note: {note}\n" if note else ""))
-if ROOT == CODE_ROOT:
-    subprocess.run(["git", "add", "-A"], cwd=ROOT)
-    subprocess.run(["git", "commit", "-qm", f"{sid}: done [checks pass]"], cwd=ROOT)
-print(f"{sid} DONE" + (" and committed" if ROOT == CODE_ROOT else "; state saved to artifact storage"))
+print(f"{sid} DONE; state saved to {ROOT}")

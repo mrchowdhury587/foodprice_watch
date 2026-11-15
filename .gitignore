@@ -14,3 +14,8 @@ models/
 docs/reference/
 docs/report_sample/
 report_sample/
+# TCB price files must never be committed (public repo); derived tables under reports/ are fine
+*.csv
+!reports/**/*.csv
+!config/**/*.csv
+!archive/**/*.csv

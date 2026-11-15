@@ -39,15 +39,12 @@ DECISIONS.md, this file is newer: log each conflict in DEVIATIONS.md before acti
 
 ## 2. Environment and repository
 
-- Repo: `github.com/mrchowdhury587/foodprice_watch` (transferred from `mehediparvez/foodprice_watch`;
-  the README badge and notebook cell 2 still point to the old repo, so update them).
-- Runs in Google Colab under the `mehedi11908015` Google account, data and outputs on Google Drive
-  (`MyDrive/FoodPriceWatch/`), code cloned from GitHub. Every unit of work stays resumable
-  (atomic writes + `_SUCCESS.json` markers). User has a Google One plan; check whether it
-  includes Colab Pro before relying on faster machines.
-- **Push access:** the cloud session could not push (Claude GitHub App not installed on
-  `mrchowdhury587`). Step 1 exists as commit `d8f67f0` / `step1_data_collection.patch`; make sure
-  it is in the repo before building on it.
+- Repo: `github.com/mrchowdhury587/foodprice_watch`.
+- Runs in Google Colab under the `mehedi11908015` Google account. Code is cloned from GitHub `main` into
+  `/content/foodprice_watch` every session; data and outputs live on Google Drive (`MyDrive/FoodPriceWatch/`),
+  never code. Long jobs stay resumable (atomic writes + `_SUCCESS.json` markers). User has a Google One plan;
+  check whether it includes Colab Pro before relying on faster machines.
+- Push access works from the work PC; commits and pushes come from there, never from the Colab runtime.
 - **Do not edit config.yaml.** Its hash is stored in the S05 unit markers; editing it forces the
   ~2-hour classical-baseline rerun. New settings go in a new `config/project.yaml`.
 

@@ -1,7 +1,5 @@
 """The registry (code) and the ledger (state/stages.json) must agree; scripts and tests it names must exist."""
 import json, re
-import pytest
-from fpw.paths import ROOT as ARTIFACT_ROOT, CODE_ROOT
 from pathlib import Path
 from fpw.registry import STAGES
 from fpw import runner
@@ -21,25 +19,12 @@ def test_ledger_outputs_are_produced_by_registry_stage():
 
 def test_named_scripts_and_tests_exist():
     for sid, spec in STAGES.items():
-        cmds = spec.get("before", []) + spec["run"] + ([spec["prereg"][0]] if "prereg" in spec else [])
+        cmds = spec["run"]
         for c in cmds:
             m = re.search(r"(src/stages/\S+\.py)", c)
             assert m and (R / m.group(1)).exists(), (sid, c)
         for t in spec["tests"]:
             assert (R / t).exists(), (sid, t)
-
-
-def test_plan_orders_preregistration_before_the_test_is_unsealed():
-    if ARTIFACT_ROOT != CODE_ROOT:
-        with pytest.raises(RuntimeError, match='Sealed legacy stages'):
-            runner.plan('S06')
-        return
-    steps = runner.plan("S06")
-    if (R / "state/prereg_S06.yaml").exists():          # already pre-registered: the plan must not rewrite it
-        assert not any("s06_prereg" in s for s in steps)
-    else:
-        assert next(i for i, s in enumerate(steps) if "s06_prereg" in s) < next(i for i, s in enumerate(steps) if "s06_run" in s)
-    assert steps[-1].startswith("python src/stages/finalize.py S06")
 
 
 def test_notes_are_safe_on_a_shell_command_line():

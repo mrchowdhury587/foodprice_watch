@@ -105,3 +105,7 @@
 
 ## 2026-11-15 - remove duplicate notebook
 - Deleted FoodPriceWatch_Prediction_Resume.ipynb (byte-identical to FoodPriceWatch_Colab.ipynb); tools/build_resume_notebook.py now writes only FoodPriceWatch_Colab.ipynb. Checked with py_compile only; generator not run. Changes local, not committed.
+
+## 2026-11-15 — simplification refactor (local, not yet committed)
+- Done: removed Drive code-sync tooling, collapsed notebooks into notebooks/run_stage.ipynb, archived the earlier comparison track and stale docs under archive/, simplified runner/registry/finalize/paths, trimmed drivers.py, README/ARCHITECTURE/AGENTS/PLAN/HANDOVER updated, .gitignore blocks stray CSVs. Check: pytest 26 passed, 10 skipped (data-dependent tests skip without Drive files). Not run in Colab yet.
+- Not done: Colab dry run of notebooks/run_stage.ipynb; changes await commit and push (commit was denied by the permission classifier).

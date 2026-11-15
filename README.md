@@ -1,34 +1,30 @@
 # Bangladesh Food Price Watch
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/FoodPriceWatch_Colab.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/run_stage.ipynb)
 
-Master's project (not a thesis): detect and explain unexplained food price rises in Dhaka, using TCB daily retail prices (63 items, May 2021 – Oct 2026) with world prices, exchange rate, fuel, weather, policy and event drivers.
-
-| RQ | Question | Stage |
-|---|---|---|
-| RQ1 | Does any model beat "tomorrow = today"? | S05, S06 |
-| RQ2 | Which driver groups add value beyond persistence, and for which goods (with placebo control)? | S06 |
-| RQ3 | Do forecast-interval alerts flag the 12 documented shocks, at what false-alarm rate? | S07 |
-| RQ4 | How much of each rise is explained by measured cost drivers, and how much is not? | S09 |
-| RQ5 | Is a flagged rise national or local (WFP markets)? | S08 — blocked until WFP data is supplied |
+Master's project (not a thesis): a price-prediction system for TCB daily retail prices in Dhaka (63 items, May 2021 onward).
+For each item it forecasts the price 1, 7, 14 and 30 report days ahead with an expected range, raises an alert when the
+price stays above the range, and attaches a driver breakdown to each alert. One LightGBM model serves all items and horizons.
+Scope and "done": `SPEC.md`. Plan: `docs/PROJECT_PLAN_2026-11-15.md`. Stage status: `state/stages.json`, `PROGRESS.md`.
 
 ## Run it in Colab
 
-1. Click **Open in Colab** above.
-2. On Google Drive, create `MyDrive/FoodPriceWatch/inbox/project/` and put the 32 project data files there. Data is **not** in this public repo (TCB reuse terms are still unconfirmed).
-3. Run the cells top to bottom. Cell 2 clones this repo into `MyDrive/FoodPriceWatch/` the first time and pulls code updates afterwards.
+- **GitHub holds code only.** Every session the notebook clones `main` into `/content/foodprice_watch`.
+- **Google Drive holds data and outputs only**, in `MyDrive/FoodPriceWatch/` (`inbox/`, `data/`, `outputs/`, `models/`, `state/`). Data is not in this public repo (TCB reuse terms are unconfirmed).
 
-**Disconnects:** reconnect, run cells 1–4, then re-run the interrupted stage cell. Every unit of work is saved to Drive with a `_SUCCESS.json` marker, finished stages are skipped, and each test period can be unsealed only once.
+1. Put the project data files in `MyDrive/FoodPriceWatch/inbox/project/`.
+2. Click **Open in Colab**, run the cells top to bottom, set `STAGE`, run the stage cell, paste the summary back.
+
+After a disconnect, reconnect and run the same cells again; long jobs skip units already saved on Drive.
 
 ## Layout
 
-- `src/fpw/` shared library (paths, loaders, availability lags, checkpoints, benchmark metrics, alert rules, stage registry and runner)
-- `src/stages/sNN*.py` one script per stage step; `src/stages/finalize.py` runs a stage's tests, marks it done, commits
-- `tests/` acceptance tests (panel invariants, leakage, no ±inf, seals, wording, …)
-- `config/` settings, item→driver map, verified event dates
-- `tools/` user-run data collection helpers (not part of the pipeline); `docs/ARCHITECTURE.md` explains the layers
-- `state/` ledger (`stages.json`), pre-registrations and seals (written during runs)
-- `AGENTS.md`, `SPEC.md`, `DECISIONS.md`, `DEVIATIONS.md`, `PROGRESS.md`: the agent instruction set and the run log
-- `docs/` full instruction set, data inventory, prompts, reference notes
+- `src/fpw/` library: paths, loaders, panel, features, checkpoints, stage registry and runner
+- `src/stages/` one script per stage (S00 intake, S22 panel, S23 features); `finalize.py` runs a stage's tests and marks it done
+- `tests/` acceptance tests; `config/project.yaml` settings of the prediction system
+- `tools/` data collection helpers run on the work PC (convert, download, append, audit)
+- `state/` ledger, pre-registrations, seals; `reports/` tables, figures, results register
+- `archive/` frozen earlier comparison study (S00-S11) and retired instructions; not run
+- `AGENTS.md`, `SPEC.md`, `DECISIONS.md`, `DEVIATIONS.md`, `PROGRESS.md`, `docs/`: rules, scope, choices, log
 
-Author: to be confirmed (`config.yaml → author`).
+Author: to be confirmed (`config.yaml` author).
