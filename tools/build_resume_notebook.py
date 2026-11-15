@@ -119,10 +119,8 @@ for line in (ROOT / 'config/project.yaml').read_text().splitlines():
     if 'TO_CONFIRM' in line and not line.lstrip().startswith('#'):
         print(line)
 ''')
-notebook = dict(cells=cells, metadata=dict(kernelspec=dict(display_name='Python 3', language='python', name='python3'), language_info=dict(name='python'), colab=dict(name='FoodPriceWatch_Prediction_Resume.ipynb')), nbformat=4, nbformat_minor=4)
-target = ROOT / 'FoodPriceWatch_Prediction_Resume.ipynb'
-target.write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
-print('Notebook built; all code cells parse; outputs empty:', target.name)
+notebook = dict(cells=cells, metadata=dict(kernelspec=dict(display_name='Python 3', language='python', name='python3'), language_info=dict(name='python'), colab=dict(name='FoodPriceWatch_Colab.ipynb')), nbformat=4, nbformat_minor=4)
+print('Notebook built; all code cells parse; outputs empty.')
 # Keep the established GitHub/Colab notebook URL as the primary entry point.
 notebook['metadata']['colab']['name'] = 'FoodPriceWatch_Colab.ipynb'
 (ROOT / 'FoodPriceWatch_Colab.ipynb').write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
@@ -354,7 +352,6 @@ assert CHECKS_PASS, 'Startup check failed; fix it before running stages'
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     links.append(f'- [{name}.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/{name}.ipynb): {title}')
 index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\n01 contains the implemented workflow; 02-05 are planning pages without execution cells. The old Drive checkout is no longer used for code. Preserve it until its unique edits and any conflicted artifact files have been recovered. Training and testing are not completed by this reorganization.')])
-for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
-    (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
+(ROOT / 'FoodPriceWatch_Colab.ipynb').write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
 (directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nNotebook 01 starts with two code cells: mount Drive, then clone or pull GitHub main in /content/foodprice_watch. Existing code is updated by fast-forward only; local conflicts stop the update without deleting edits. Code lives in temporary storage; data, checkpoints, reports and stage state persist under MyDrive/FoodPriceWatch through FPW_ARTIFACT_ROOT. No Git operation runs against the old Drive repository. Keep that folder intact until its conflicting edits and artifacts have been reviewed. Package installation, checks and stage execution follow in separate sections. Invalid Drive ledger files stop initialization. Earlier sealed stages cannot be rerun in this separate-storage mode. Nothing in the old Drive checkout is deleted. Only notebook 01 initializes storage, installs packages and runs startup checks. Notebooks 02-05 are planning pages with no executable cells. After reconnecting, initialize the selected notebook again. Future executable notebooks will reuse the same Drive state. Stop after each stage and paste output for review. The planning notebooks mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Five numbered notebooks and compatibility indexes generated.')
