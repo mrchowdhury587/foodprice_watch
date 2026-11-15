@@ -296,13 +296,65 @@ except ValueError as error:
     raise RuntimeError('Drive stage ledger is invalid, possibly due to old merge conflicts. Preserve it and ask for recovery; do not run stages.') from error
 print('Code:', CODE_ROOT, '\\nArtifacts:', ROOT)""")
             cell['source'] = '%cd /content/foodprice_watch\n%env PYTHONPATH=/content/foodprice_watch/src\n' + source.replace("sys.path.insert(0, str(ROOT / 'src'))", "sys.path.insert(0, str(CODE_ROOT / 'src'))")
+    if name in stages:
+        # Unimplemented stages need no runtime setup or side effects.
+        content = [markdown(f'# {name[:2]}. {title}\n**Planning notebook: these stages are not implemented.** Start with notebook 01 for the executable data workflow.')]
+        content += [markdown(f'## {sid}: {description}\nPending implementation and verified prerequisites.') for sid, description in stages[name]]
+        if name == '02_model_training':
+            content.append(markdown('Confirm validation period and model candidates/winner rule before S25.'))
+        if name == '03_evaluation':
+            content.append(markdown('Testing requires committed pre-registration and seal enforcement. Do not rerun an earlier sealed test.'))
+    else:
+        for cell in content:
+            source = cell['source']
+            if cell['cell_type'] == 'markdown':
+                cell['source'] = source.replace('A failed check stops execution.', 'A failed check raises an error and blocks the stage cells below.')
+                continue
+            if source.startswith('%cd '):
+                cell['source'] = """%cd /content/foodprice_watch
+%env PYTHONPATH=/content/foodprice_watch/src
+%env FPW_ARTIFACT_ROOT=/content/drive/MyDrive/FoodPriceWatch
+from pathlib import Path
+import csv, hashlib, json, shutil
+ROOT = Path('/content/drive/MyDrive/FoodPriceWatch')
+for folder in ['inbox/project', 'inbox/external', 'data/processed', 'outputs',
+               'reports/tables', 'reports/figures', 'reports/project/tables',
+               'state', 'config', 'logs', 'models']:
+    (ROOT / folder).mkdir(parents=True, exist_ok=True)
+# First-run initialization only; never replace existing artifacts or seals.
+for name in ['state/stages.json', 'config/item_driver_map.yaml',
+             'DECISIONS.md', 'PROGRESS.md', 'DEVIATIONS.md',
+             'reports/project/tables/P2_audit.csv',
+             'reports/project/tables/P2_audit_summary.csv']:
+    if not (ROOT / name).exists():
+        shutil.copy2(name, ROOT / name)
+json.loads((ROOT / 'state/stages.json').read_text())
+CODE_COMMIT = !git rev-parse HEAD
+assert len(CODE_COMMIT) == 1 and len(CODE_COMMIT[0]) in (40, 64) and all(c in '0123456789abcdef' for c in CODE_COMMIT[0]), 'Cannot identify code revision'
+CODE_COMMIT = CODE_COMMIT[0]
+CHECKS_PASS = False
+stage_ok = {}
+"""
+            elif source.strip() == '!python -m fpw.check':
+                cell['source'] = """CHECKS_PASS = False
+stage_ok.clear()
+!python -m fpw.check
+CHECKS_PASS = get_ipython().user_ns['_exit_code'] == 0
+assert CHECKS_PASS, 'Startup check failed; fix it before running stages'
+"""
+            elif source.startswith('!python '):
+                sid = 'S00' if 's00_intake' in source else ('S22' if 'S22' in source else 'S23')
+                cell['source'] = f"assert CHECKS_PASS, 'Run and pass startup checks first'\nstage_ok['{sid}'] = False\n" + source + f"stage_ok['{sid}'] = get_ipython().user_ns['_exit_code'] == 0\nassert stage_ok['{sid}'], 'Stage failed; stop and review output'\n"
+            elif source.startswith('def summarize_unit'):
+                cell['source'] = source.replace('def summarize_unit(sid):\n', "def summarize_unit(sid):\n    assert stage_ok.get(sid), 'Stage command did not succeed in this session'\n").replace("git_commit=stage.get('git_commit')", 'verification_code_commit=CODE_COMMIT')
+        content.insert(6, markdown('Current project settings come from GitHub. The Drive driver map is the frozen S04 artifact. Only explicitly required missing files are initialized; historical reports, state and seals are never replaced.'))
     assert all('run_python(' not in c['source'] and 'run_unit(' not in c['source'] and 'subprocess' not in c['source'] for c in content)
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     links.append(f'- [{name}.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/{name}.ipynb): {title}')
-index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. The old Drive checkout is no longer used for code. Preserve it until its unique edits and any conflicted artifact files have been recovered. Training and testing are not completed by this reorganization.')])
+index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\n01 contains the implemented workflow; 02-05 are planning pages without execution cells. The old Drive checkout is no longer used for code. Preserve it until its unique edits and any conflicted artifact files have been recovered. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then clone or pull GitHub main in /content/foodprice_watch. Existing code is updated by fast-forward only; local conflicts stop the update without deleting edits. Code lives in temporary storage; data, checkpoints, reports and stage state persist under MyDrive/FoodPriceWatch through FPW_ARTIFACT_ROOT. No Git operation runs against the old Drive repository. Keep that folder intact until its conflicting edits and artifacts have been reviewed. Package installation, checks and stage execution follow in separate sections. Invalid Drive ledger files stop initialization. Earlier sealed stages cannot be rerun in this separate-storage mode. Nothing in the old Drive checkout is deleted. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nNotebook 01 starts with two code cells: mount Drive, then clone or pull GitHub main in /content/foodprice_watch. Existing code is updated by fast-forward only; local conflicts stop the update without deleting edits. Code lives in temporary storage; data, checkpoints, reports and stage state persist under MyDrive/FoodPriceWatch through FPW_ARTIFACT_ROOT. No Git operation runs against the old Drive repository. Keep that folder intact until its conflicting edits and artifacts have been reviewed. Package installation, checks and stage execution follow in separate sections. Invalid Drive ledger files stop initialization. Earlier sealed stages cannot be rerun in this separate-storage mode. Nothing in the old Drive checkout is deleted. Only notebook 01 initializes storage, installs packages and runs startup checks. Notebooks 02-05 are planning pages with no executable cells. After reconnecting, initialize the selected notebook again. Future executable notebooks will reuse the same Drive state. Stop after each stage and paste output for review. The planning notebooks mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Five numbered notebooks and compatibility indexes generated.')

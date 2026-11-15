@@ -97,3 +97,8 @@
 ## 2026-11-15 - fixed Colab code directory
 - Simplified all five notebook files to clone/pull main at /content/foodprice_watch. Removed random directory creation, path-pointer file, redundant Path conversion and os.chdir. One %cd and %env setup per notebook. Existing runtime checkout updates fast-forward only; no resets or deletion. Drive artifact paths unchanged.
 - Verification: five notebooks have no old path-pointer or mktemp references, one directory setup each, ordinary Python and Bash syntax pass, git diff --check passes. No Colab execution or training claimed. AGENTS.md draft remains local for review.
+
+## 2026-11-15 - remove unnecessary notebook setup
+- Approved cleanup: notebooks 02-05 are now markdown-only planning pages with no runtime side effects. Notebook 01 initializes only named missing supporting files, removes unused sys.path/thread setup, retains required cleanup/checks and row/hash summaries. Current GitHub config versus frozen Drive driver map documented.
+- Added startup/stage exit-status guards so failed commands invalidate success flags and stages require a passed startup check. Summaries identify the actual verification-session Git revision rather than a possibly stale ledger git_commit. No claim that cached artifacts were produced by this verification revision.
+- Verification: python -m fpw.check PASS (35 passed, 31 skipped), including failure-guard and planning-notebook regression checks; ordinary Python/Bash syntax and empty notebook outputs verified; git diff --check passes. No Colab run or model completion claimed. AGENTS.md review draft remains local.
