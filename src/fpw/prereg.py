@@ -17,7 +17,9 @@ def s27(selection, tuning):
         purpose="Fixed before the 2025-26 test period is scored. The test is unsealed once; nothing below changes after seeing a test number.",
         model=dict(kind="one LightGBM for all items and horizons (horizon stacking)", selected_by=selection["rule"],
                    validation_scores=selection["scores"], winner=selection["winner"], objective=tuning["params"]["objective"],
-                   params=tuning["params"], n_estimators=int(tuning["n_estimators"]), tuning_rule=tuning["rule"]),
+                   params=tuning["params"], n_estimators=int(tuning["n_estimators"]), tuning_rule=tuning["rule"],
+                   decision=("LightGBM kept as the main model by user decision 2026-11-16 although validation winner was %s (naive reference %.4f; LightGBM %.4f)"
+                             % (selection["winner"], selection["naive_mae_log"], selection["scores"]["lgbm"])) if selection["winner"] != "lgbm" else "validation winner"),
         features=ml.feature_columns(), horizons=list(PCFG["horizons"]),
         test=dict(period=list(t["period"]), first_cutoff=int(t["first_cutoff"]), last_cutoff=int(t["last_cutoff"]), step=int(t["step"]),
                   origins=len(range(int(t["first_cutoff"]), int(t["last_cutoff"]) + 1, int(t["step"]))),

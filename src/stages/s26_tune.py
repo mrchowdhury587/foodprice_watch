@@ -11,7 +11,7 @@ from fpw import ml, cv, metrics as M, prereg, state
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 state.start("S26")
 sel = json.loads((ROOT / "state/selection_S25.json").read_text())
-if sel["winner"] != "lgbm":
+if sel["winner"] != "lgbm" and PCFG["selection"].get("main_model") != "lgbm":
     sys.exit(f"STOP: the validation winner is {sel['winner']}; S26-S29 are built for LightGBM. Ask the user before continuing.")
 trials_n = int(need("tuning", "trials")); refit = int(need("test", "refit_every_n_cutoffs")); sp = need("tuning", "search")
 F = pd.read_parquet(features_path()); S = ml.prepare(F); L = ml.stack(S); cols = ml.feature_columns()
