@@ -12,7 +12,7 @@
       "checks": [
         "make check"
       ],
-      "status": "done",
+      "status": "pending",
       "started_at": null,
       "last_unit": null,
       "units_done": 0,

@@ -30,3 +30,9 @@
 - S00 intake: 33 present (9 external sources missing, as before). S01: 76,440 rows, 1,412 report days, 7 tests passed. S22: 77,520 rows, 1,430 report days to 2026-11-12, 0 cells differing from the base file, 8 tests passed (including equality with the earlier panel).
 - Bug found by this run and fixed: the S22 note contained a semicolon, so the unquoted finalize command was split by the shell and the runner printed a false STOP after S22 was already accepted. Note reworded; tests/test_registry.py now rejects shell characters in notes.
 - This was a verification run in a temporary session. The Drive ledger is unchanged: S22 is still pending there.
+
+## 2026-11-15 - handover resumed in Desktop checkout
+- Copied docs/HANDOVER_2026-11-15.md from C:/Users/mrcho/foodprice_watch; fetched origin. Local main and origin/main are 0de0cfe; origin/v2/step-3 is fac8962, still awaiting merge approval.
+- Startup check reset local S00 to pending: data/raw/MANIFEST.csv is absent and DECISIONS.md differs from the stored hash. This checkout has no mounted Drive or pipeline data. No Colab stage completion is claimed.
+- Verification: python -m fpw.check using the existing repo virtual environment: CHECK PASS, 22 passed, 26 skipped (data-dependent checks skipped). Initial sandbox run had pytest temporary-directory permission errors; rerun outside sandbox passed, with a pytest cache permission warning.
+- Next: user approval of feature branch merge; Drive S00 intake refresh and S22 verified output, then S23. Heavy model work remains in Colab.
