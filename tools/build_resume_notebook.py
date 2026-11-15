@@ -245,6 +245,19 @@ def run_python(path, *arguments, module=False):
         cell['source'] = source
         direct.append(cell)
     content = direct
+    for cell in content:
+        if cell['cell_type'] != 'code':
+            continue
+        source = cell['source']
+        if source.startswith(prefix):
+            commands = source[len(prefix):].strip().splitlines()
+            # Keep intake/finalization dependent: never finalize failed intake.
+            cell['source'] = '!' + ' && '.join(commands) + '\n'
+        elif source.startswith('%%bash\nset -e\ncd /content/drive/MyDrive/FoodPriceWatch\npython -m pip'):
+            cell['source'] = '%pip install -q -r requirements-colab.txt\n'
+        elif source.startswith('from pathlib import Path'):
+            source = source.replace('os.chdir(ROOT)\n', '').replace("os.environ['PYTHONPATH'] = str(ROOT / 'src')\n", '')
+            cell['source'] = '%cd /content/drive/MyDrive/FoodPriceWatch\n%env PYTHONPATH=/content/drive/MyDrive/FoodPriceWatch/src\n' + source
     assert all('run_python(' not in c['source'] and 'run_unit(' not in c['source'] and 'subprocess' not in c['source'] for c in content)
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')

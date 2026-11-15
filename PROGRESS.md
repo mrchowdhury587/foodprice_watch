@@ -83,3 +83,7 @@
 ## 2026-11-15 - direct notebook Python commands
 - Updated all five notebooks to execute checks and stages using visible Bash cells with set -e and direct python commands. S00 runs intake and finalization directly; S22/S23 use python -m fpw.runner to preserve dependency checks. Summaries are separate read-only Python cells; redundant S00 runner call removed.
 - Verification: all ordinary Python cells parse, all Bash cells pass bash -n, no subprocess/run_python/run_unit execution wrappers in generated notebooks; git diff --check passes. No Colab execution claimed. AGENTS.md remains a local review draft.
+
+## 2026-11-15 - simplify repeated notebook shell setup
+- Set working directory and absolute PYTHONPATH once per notebook using Colab magics. Checks/stages now use direct !python commands; package install uses %pip. S00 intake and finalization joined with && to avoid finalizing failed intake. Conditional clone/pull retains its Bash cell.
+- Verified exactly one directory/path setup in each notebook, ordinary Python syntax after excluding Colab magic lines, Bash syntax for clone/pull, and git diff --check. No Colab execution claimed. Stop and review command failures before running later cells.
