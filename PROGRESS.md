@@ -109,3 +109,9 @@
 ## 2026-11-15 — simplification refactor (local, not yet committed)
 - Done: removed Drive code-sync tooling, collapsed notebooks into notebooks/run_stage.ipynb, archived the earlier comparison track and stale docs under archive/, simplified runner/registry/finalize/paths, trimmed drivers.py, README/ARCHITECTURE/AGENTS/PLAN/HANDOVER updated, .gitignore blocks stray CSVs. Check: pytest 26 passed, 10 skipped (data-dependent tests skip without Drive files). Not run in Colab yet.
 - Not done: Colab dry run of notebooks/run_stage.ipynb; changes await commit and push (commit was denied by the permission classifier).
+
+## 2026-11-15 — Colab dry run of notebooks/01_data_features.ipynb (account mehedi11908015)
+- Done: Drive mount, clone, setup, `fpw.check` (28 passed, 9 skipped), S00 (41 files, 0 missing), S22 (76,440 rows, 1,412 report days, 2021-05-17..2026-10-24, 63 items, 0 cells differ from base, 24 gap-2022 reports), S23 (76,440 rows, 63 items, weather chosen wx_bd_tmax_7d / wx_bd_tmean_30d / wx_bd_rain_7d). All three finalized from Colab output; S22 summary printed code_commit 1077b59.
+- Errors found and fixed: Drive state/stages.json held a git merge-conflict block (backed up as state/stages.json.conflict-backup, Drive side kept); storage-path test failed on Colab (fixed, 436eddf); S22 now uses the base price file (1077b59).
+- Drive cleanup (user approved): old code checkout removed after saving its git history as archive/old_drive_checkout_2026-11-11.bundle (13.9 MB; contains the S06/S07 pre-registration commits). Kept data, inbox, outputs, reports, state, config, DECISIONS/PROGRESS/DEVIATIONS, logs, models.
+- Not done: notebooks 02-05 have no runnable stages yet (S24+ not implemented). The extended _v2 price file is not on Drive; it is only needed for the S32 update run.
