@@ -71,3 +71,7 @@
 ## 2026-11-15 - consistent two-cell notebook connection
 - Implemented approved mount-Drive then plain git pull --no-rebase shell cell in all five notebooks. Runtime initialization, package installation, startup checks and stage execution remain separate. Persistent project paths remain on Drive.
 - Verified identical first two code cells in all five notebooks, parsed ordinary Python cells, checked shell cell against specified commands. IPython transformation validation unavailable locally (IPython not installed). No Colab execution or stage completion claimed.
+
+## 2026-11-15 - clone-or-pull Drive workflow
+- User requested the linked project's setup pattern. All five notebooks now mount Drive in the first cell and clone the main branch if absent or pull the existing checkout in the second cell. Dependency setup follows separately; persistent paths stay under MyDrive/FoodPriceWatch. Existing conflicting edits are not discarded.
+- Verified all five notebooks have identical opening cells, ordinary Python syntax passes and Bash syntax passes bash -n. All execution counts unset and saved outputs empty. No Colab execution or stage completion claimed.

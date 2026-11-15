@@ -159,7 +159,16 @@ for name, title, body in groups:
         content.append(markdown('Testing requires committed pre-registration and existing checkpoint enforcement. Do not rerun earlier sealed tests. Keep models, exports and data out of GitHub.'))
     # Replace the old mount/setup prefix with two minimal connection cells.
     mount = "from google.colab import drive\ndrive.mount('/content/drive')\n"
-    pull = "%%bash\nset -e\ncd /content/drive/MyDrive/FoodPriceWatch\ngit pull --no-rebase origin main\n"
+    pull = """%%bash
+set -e
+REPO_DIR='/content/drive/MyDrive/FoodPriceWatch'
+REPO_URL='https://github.com/mrchowdhury587/foodprice_watch.git'
+if [ ! -d "$REPO_DIR/.git" ]; then
+    git clone -b main "$REPO_URL" "$REPO_DIR"
+else
+    git -C "$REPO_DIR" pull --no-rebase origin main
+fi
+"""
     initialization = """from pathlib import Path
 import os, sys, subprocess, json, hashlib, csv
 ROOT = Path('/content/drive/MyDrive/FoodPriceWatch')
@@ -173,7 +182,7 @@ def git(*args):
     def code(source):
         return dict(cell_type='code', metadata={}, source=source, execution_count=None, outputs=[])
     content = [intro, markdown('## Connect Drive'), code(mount),
-               markdown('## Pull repository updates\nStop if Git reports an error. Resolve conflicts before continuing; no files are reset.'), code(pull),
+               markdown('## Get the code: clone once, pull on later runs\nThe repository stays on Drive so saved artifacts survive runtime disconnects. An existing nonempty folder without Git needs review before cloning. Stop if Git reports an error; existing conflicts need resolution before continuing. No files are reset.'), code(pull),
                markdown('## Initialize project runtime\nPersistent artifacts are saved under the Drive project folder.'), code(initialization)] + content[3:]
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
@@ -182,5 +191,5 @@ def git(*args):
 index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then git pull --no-rebase. Package installation, checks and stage execution follow in separate sections. The repository must already exist. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nEvery workflow notebook starts with two code cells: mount Drive, then clone the repository if missing or pull updates if it already exists. Code, data and persistent artifacts live under MyDrive/FoodPriceWatch. Package installation, checks and stage execution follow in separate sections. Existing nonempty folders without Git and conflicting Git changes require review; no files are reset. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Five numbered notebooks and compatibility indexes generated.')
