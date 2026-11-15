@@ -58,7 +58,7 @@ def test_invariants(df):
 @real
 def test_longer_than_base_and_same_before(df):
     last = pd.Timestamp(PC["base_last_date"])
-    assert df.Date.min() == pd.Timestamp("2021-05-17") and df.Date.max() > last
+    assert df.Date.min() == pd.Timestamp("2021-05-17") and df.Date.max() >= last   # equal while the base file is the price file
     old = df[df.Date <= last]
     assert len(old) == 76440 and old.Date.nunique() == 1412 and old.report_idx.max() == 1411
     base = pd.read_csv(RAWP / "tcb_dhaka_daily_prices_2021_2026.csv", parse_dates=["Date"]); base["item_id"] = base.Product + " | " + base.Unit

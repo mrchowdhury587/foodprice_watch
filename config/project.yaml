@@ -4,11 +4,11 @@
 version: 2
 
 # ---- data (step 2, S22)
-price_file: tcb_dhaka_daily_prices_2021_2026_v2.csv   # data/raw/project/, arrives through inbox/project/
+price_file: tcb_dhaka_daily_prices_2021_2026.csv      # data/raw/project/. Base file (to 2026-10-24) while the pipeline is built; the extended _v2 file is used by the S32 update run
 panel_file: tcb_v2_rebuilt.parquet                    # data/processed/
 base_panel_file: tcb_v1.0_rebuilt.parquet             # the v2 panel must equal this on every date up to base_last_date
 base_last_date: "2026-10-24"
-extra_raw_files: [tcb_dhaka_daily_prices_2021_2026_v2.csv]   # added to MANIFEST by S00 intake when present
+extra_raw_files: []                                   # e.g. [tcb_dhaka_daily_prices_2021_2026_v2.csv] when the extended file is supplied
 
 # ---- features (step 3, S23)
 features_file: features_v2.parquet
