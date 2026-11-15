@@ -27,4 +27,8 @@ STAGES = {
         run=[f"{PY} src/stages/s25_select.py"],
         outputs=["state/selection_S25.json", "reports/project/tables/P5_model_selection.csv", "reports/project/tables/P5_model_selection_overall.csv"],
         tests=["tests/test_ml_design.py", "tests/test_s25_select.py"]),
+    "S26": dict(
+        run=[f"{PY} src/stages/s26_tune.py"],
+        outputs=["reports/project/tables/P6_tuning_trials.csv", "state/tuning_S26.json", "state/prereg_S27.yaml"],
+        tests=["tests/test_ml_design.py", "tests/test_s26_prereg.py"]),
 }
