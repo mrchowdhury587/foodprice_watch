@@ -184,6 +184,37 @@ def git(*args):
     content = [intro, markdown('## Connect Drive'), code(mount),
                markdown('## Get the code: clone once, pull on later runs\nThe repository stays on Drive so saved artifacts survive runtime disconnects. An existing nonempty folder without Git needs review before cloning. Stop if Git reports an error; existing conflicts need resolution before continuing. No files are reset.'), code(pull),
                markdown('## Initialize project runtime\nPersistent artifacts are saved under the Drive project folder.'), code(initialization)] + content[3:]
+    # Notebook-facing execution uses Colab magics and Python entry points.
+    for cell in content:
+        if cell['cell_type'] != 'code':
+            continue
+        source = cell['source']
+        if source.startswith("subprocess.run([sys.executable, '-m', 'pip'"):
+            source = "%%bash\nset -e\ncd /content/drive/MyDrive/FoodPriceWatch\npython -m pip install -q -r requirements-colab.txt\n"
+        else:
+            source = source.replace('import os, sys, subprocess, json, hashlib, csv', 'import os, sys, json, hashlib, csv, runpy')
+            source = source.replace("def git(*args):\n    return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()", """os.environ.setdefault('FPW_THREADS', str(os.cpu_count() or 2))
+def run_python(path, *arguments, module=False):
+    previous = sys.argv[:]
+    try:
+        sys.argv = [path, *arguments]
+        if module:
+            runpy.run_module(path, run_name='__main__')
+        else:
+            runpy.run_path(path, run_name='__main__')
+    except SystemExit as result:
+        if result.code not in (None, 0):
+            raise RuntimeError(f'{path} failed: {result.code}') from result
+    finally:
+        sys.argv = previous
+""")
+            source = source.replace("subprocess.run([sys.executable, '-m', 'fpw.check'], cwd=ROOT, check=True)", "run_python('fpw.check', module=True)")
+            source = source.replace("subprocess.run([sys.executable, '-m', 'fpw.runner', sid], cwd=ROOT, check=True)", "from fpw.runner import run\n    assert run(sid) == 0, 'STOP: stage failed'")
+            source = source.replace("git_commit=git('rev-parse', 'HEAD')", "git_commit=stage.get('git_commit')")
+            source = source.replace("subprocess.run([sys.executable, 'src/stages/s00_intake.py'], cwd=ROOT, check=True)", "run_python('src/stages/s00_intake.py')")
+            source = source.replace("subprocess.run([sys.executable, 'src/stages/finalize.py', 'S00'], cwd=ROOT, check=True)", "run_python('src/stages/finalize.py', 'S00')")
+        assert 'subprocess' not in source
+        cell['source'] = source
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')

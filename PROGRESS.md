@@ -75,3 +75,7 @@
 ## 2026-11-15 - clone-or-pull Drive workflow
 - User requested the linked project's setup pattern. All five notebooks now mount Drive in the first cell and clone the main branch if absent or pull the existing checkout in the second cell. Dependency setup follows separately; persistent paths stay under MyDrive/FoodPriceWatch. Existing conflicting edits are not discarded.
 - Verified all five notebooks have identical opening cells, ordinary Python syntax passes and Bash syntax passes bash -n. All execution counts unset and saved outputs empty. No Colab execution or stage completion claimed.
+
+## 2026-11-15 - remove notebook subprocess calls
+- Replaced notebook subprocess imports/calls with Bash cells for dependency setup and Python entry points for checks/stages. Underlying pipeline process isolation remains unchanged. Model/data artifacts remain on Drive.
+- Verified no subprocess references in the five generated notebooks; ordinary Python cells parse and git diff --check passes. Colab execution not performed. AGENTS.md review draft left out of this commit.
