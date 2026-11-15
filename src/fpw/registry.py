@@ -23,4 +23,8 @@ STAGES = {
     "S24": dict(
         run=[f"{PY} src/stages/s24_model.py"],
         outputs=["outputs/24_model/checks.json"], tests=["tests/test_ml_design.py"]),
+    "S25": dict(
+        run=[f"{PY} src/stages/s25_select.py"],
+        outputs=["state/selection_S25.json", "reports/project/tables/P5_selection.csv", "reports/project/tables/P5_selection_overall.csv"],
+        tests=["tests/test_ml_design.py", "tests/test_s25_select.py"]),
 }
