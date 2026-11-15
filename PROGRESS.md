@@ -63,3 +63,7 @@
 ## 2026-11-15 - pull-only notebook 00
 - User requested 00 only pull GitHub changes. Reduced it to a single git pull --ff-only cell; Drive must already be mounted. Other notebooks retain independent runtime initialization. Updated generated links and guide. Existing divergent Drive history still requires review; this change does not resolve it.
 - Regenerated all notebooks and parsed every code cell successfully. No Colab stages executed.
+
+## 2026-11-15 - setup merged into notebook 01
+- User requested removal of separate setup notebook. Removed notebooks/00_setup.ipynb; notebook 01 now mounts Drive, pulls GitHub updates, then initializes packages/helpers and runs data stages. Updated generator, five notebooks, indexes and guide.
+- Verification: exactly five workflow notebooks; all code cells parse. No Colab execution claimed.

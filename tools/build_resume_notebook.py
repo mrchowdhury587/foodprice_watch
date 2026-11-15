@@ -128,12 +128,11 @@ notebook['metadata']['colab']['name'] = 'FoodPriceWatch_Colab.ipynb'
 (ROOT / 'FoodPriceWatch_Colab.ipynb').write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
 print('Original notebook updated for the prediction track: FoodPriceWatch_Colab.ipynb')
 
-# Group the existing verified workflow into six manageable entry points.
+# Group the existing verified workflow into five manageable entry points.
 directory = ROOT / 'notebooks'
 directory.mkdir(exist_ok=True)
 setup = cells[1:9]
 groups = [
-    ('00_setup', 'Pull updates from GitHub', []),
     ('01_data_features', 'Intake, panel, audit and features', setup[:2] + setup[4:] + cells[9:15]),
     ('02_model_training', 'Model implementation, selection and tuning', []),
     ('03_evaluation', 'Sealed testing, ranges, alerts and explanations', []),
@@ -151,11 +150,8 @@ def markdown(text):
 
 links = []
 for name, title, body in groups:
-    intro = markdown(f'# {name[:2]}. {title}\nRun setup first. Use the same Drive project folder. Run one stage cell at a time and share its output for review. Never use Run all across stages.')
+    intro = markdown(f'# {name[:2]}. {title}\nStart with notebook 01. Use the same Drive project folder. Run one stage cell at a time and share its output for review. Never use Run all across stages.')
     content = [intro] + body
-    if name == '00_setup':
-        content = [markdown('# 00. Pull updates from GitHub\nDrive must already be mounted and the repository must already exist at the path below. This notebook only pulls code. It does not mount Drive, install packages, run checks, or execute stages. Git conflicts or diverged history require separate review; no reset is performed.'),
-                   dict(cell_type='code', metadata={}, execution_count=None, outputs=[], source="from pathlib import Path\nimport subprocess\n\nROOT = Path('/content/drive/MyDrive/FoodPriceWatch')\nsubprocess.run(['git', 'pull', '--ff-only', 'origin', 'main'], cwd=ROOT, check=True)\n")]
     if name in stages:
         content += setup[:2] + setup[4:]
         for sid, description in stages[name]:
@@ -170,12 +166,15 @@ def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
 """
         content.insert(3, dict(cell_type='code', metadata={}, source=initialization, execution_count=None, outputs=[]))
+    if name == '01_data_features':
+        content.insert(3, markdown('## Pull GitHub updates\nThe repository must already exist. Conflicts or diverged history require separate review.'))
+        content.insert(4, dict(cell_type='code', metadata={}, execution_count=None, outputs=[], source="subprocess.run(['git', 'pull', '--ff-only', 'origin', 'main'], cwd=ROOT, check=True)\n"))
     document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
     document['metadata']['colab'] = dict(name=name + '.ipynb')
     (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     links.append(f'- [{name}.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/{name}.ipynb): {title}')
-index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 00. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
+index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 01. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\n00 only pulls GitHub changes into an existing checkout on already-mounted Drive. It does not install packages or run checks. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
-print('Six numbered notebooks and compatibility indexes generated.')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\n01 mounts Drive and pulls GitHub changes before initializing the runtime and running data stages. The repository must already exist. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+print('Five numbered notebooks and compatibility indexes generated.')
