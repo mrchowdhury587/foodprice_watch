@@ -34,3 +34,10 @@ def test_plan_orders_preregistration_before_the_test_is_unsealed():
     else:
         assert next(i for i, s in enumerate(steps) if "s06_prereg" in s) < next(i for i, s in enumerate(steps) if "s06_run" in s)
     assert steps[-1].startswith("python src/stages/finalize.py S06")
+
+
+def test_notes_are_safe_on_a_shell_command_line():
+    """runner.py and the notebook pass the note unquoted to `finalize.py SNN <note>`; a ; | & < > ( ) or quote would split or break that command."""
+    for sid, spec in STAGES.items():
+        assert not set(spec.get("note", "")) & set(";|&<>()$`'\"\\"), (sid, spec.get("note"))
+    assert runner.plan("S22")[-1].startswith("python src/stages/finalize.py S22 ")

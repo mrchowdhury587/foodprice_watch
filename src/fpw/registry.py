@@ -47,7 +47,7 @@ STAGES = {
         outputs=["reports/RESULTS_REGISTER.md", "reports/README.md"], tests=["tests/test_wording.py"]),
     # ---- prediction-system track (docs/PROJECT_PLAN_2026-11-15.md); settings in config/project.yaml
     "S22": dict(
-        run=[f"{PY} src/stages/s22_panel.py"], note="extended price file; audit table P2_audit.csv made on the work PC by tools/tcb_audit.py",
+        run=[f"{PY} src/stages/s22_panel.py"], note="extended price file, audit table P2_audit.csv made on the work PC by tools/tcb_audit.py",
         outputs=["data/processed/tcb_v2_rebuilt.parquet", "outputs/22_panel/checks.json", "reports/project/tables/P2_panel_summary.csv",
                  "reports/project/tables/P2_audit.csv", "reports/project/tables/P2_audit_summary.csv"],
         tests=["tests/test_v2_panel.py", "tests/test_wording.py"]),

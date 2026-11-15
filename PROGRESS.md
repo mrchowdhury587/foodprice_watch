@@ -24,3 +24,9 @@
 - Extended price file built on the work PC: 77,520 rows, 1,430 report days to 2026-11-12 (sha256 0159e1f4...); earlier rows byte-identical to the base file. The Friday/Saturday dates among the new days are genuine: TCB reports seven days a week and each file heading names its date (serials 265-282).
 - Audit (tools/tcb_audit.py): 1,530 of 1,530 sampled rows checked against the original Excel files, 0 mismatches; the 5 ginger candidates equal the originals (kept, still flagged). Three planted errors were all found.
 - s22_panel.py tested on a scratch copy with the real files: all invariants pass. NOT yet run on Drive: S22 stays pending until the Colab output is pasted.
+
+## 2026-11-15 - S22 checked in a fresh Colab session (new notebook, local storage, no Drive)
+- Data: the 32 project files + the extended price file sent from the work PC (bundle sha256 b9a7a418...). Code: main at 9fcfc66.
+- S00 intake: 33 present (9 external sources missing, as before). S01: 76,440 rows, 1,412 report days, 7 tests passed. S22: 77,520 rows, 1,430 report days to 2026-11-12, 0 cells differing from the base file, 8 tests passed (including equality with the earlier panel).
+- Bug found by this run and fixed: the S22 note contained a semicolon, so the unquoted finalize command was split by the shell and the runner printed a false STOP after S22 was already accepted. Note reworded; tests/test_registry.py now rejects shell characters in notes.
+- This was a verification run in a temporary session. The Drive ledger is unchanged: S22 is still pending there.
