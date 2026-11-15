@@ -93,3 +93,7 @@
 - Notebooks now clone main into a fresh temporary Colab directory; Drive is used only for persistent artifacts. Added FPW_ARTIFACT_ROOT with local-checkout default; code configuration and acceptance tests use CODE_ROOT. Runtime finalization writes Drive state without committing to its old Git checkout; legacy sealed stages are blocked from rerun in this mode.
 - Existing Drive files and old .git are not physically removed because this session cannot access Drive. They are not used for code updates; invalid/conflicted stage ledger stops initialization and needs recovery. No Colab stages run.
 - Verification: full check after storage changes PASS (32 passed, 31 skipped); after final intake/seal/registry adjustments targeted checks PASS (10 passed, 1 skipped). Notebook Python/Bash syntax and temporary main-only clone verified. Environment deviation logged. AGENTS.md review draft remains local.
+
+## 2026-11-15 - fixed Colab code directory
+- Simplified all five notebook files to clone/pull main at /content/foodprice_watch. Removed random directory creation, path-pointer file, redundant Path conversion and os.chdir. One %cd and %env setup per notebook. Existing runtime checkout updates fast-forward only; no resets or deletion. Drive artifact paths unchanged.
+- Verification: five notebooks have no old path-pointer or mktemp references, one directory setup each, ordinary Python and Bash syntax pass, git diff --check passes. No Colab execution or training claimed. AGENTS.md draft remains local for review.
