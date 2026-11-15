@@ -34,5 +34,5 @@ outputs/, models/, reports/project/   every number in RESULTS_REGISTER.md (value
 `registry`, `runner` (`make stage S=S22`) · `check` (`make check`).
 
 ## Running
-- Colab: `notebooks/run_stage.ipynb`. Work PC: `make check`, `make stage S=S22 [DRY=1]` (use `.venv`).
+- Colab: `notebooks/01_data_features.ipynb`. Work PC: `make check`, `make stage S=S22 [DRY=1]` (use `.venv`).
 - The runner refuses to start a stage before its dependencies are done and never makes git commits.

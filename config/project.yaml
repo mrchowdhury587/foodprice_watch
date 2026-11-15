@@ -30,7 +30,7 @@ features:
 
 # ---- validation and test (steps 5-7)
 validation:
-  period: TO_CONFIRM                                  # question 2: calendar 2024, or Jul 2023 - Dec 2024
+  period: calendar_2024                               # decided 2026-11-15 (user): tune Jan-Sep 2024, confirm Oct-Dec 2024
   tune: ["2024-01-01", "2024-09-30"]
   confirm: ["2024-10-01", "2024-12-31"]
 test:
@@ -40,7 +40,7 @@ test:
   step: 7
   refit_every_n_cutoffs: 8
 selection:
-  candidates: TO_CONFIRM                              # question 1
+  candidates: [naive, ets, ridge, rf, lgbm, lstm]     # decided 2026-11-15 (user); no hybrid, no Chronos-2
   tie_margin: 0.01                                    # within this, the simpler model wins
 tuning:
   trials: 50

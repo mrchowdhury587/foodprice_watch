@@ -1,6 +1,6 @@
 # Bangladesh Food Price Watch
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/run_stage.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/01_data_features.ipynb)
 
 Master's project (not a thesis): a price-prediction system for TCB daily retail prices in Dhaka (63 items, May 2021 onward).
 For each item it forecasts the price 1, 7, 14 and 30 report days ahead with an expected range, raises an alert when the

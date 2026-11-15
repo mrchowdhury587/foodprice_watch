@@ -1,5 +1,5 @@
 # Bangladesh Food Price Watch. Use `make check` (stages.json vs disk markers, raw hashes, tests/).
-# Heavy stages run in Colab (notebooks/run_stage.ipynb); `make stage` is the same logic from the command line.
+# Heavy stages run in Colab (notebooks/01_data_features.ipynb); `make stage` is the same logic from the command line.
 PY ?= python
 check:
 	PYTHONPATH=src $(PY) -m fpw.check

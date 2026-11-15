@@ -18,7 +18,7 @@ A master's PROJECT (not a thesis): a price prediction system. For each TCB item 
 - Work PC (user decision 2026-11-15): pip is allowed inside the repo's `.venv` only. Use it for data collection (convert, append, audit), unit tests on small made-up frames and the local dashboard. Heavy work (model fits, tuning, the test) runs in Colab. `fpw.paths`, `fpw.runner`, `fpw.state` and `tools/tcb_download.py`, `tools/tcb_append.py` stay standard library only.
 
 ## Startup ritual (every session, before any new work)
-1. In Colab: mount Drive and set FPW_ARTIFACT_ROOT=/content/drive/MyDrive/FoodPriceWatch (notebooks/run_stage.ipynb does this). Code comes from a fresh clone of GitHub main; Drive holds data and outputs only, never code. Work PC: ROOT is the checkout.
+1. In Colab: mount Drive and set FPW_ARTIFACT_ROOT=/content/drive/MyDrive/FoodPriceWatch (the notebooks in notebooks/ do this). Code comes from a fresh clone of GitHub main; Drive holds data and outputs only, never code. Work PC: ROOT is the checkout.
 2. Read, in order: this file, SPEC.md, docs/PROJECT_PLAN_2026-11-15.md, DECISIONS.md, the last 2 PROGRESS.md entries, DEVIATIONS.md, state/stages.json, then `git log --oneline -20` and `git status`.
 3. Delete *.tmp files under outputs/ and data/ (leftovers from a dropped session).
 4. Run `make check`. It re-hashes every done stage's outputs against its _SUCCESS.json. If a check fails, set that stage to pending, log why, and do not pass it.
