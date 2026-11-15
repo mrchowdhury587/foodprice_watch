@@ -30,3 +30,8 @@
 - S00 intake: 33 present (9 external sources missing, as before). S01: 76,440 rows, 1,412 report days, 7 tests passed. S22: 77,520 rows, 1,430 report days to 2026-11-12, 0 cells differing from the base file, 8 tests passed (including equality with the earlier panel).
 - Bug found by this run and fixed: the S22 note contained a semicolon, so the unquoted finalize command was split by the shell and the runner printed a false STOP after S22 was already accepted. Note reworded; tests/test_registry.py now rejects shell characters in notes.
 - This was a verification run in a temporary session. The Drive ledger is unchanged: S22 is still pending there.
+
+## 2026-11-15 - step 3 (S23) code, branch v2/step-3
+- src/fpw/features.py + src/stages/s23_features.py: features_v2.parquet with calendar, weather (2024 choice), onion export measure, exchange rate. Earlier S04 untouched.
+- Work-PC run on a scratch copy with the real files: 77,520 rows; tests pass, including re-derived weather (+5 d) and exchange-rate values and equality of every kept column with the earlier features.parquet up to 2026-10-24.
+- Found: the onion export flag is unknown after 2025-03-27 (end of the events table); weather empty after 2026-10-31, exchange rate after 2026-11-01. Logged in DEVIATIONS.md.
