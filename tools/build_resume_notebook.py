@@ -127,3 +127,52 @@ print('Notebook built; all code cells parse; outputs empty:', target.name)
 notebook['metadata']['colab']['name'] = 'FoodPriceWatch_Colab.ipynb'
 (ROOT / 'FoodPriceWatch_Colab.ipynb').write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
 print('Original notebook updated for the prediction track: FoodPriceWatch_Colab.ipynb')
+
+# Group the existing verified workflow into six manageable entry points.
+directory = ROOT / 'notebooks'
+directory.mkdir(exist_ok=True)
+setup = cells[1:9]
+groups = [
+    ('00_setup', 'Environment and code setup', setup),
+    ('01_data_features', 'Intake, panel, audit and features', setup[:2] + setup[4:] + cells[9:15]),
+    ('02_model_training', 'Model implementation, selection and tuning', []),
+    ('03_evaluation', 'Sealed testing, ranges, alerts and explanations', []),
+    ('04_production', 'Production exports, dashboard and updates', []),
+    ('05_results_documentation', 'Results, limitations and documentation', []),
+]
+stages = {
+    '02_model_training': [('S24', 'Stacked-model implementation checks'), ('S25', 'Validation-based model selection'), ('S26', 'Tuning and validation confirmation')],
+    '03_evaluation': [('S27', 'Committed pre-registration and sealed test'), ('S28', 'Ranges and alert evaluation'), ('S29', 'Driver explanations')],
+    '04_production': [('S30', 'Production training and exports'), ('S31', 'Local dashboard instructions'), ('S32', 'Production update workflow')],
+    '05_results_documentation': [('S33', 'Documentation and report readiness')],
+}
+def markdown(text):
+    return dict(cell_type='markdown', metadata={}, source=text + '\n')
+
+links = []
+for name, title, body in groups:
+    intro = markdown(f'# {name[:2]}. {title}\nRun setup first. Use the same Drive project folder. Run one stage cell at a time and share its output for review. Never use Run all across stages.')
+    content = [intro] + body
+    if name in stages:
+        content += setup[:2] + setup[4:]
+        for sid, description in stages[name]:
+            content.append(markdown(f'## {sid}: {description}\n**Not implemented yet.** No execution command is provided. Prerequisites and required decisions must be verified before this stage is implemented.'))
+        content.append(markdown('Testing requires committed pre-registration and existing checkpoint enforcement. Do not rerun earlier sealed tests. Keep models, exports and data out of GitHub.'))
+    if name != '00_setup':
+        initialization = """assert (ROOT / 'src/fpw/runner.py').is_file(), 'Run notebook 00 first'
+os.chdir(ROOT)
+os.environ['PYTHONPATH'] = str(ROOT / 'src')
+sys.path.insert(0, str(ROOT / 'src'))
+def git(*args):
+    return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
+"""
+        content.insert(3, dict(cell_type='code', metadata={}, source=initialization, execution_count=None, outputs=[]))
+    document = dict(notebook, cells=content, metadata=dict(notebook['metadata']))
+    document['metadata']['colab'] = dict(name=name + '.ipynb')
+    (directory / (name + '.ipynb')).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
+    links.append(f'- [{name}.ipynb](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/{name}.ipynb): {title}')
+index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 00. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
+for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
+    (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nAfter reconnecting, initialize the selected notebook again. Only 00 synchronizes Git. All notebooks share Drive state. Stop after each stage and paste output for review. Missing prerequisites or conflicts block execution. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+print('Six numbered notebooks and compatibility indexes generated.')

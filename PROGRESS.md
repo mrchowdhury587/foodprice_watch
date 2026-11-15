@@ -55,3 +55,7 @@
 - User asked to adapt the existing notebook and fix merge --ff-only exit 128. Updated FoodPriceWatch_Colab.ipynb to the prediction workflow; resume notebook kept synchronized by tools/build_resume_notebook.py. Earlier scripts, seals, results and config.yaml untouched; notebook history remains in Git.
 - Added tools/colab_sync.py: clean-tree guard, backup branch, merge diverged histories, preserve local Drive stage status/hashes, abort unexpected conflicts. Generic exit 128 alone does not prove divergence; command output now identifies the cause.
 - Verification: all generated code cells parse, outputs empty. Two local Git scenario tests pass (divergence plus conflicting ledger, code conflict abort). Full python -m fpw.check: CHECK PASS, 30 passed, 31 skipped. No Colab execution or model completion claimed. No scope deviation.
+
+## 2026-11-15 - six notebook workflow
+- Implemented approved six-notebook grouping under notebooks/, with compatibility indexes at the original notebook paths and a workflow guide. Only 00 synchronizes Git; each stage retains a separate execution cell. S24-S33 remain clearly marked unimplemented without execution commands.
+- Verification: six generated notebooks, all code cells parse, no saved runtime output. No Colab execution or stage completion claimed; no scope changes.
