@@ -45,3 +45,8 @@
 - User approved continuing and merging v2/step-3; merged origin/v2/step-3 into local main at ed7ee32, preserving local handover and S00 pending status. Not pushed.
 - Post-merge python -m fpw.check: CHECK PASS, 28 passed, 31 skipped, one pytest cache permission warning. Data-dependent verification remains unavailable locally.
 - Prepared docs/COLAB_RESUME_S00.py as one human-runner intake cell. Not executed in Colab; no stage completion inferred. Await its pasted output before proceeding to S22.
+
+## 2026-11-15 - separate Colab resume notebook prepared
+- Added FoodPriceWatch_Prediction_Resume.ipynb and its standard-library builder tools/build_resume_notebook.py, derived from repository code and the handover; private Drive notebook contents could not be read.
+- Notebook includes Drive-only setup, clean-tree and fast-forward Git guards, package setup, startup check, separate S00/S22/S23 cells with row counts and output hashes, and remaining-stage checklist. It does not execute earlier sealed tests or claim training is implemented.
+- Verification: builder completed; every generated code cell parses with ast.parse; all execution counts unset and outputs empty. No Colab cell run, no new stage completion, no scope deviation, not pushed.
