@@ -24,7 +24,7 @@ def run(cell, **namespace):
 
 def test_failed_startup_blocks_stage_even_if_old_stage_passed():
     startup = next(s for s in sources() if s.startswith('CHECKS_PASS = False\nstage_ok.clear()'))
-    stage = next(s for s in sources() if s.startswith("STAGE = "))
+    stage = next(s for s in sources() if s.startswith("STAGES = "))
     ipy = lambda: SimpleNamespace(user_ns={'_exit_code': 1})
     with pytest.raises(AssertionError, match='Startup check failed'):
         run(startup, CHECKS_PASS=True, stage_ok={'S22': True}, get_ipython=ipy)
@@ -33,9 +33,9 @@ def test_failed_startup_blocks_stage_even_if_old_stage_passed():
 
 
 def test_failed_stage_does_not_leave_success_flag():
-    stage = next(s for s in sources() if s.startswith("STAGE = "))
+    stage = next(s for s in sources() if s.startswith("STAGES = "))
     ns = dict(CHECKS_PASS=True, stage_ok={'S00': True}, get_ipython=lambda: SimpleNamespace(user_ns={'_exit_code': 1}))
-    with pytest.raises(AssertionError, match='Stage failed'):
+    with pytest.raises(AssertionError, match='failed; stop'):
         run(stage, **ns)
     assert ns['stage_ok']['S00'] is False
 
@@ -51,5 +51,5 @@ def test_five_notebooks_share_setup_and_guards():
     for name in NAMES:
         cells = sources(DIRECTORY / f'{name}.ipynb')
         assert cells[:4] == first, name
-        assert any(c.startswith('STAGE = ') for c in cells), name
+        assert any(c.startswith('STAGES = ') for c in cells), name
         assert any('def summarize_unit' in c for c in cells), name
