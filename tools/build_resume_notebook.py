@@ -133,7 +133,7 @@ directory = ROOT / 'notebooks'
 directory.mkdir(exist_ok=True)
 setup = cells[1:9]
 groups = [
-    ('00_setup', 'Environment and code setup', setup),
+    ('00_setup', 'Pull updates from GitHub', []),
     ('01_data_features', 'Intake, panel, audit and features', setup[:2] + setup[4:] + cells[9:15]),
     ('02_model_training', 'Model implementation, selection and tuning', []),
     ('03_evaluation', 'Sealed testing, ranges, alerts and explanations', []),
@@ -153,13 +153,16 @@ links = []
 for name, title, body in groups:
     intro = markdown(f'# {name[:2]}. {title}\nRun setup first. Use the same Drive project folder. Run one stage cell at a time and share its output for review. Never use Run all across stages.')
     content = [intro] + body
+    if name == '00_setup':
+        content = [markdown('# 00. Pull updates from GitHub\nDrive must already be mounted and the repository must already exist at the path below. This notebook only pulls code. It does not mount Drive, install packages, run checks, or execute stages. Git conflicts or diverged history require separate review; no reset is performed.'),
+                   dict(cell_type='code', metadata={}, execution_count=None, outputs=[], source="from pathlib import Path\nimport subprocess\n\nROOT = Path('/content/drive/MyDrive/FoodPriceWatch')\nsubprocess.run(['git', 'pull', '--ff-only', 'origin', 'main'], cwd=ROOT, check=True)\n")]
     if name in stages:
         content += setup[:2] + setup[4:]
         for sid, description in stages[name]:
             content.append(markdown(f'## {sid}: {description}\n**Not implemented yet.** No execution command is provided. Prerequisites and required decisions must be verified before this stage is implemented.'))
         content.append(markdown('Testing requires committed pre-registration and existing checkpoint enforcement. Do not rerun earlier sealed tests. Keep models, exports and data out of GitHub.'))
     if name != '00_setup':
-        initialization = """assert (ROOT / 'src/fpw/runner.py').is_file(), 'Run notebook 00 first'
+        initialization = """assert (ROOT / 'src/fpw/runner.py').is_file(), 'Repository is missing; mount the existing project Drive folder first'
 os.chdir(ROOT)
 os.environ['PYTHONPATH'] = str(ROOT / 'src')
 sys.path.insert(0, str(ROOT / 'src'))
@@ -174,5 +177,5 @@ def git(*args):
 index = dict(notebook, cells=[markdown('# Food Price Watch notebook index\n\n' + '\n'.join(links) + '\n\nStart with 00. Existing Drive Git conflicts must be resolved before continuing. Training and testing are not completed by this reorganization.')])
 for filename in ['FoodPriceWatch_Colab.ipynb', 'FoodPriceWatch_Prediction_Resume.ipynb']:
     (ROOT / filename).write_text(json.dumps(index, indent=1) + '\n', encoding='utf-8')
-(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\nAfter reconnecting, initialize the selected notebook again. Only 00 synchronizes Git. All notebooks share Drive state. Stop after each stage and paste output for review. Missing prerequisites or conflicts block execution. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
+(directory / 'README.md').write_text('# Colab workflow\n\n' + '\n'.join(links) + '\n\n00 only pulls GitHub changes into an existing checkout on already-mounted Drive. It does not install packages or run checks. Diverged histories or conflicts require separate review. Notebooks 01-05 initialize their own runtime, mount Drive, install packages and run startup checks. After reconnecting, initialize the selected notebook again. All notebooks share Drive state. Stop after each stage and paste output for review. Notebooks 02-05 mark unfinished stages explicitly; they do not train or score models. Report writing follows verified, registered results.\n', encoding='utf-8')
 print('Six numbered notebooks and compatibility indexes generated.')

@@ -59,3 +59,7 @@
 ## 2026-11-15 - six notebook workflow
 - Implemented approved six-notebook grouping under notebooks/, with compatibility indexes at the original notebook paths and a workflow guide. Only 00 synchronizes Git; each stage retains a separate execution cell. S24-S33 remain clearly marked unimplemented without execution commands.
 - Verification: six generated notebooks, all code cells parse, no saved runtime output. No Colab execution or stage completion claimed; no scope changes.
+
+## 2026-11-15 - pull-only notebook 00
+- User requested 00 only pull GitHub changes. Reduced it to a single git pull --ff-only cell; Drive must already be mounted. Other notebooks retain independent runtime initialization. Updated generated links and guide. Existing divergent Drive history still requires review; this change does not resolve it.
+- Regenerated all notebooks and parsed every code cell successfully. No Colab stages executed.
