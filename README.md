@@ -28,3 +28,8 @@ After a disconnect, reconnect and run the same cells again; long jobs skip units
 - `AGENTS.md`, `SPEC.md`, `DECISIONS.md`, `DEVIATIONS.md`, `PROGRESS.md`, `docs/`: rules, scope, choices, log
 
 Author: to be confirmed (`config.yaml` author).
+
+
+## Run guide and design
+- How to run the notebooks, the dashboard and updates: `docs/HOW_TO_RUN.md`
+- How the system works: `docs/HOW_IT_WORKS.md`

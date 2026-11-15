@@ -115,3 +115,7 @@
 - Errors found and fixed: Drive state/stages.json held a git merge-conflict block (backed up as state/stages.json.conflict-backup, Drive side kept); storage-path test failed on Colab (fixed, 436eddf); S22 now uses the base price file (1077b59).
 - Drive cleanup (user approved): old code checkout removed after saving its git history as archive/old_drive_checkout_2026-11-11.bundle (13.9 MB; contains the S06/S07 pre-registration commits). Kept data, inbox, outputs, reports, state, config, DECISIONS/PROGRESS/DEVIATIONS, logs, models.
 - Not done: notebooks 02-05 have no runnable stages yet (S24+ not implemented). The extended _v2 price file is not on Drive; it is only needed for the S32 update run.
+
+## 2026-11-16 — pipeline code complete (S24-S33), Colab runs pending
+- Code written and unit-tested locally for S24-S30, dashboard `app/dashboard.py` (smoke-tested on made-up exports), `tools/update.py`, docs. S25 ETS crash fixed (series under 30 observations fall back to "no change").
+- Not done: S24-S30 have not yet finished on Colab; the only numbers so far are S00, S22, S23.
