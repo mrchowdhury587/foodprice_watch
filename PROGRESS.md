@@ -50,3 +50,8 @@
 - Added FoodPriceWatch_Prediction_Resume.ipynb and its standard-library builder tools/build_resume_notebook.py, derived from repository code and the handover; private Drive notebook contents could not be read.
 - Notebook includes Drive-only setup, clean-tree and fast-forward Git guards, package setup, startup check, separate S00/S22/S23 cells with row counts and output hashes, and remaining-stage checklist. It does not execute earlier sealed tests or claim training is implemented.
 - Verification: builder completed; every generated code cell parses with ast.parse; all execution counts unset and outputs empty. No Colab cell run, no new stage completion, no scope deviation, not pushed.
+
+## 2026-11-15 - original notebook adapted and Drive Git update fixed
+- User asked to adapt the existing notebook and fix merge --ff-only exit 128. Updated FoodPriceWatch_Colab.ipynb to the prediction workflow; resume notebook kept synchronized by tools/build_resume_notebook.py. Earlier scripts, seals, results and config.yaml untouched; notebook history remains in Git.
+- Added tools/colab_sync.py: clean-tree guard, backup branch, merge diverged histories, preserve local Drive stage status/hashes, abort unexpected conflicts. Generic exit 128 alone does not prove divergence; command output now identifies the cause.
+- Verification: all generated code cells parse, outputs empty. Two local Git scenario tests pass (divergence plus conflicting ledger, code conflict abort). Full python -m fpw.check: CHECK PASS, 30 passed, 31 skipped. No Colab execution or model completion claimed. No scope deviation.

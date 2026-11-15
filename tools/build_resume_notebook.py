@@ -37,8 +37,10 @@ assert Path('/content/drive/MyDrive').is_dir(), 'STOP: Drive is not mounted'
 print('Project root:', ROOT)
 print('Existing project folder:', ROOT.exists())
 ''')
-add('markdown', '## 2. Load code\nAn existing checkout must be clean. Updates use fast-forward only and stop on divergence, preserving Drive run commits. Send any failure to the agent; do not reset the checkout.')
-add('code', '''REPO = 'https://github.com/mrchowdhury587/foodprice_watch.git'
+add('markdown', '## 2. Load code\nUpdates preserve Drive stage status and local stage commits, including when histories diverge. A backup branch is created before merging. Unexpected conflicts stop the update and undo the merge. Uncommitted changes need agent review.')
+sync_source = (ROOT / 'tools/colab_sync.py').read_text(encoding='utf-8').split("if __name__ == '__main__':")[0]
+add('code', sync_source + '''
+REPO = 'https://github.com/mrchowdhury587/foodprice_watch.git'
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
 if not (ROOT / '.git').exists():
@@ -46,10 +48,7 @@ if not (ROOT / '.git').exists():
     ROOT.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(['git', 'clone', REPO, str(ROOT)], check=True)
 else:
-    assert not git('status', '--porcelain'), 'STOP: uncommitted Drive changes; paste git status to the agent'
-    assert git('branch', '--show-current') == 'main', 'STOP: unexpected branch'
-    subprocess.run(['git', 'fetch', 'origin', 'main'], cwd=ROOT, check=True)
-    subprocess.run(['git', 'merge', '--ff-only', 'origin/main'], cwd=ROOT, check=True)
+    sync(ROOT)
 for name in ['src/fpw/features.py', 'src/stages/s23_features.py']:
     assert (ROOT / name).is_file(), 'STOP: push merged feature code to GitHub first: ' + name
 subprocess.run(['git', 'config', 'user.name', 'FPW runner'], cwd=ROOT, check=True)
@@ -124,3 +123,7 @@ notebook = dict(cells=cells, metadata=dict(kernelspec=dict(display_name='Python 
 target = ROOT / 'FoodPriceWatch_Prediction_Resume.ipynb'
 target.write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
 print('Notebook built; all code cells parse; outputs empty:', target.name)
+# Keep the established GitHub/Colab notebook URL as the primary entry point.
+notebook['metadata']['colab']['name'] = 'FoodPriceWatch_Colab.ipynb'
+(ROOT / 'FoodPriceWatch_Colab.ipynb').write_text(json.dumps(notebook, indent=1) + '\n', encoding='utf-8')
+print('Original notebook updated for the prediction track: FoodPriceWatch_Colab.ipynb')
