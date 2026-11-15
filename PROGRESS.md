@@ -40,3 +40,8 @@
 - src/fpw/features.py + src/stages/s23_features.py: features_v2.parquet with calendar, weather (2024 choice), onion export measure, exchange rate. Earlier S04 untouched.
 - Work-PC run on a scratch copy with the real files: 77,520 rows; tests pass, including re-derived weather (+5 d) and exchange-rate values and equality of every kept column with the earlier features.parquet up to 2026-10-24.
 - Found: the onion export flag is unknown after 2025-03-27 (end of the events table); weather empty after 2026-10-31, exchange rate after 2026-11-01. Logged in DEVIATIONS.md.
+
+## 2026-11-15 - approved S23 local merge
+- User approved continuing and merging v2/step-3; merged origin/v2/step-3 into local main at ed7ee32, preserving local handover and S00 pending status. Not pushed.
+- Post-merge python -m fpw.check: CHECK PASS, 28 passed, 31 skipped, one pytest cache permission warning. Data-dependent verification remains unavailable locally.
+- Prepared docs/COLAB_RESUME_S00.py as one human-runner intake cell. Not executed in Colab; no stage completion inferred. Await its pasted output before proceeding to S22.
