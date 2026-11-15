@@ -31,4 +31,9 @@ STAGES = {
         run=[f"{PY} src/stages/s26_tune.py"],
         outputs=["reports/project/tables/P6_tuning_trials.csv", "state/tuning_S26.json", "state/prereg_S27.yaml"],
         tests=["tests/test_ml_design.py", "tests/test_s26_prereg.py"]),
+    "S27": dict(
+        run=[f"{PY} src/stages/s27_test.py"], note="sealed test scored once, prereg_S27.yaml committed first",
+        outputs=["state/prereg_S27.yaml"] + [f"reports/project/tables/P7_{n}.csv" for n in ["accuracy_by_horizon", "accuracy_by_group", "accuracy_by_item", "walk_forward", "error_analysis", "worst20", "dm_vs_naive", "learning_curve", "bias_over_time"]]
+                + ["reports/project/figures/F10_relative_error_by_horizon.png", "reports/project/RESULTS_REGISTER.md"],
+        tests=["tests/test_s26_prereg.py", "tests/test_s27_eval.py", "tests/test_wording.py"]),
 }

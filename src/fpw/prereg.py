@@ -43,3 +43,9 @@ def s28(threshold):
                threshold_rule=threshold["rule"], threshold_period=["2024-01-01", "2024-12-31"], false_alarms_per_item_year_by_level=threshold["fa_by_level"],
                event_window_days=dict(a["event_window_days"]), events_used_for_threshold=False, model_trained_on_events=False)
     return _dump(doc)
+
+
+def verify_s27(repo_path, drive_path, selection, tuning):
+    """The committed pre-registration, the copy S26 wrote to Drive and a fresh rebuild from the tuning record must be byte-identical."""
+    a, b = repo_path.read_text(encoding="utf-8"), drive_path.read_text(encoding="utf-8")
+    assert a == b == s27(selection, tuning), "pre-registration differs between the repo, Drive and the tuning record: do not score the test"
