@@ -70,7 +70,7 @@ class LstmPred:
     def _x(self, X, idx):
         import torch
         w = torch.tensor(self.win[idx] / self.sd[0], dtype=torch.float32).unsqueeze(-1)
-        s = (X[self.statics].fillna(0).values - self.mu) / self.sd[1]
+        s = (_num(X[self.statics]) - self.mu) / self.sd[1]
         hz = np.stack([(X.horizon.values == h).astype(float) for h in self.horizons], axis=1)
         return w, torch.tensor(np.hstack([s, hz]), dtype=torch.float32), torch.tensor(X.item_code.values, dtype=torch.long)
 
@@ -80,6 +80,11 @@ class LstmPred:
         with torch.no_grad():
             w, s, it = self._x(X, X.index.values)
             return self.net(w, s, it).numpy()
+
+
+def _num(df):
+    """Static inputs as a float matrix (flags and nullable integers arrive as object columns)."""
+    return df.apply(pd.to_numeric, errors="coerce").astype(float).fillna(0).values
 
 
 def make_fit_lstm(S, epochs=8, hidden=32, seed=42):
@@ -94,7 +99,7 @@ def make_fit_lstm(S, epochs=8, hidden=32, seed=42):
         win = np.tile(win_S, (len(horizons), 1))
         tr = ml.train_rows(L, cutoff)
         n_items = int(L.item_code.max()) + 1
-        st = tr[statics].fillna(0).values
+        st = _num(tr[statics])
         mu, sd_s = st.mean(0), st.std(0) + 1e-6
         sd = (float(win[tr.index.values].std() + 1e-6), sd_s)
         class Net(nn.Module):

@@ -79,3 +79,10 @@ def test_ets_handles_short_series_with_no_change_fallback():
     fc = C.ets_forecasts(S, [4, 100], horizons=[1, 7])
     assert set(fc.item_id) == {"long", "short"} and fc.pred.notna().all()
     assert (fc[(fc.item_id == "short")].pred == 0).all()
+
+
+def test_lstm_static_inputs_become_floats():
+    import pandas as pd
+    from fpw import candidates as C
+    df = pd.DataFrame({"a": pd.array([1, None, 3], dtype="Int64"), "b": [True, False, True], "c": pd.Series([1.0, 2.0, None], dtype=object)})
+    x = C._num(df); assert x.dtype == float and x.std(0).shape == (3,) and x[1, 0] == 0
