@@ -1,5 +1,5 @@
 """S25 Model selection on the validation year (idempotent, resumable per candidate). Candidates: config/project.yaml selection.candidates.
-Scored on 2024 rolling origins only; the 2025-26 test is not touched. Outputs: P5_selection.csv, state/selection_S25.json, outputs/25_select/forecasts_<model>.parquet.
+Scored on 2024 rolling origins only; the 2025-26 test is not touched. Outputs: P5_model_selection.csv, state/selection_S25.json, outputs/25_select/forecasts_<model>.parquet.
 Winner = lowest mean log-change MAE over horizons; a simpler model within tie_margin wins; 'naive' is the reference and never chosen."""
 import sys, json, time, hashlib
 sys.path.insert(0, "src")
@@ -34,8 +34,8 @@ T = pd.concat(rows, ignore_index=True)
 overall = T.groupby("model").agg(mae_log=("mae_log", "mean"), mae_tk=("mae_tk", "mean"), gmean_rel_mae=("gmean_rel_mae", "mean")).reset_index()
 scores = dict(zip(overall.model, overall.mae_log))
 winner = C.choose_winner(scores, margin)
-T.to_csv(out_dir("tables") / "P5_selection.csv", index=False)
-overall.to_csv(out_dir("tables") / "P5_selection_overall.csv", index=False)
+T.to_csv(out_dir("tables") / "P5_model_selection.csv", index=False)
+overall.to_csv(out_dir("tables") / "P5_model_selection_overall.csv", index=False)
 rec = dict(rule=f"lowest mean log-change MAE over horizons {PCFG['horizons']} on the 2024 rolling origins; a simpler model within {margin:.0%} wins; naive is the reference",
            origins=len(cut), first_origin=int(cut[0]), last_origin=int(cut[-1]), scores={k: float(v) for k, v in scores.items()}, winner=winner, candidates=names,
            naive_mae_log=float(T[T.model == "naive"].mae_log.mean()) if "naive" in names else None,
