@@ -65,3 +65,17 @@ def test_nothing_after_the_cutoff_reaches_any_candidate(S, L):
     a = C.run_candidate("ridge", S, L, ml.feature_columns(), [115])
     b = C.run_candidate("ridge", S2, L2, ml.feature_columns(), [115])
     assert np.allclose(a.sort_values(["item_id", "horizon"]).pred.values, b.sort_values(["item_id", "horizon"]).pred.values)
+
+
+def test_ets_handles_short_series_with_no_change_fallback():
+    import numpy as np, pandas as pd
+    from fpw import candidates as C
+    rows = []
+    for it, n in (("long", 120), ("short", 5)):
+        for r in range(n):
+            rows.append(dict(item_id=it, report_idx=r, lp=4 + 0.001 * r, gap_2022=False, touch_gap=False, eval_stratum="x"))
+    S = pd.DataFrame(rows)
+    for h in (1, 7, 14, 30): S[f"y{h}"] = 0.01
+    fc = C.ets_forecasts(S, [4, 100], horizons=[1, 7])
+    assert set(fc.item_id) == {"long", "short"} and fc.pred.notna().all()
+    assert (fc[(fc.item_id == "short")].pred == 0).all()

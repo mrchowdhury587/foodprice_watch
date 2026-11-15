@@ -118,6 +118,9 @@ def make_fit_lstm(S, epochs=8, hidden=32, seed=42):
     return fit_fn
 
 
+ETS_MIN_OBS = 30
+
+
 def ets_forecasts(S, cutoffs, horizons=None, model_name="ets"):
     """AutoETS on each item's own carried log price, refitted at every origin (an ETS model is its own recent history). Origins use only rows <= cutoff."""
     from statsforecast import StatsForecast
@@ -127,14 +130,17 @@ def ets_forecasts(S, cutoffs, horizons=None, model_name="ets"):
         hist = S[(S.report_idx <= c) & S.lp.notna() & ~S.gap_2022].sort_values(["item_id", "report_idx"])
         Y = hist[["item_id", "lp"]].rename(columns={"item_id": "unique_id", "lp": "y"}); Y["ds"] = Y.groupby("unique_id").cumcount() + 1
         n = Y.groupby("unique_id").ds.max()
-        f = StatsForecast(models=[AutoETS(season_length=1)], freq=1, n_jobs=-1).forecast(df=Y[["unique_id", "ds", "y"]], h=H).reset_index()
+        Y = Y[Y.unique_id.map(n) >= ETS_MIN_OBS]                      # AutoETS refuses tiny series; those items get "no change" (naive) below
+        f = (StatsForecast(models=[AutoETS(season_length=1)], freq=1, n_jobs=-1).forecast(df=Y[["unique_id", "ds", "y"]], h=H).reset_index() if len(Y)
+             else pd.DataFrame(dict(unique_id=[], ds=[], AutoETS=[])))
         f["step"] = f.ds - f.unique_id.map(n)
         origin = S[(S.report_idx == c) & S.lp.notna() & ~S.touch_gap].set_index("item_id")
         for h in horizons:
             fh = f[f.step == h].set_index("unique_id")["AutoETS"]
-            O = origin[origin.index.isin(fh.index)].reset_index()
+            O = origin.reset_index()
             O = O.assign(horizon=h, y=O[f"y{h}"], target_idx=O.report_idx + h)
-            out.append(ml.to_forecast(O, fh.loc[O.item_id].values - O.lp.values, model_name).assign(fit_cutoff=c))
+            pred = O.item_id.map(fh).values - O.lp.values
+            out.append(ml.to_forecast(O, np.where(np.isnan(pred), 0.0, pred), model_name).assign(fit_cutoff=c))
     return pd.concat(out, ignore_index=True)
 
 
