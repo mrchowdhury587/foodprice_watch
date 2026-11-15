@@ -36,4 +36,17 @@ STAGES = {
         outputs=["state/prereg_S27.yaml"] + [f"reports/project/tables/P7_{n}.csv" for n in ["accuracy_by_horizon", "accuracy_by_group", "accuracy_by_item", "walk_forward", "error_analysis", "worst20", "dm_vs_naive", "learning_curve", "bias_over_time"]]
                 + ["reports/project/figures/F10_relative_error_by_horizon.png", "reports/project/RESULTS_REGISTER.md"],
         tests=["tests/test_s26_prereg.py", "tests/test_s27_eval.py", "tests/test_wording.py"]),
+    "S28": dict(
+        run=[f"{PY} src/stages/s28_alerts.py"], note="alert level fixed from 2024 non-event periods, prereg_S28.yaml committed first, 12 shock episodes scored once",
+        outputs=["state/prereg_S28.yaml", "outputs/28_alerts/forecasts_daily.parquet", "outputs/28_alerts/alerts.csv"]
+                + [f"reports/project/tables/P8_{n}.csv" for n in ["event_scores", "level_curve", "range_quality", "range_quality_by_period", "alert_summary"]],
+        tests=["tests/test_s28_alerts.py", "tests/test_wording.py"]),
+    "S29": dict(
+        run=[f"{PY} src/stages/s29_explain.py"],
+        outputs=["outputs/export/alert_drivers.csv"] + [f"reports/project/tables/P9_{n}.csv" for n in ["driver_overall", "driver_by_horizon", "driver_by_item_group", "driver_by_item", "sign_checks", "driver_stability"]],
+        tests=["tests/test_exports.py", "tests/test_wording.py"]),
+    "S30": dict(
+        run=[f"{PY} src/stages/s30_export.py"], note="exports and model hold TCB prices: Drive only",
+        outputs=["outputs/export/forecasts.parquet", "outputs/export/alerts.csv", "models/lgbm_production.txt"],
+        tests=["tests/test_exports.py"]),
 }
