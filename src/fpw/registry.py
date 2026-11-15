@@ -51,4 +51,8 @@ STAGES = {
         outputs=["data/processed/tcb_v2_rebuilt.parquet", "outputs/22_panel/checks.json", "reports/project/tables/P2_panel_summary.csv",
                  "reports/project/tables/P2_audit.csv", "reports/project/tables/P2_audit_summary.csv"],
         tests=["tests/test_v2_panel.py", "tests/test_wording.py"]),
+    "S23": dict(
+        run=[f"{PY} src/stages/s23_features.py"],
+        outputs=["data/processed/features_v2.parquet", "outputs/23_features/checks.json", "reports/project/tables/P3_driver_inventory.csv"],
+        tests=["tests/test_v2_features.py", "tests/test_wording.py"]),
 }

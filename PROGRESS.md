@@ -36,3 +36,7 @@
 - Startup check reset local S00 to pending: data/raw/MANIFEST.csv is absent and DECISIONS.md differs from the stored hash. This checkout has no mounted Drive or pipeline data. No Colab stage completion is claimed.
 - Verification: python -m fpw.check using the existing repo virtual environment: CHECK PASS, 22 passed, 26 skipped (data-dependent checks skipped). Initial sandbox run had pytest temporary-directory permission errors; rerun outside sandbox passed, with a pytest cache permission warning.
 - Next: user approval of feature branch merge; Drive S00 intake refresh and S22 verified output, then S23. Heavy model work remains in Colab.
+## 2026-11-15 - step 3 (S23) code, branch v2/step-3
+- src/fpw/features.py + src/stages/s23_features.py: features_v2.parquet with calendar, weather (2024 choice), onion export measure, exchange rate. Earlier S04 untouched.
+- Work-PC run on a scratch copy with the real files: 77,520 rows; tests pass, including re-derived weather (+5 d) and exchange-rate values and equality of every kept column with the earlier features.parquet up to 2026-10-24.
+- Found: the onion export flag is unknown after 2025-03-27 (end of the events table); weather empty after 2026-10-31, exchange rate after 2026-11-01. Logged in DEVIATIONS.md.
