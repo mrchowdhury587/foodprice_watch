@@ -1,9 +1,15 @@
 """Ledger helpers: update only status fields of state/stages.json (atomic)."""
 import json, os, time
 from .checkpoint import sha256
-from .paths import ROOT, LEDGER
+from .paths import ROOT, LEDGER, CODE_ROOT
 ALLOWED = {"status","started_at","last_unit","units_done","output_sha256","git_commit","finished_at","notes"}
-def load(): return json.loads(LEDGER.read_text())
+def load():
+    """The ledger in ROOT (Drive in Colab). Stages appended to the repo ledger later (new entries only, never edits) are added when missing."""
+    d = json.loads(LEDGER.read_text()); repo = CODE_ROOT / "state/stages.json"
+    if repo.exists() and repo.resolve() != LEDGER.resolve():
+        have = {s["id"] for s in d["stages"]}
+        d["stages"] += [s for s in json.loads(repo.read_text())["stages"] if s["id"] not in have]
+    return d
 def save(d):
     tmp = LEDGER.with_suffix(".tmp"); tmp.write_text(json.dumps(d, indent=2)); os.replace(tmp, LEDGER)
 def stage(d, sid): return next(s for s in d["stages"] if s["id"] == sid)
