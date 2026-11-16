@@ -19,3 +19,6 @@ report_sample/
 !reports/**/*.csv
 !config/**/*.csv
 !archive/**/*.csv
+
+# Old local files (zips, PDFs, report drafts with TCB prices): kept on this PC only
+archive/old_pipeline/local_files/
