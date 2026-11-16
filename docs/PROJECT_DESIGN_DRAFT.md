@@ -1,0 +1,591 @@
+# Bangladesh Food Price Watch — Full Project Design Draft
+
+This draft explains what the project does, how information moves through it, how the forecasting model learns, and how alerts are generated and evaluated. It describes the methodology without reporting experimental results.
+
+The proposed TCB-based alert evaluation is identified separately because it still requires a fixed price-rise definition and implementation.
+
+## 1. Project idea
+
+Bangladesh Food Price Watch is a price prediction and monitoring system built around the retail price reports published by the Trading Corporation of Bangladesh for Dhaka.
+
+The system answers four practical questions:
+
+1. What price does the model expect at a future report?
+2. What range of prices would be consistent with recent forecasting uncertainty?
+3. Has the observed price repeatedly exceeded its expected upper bound?
+4. Which inputs contributed to the model's forecast?
+
+The system combines these functions into a single workflow, from preparing source observations to displaying forecasts and alerts.
+
+It forecasts prices numerically. Its alert component detects observed departures from forecast ranges after new reports arrive.
+
+**Current implementation:** forecasting, ranges, persistent-exceedance alerts, contribution outputs, and viewing interfaces.
+
+**Proposed revision:** use an independently defined TCB price-rise criterion as the primary reference for evaluating alerts. News would provide optional context afterward. This revised evaluation has not yet been implemented.
+
+## 2. Complete logic flow
+
+```text
+TCB reports and supporting source files
+                  ↓
+Convert reports into structured observations
+                  ↓
+Validate prices, dates, product names and units
+                  ↓
+Create an item-by-report-date panel
+                  ↓
+Join supporting drivers by availability date
+                  ↓
+Calculate historical price features
+                  ↓
+Create targets for four forecast horizons
+                  ↓
+Separate model development from evaluation
+                  ↓
+Train and tune a single LightGBM model
+                  ↓
+Generate future price estimates
+                  ↓
+Construct expected ranges from past forecast errors
+                  ↓
+Save forecasts and their original bounds
+                  ↓
+Receive a new TCB report
+                  ↓
+Compare actual prices with previously issued bounds
+                  ↓
+Apply the persistence rule
+                  ↓
+Record alert starts and continuing alert status
+                  ↓
+Attach model contribution breakdowns
+                  ↓
+Save outputs and display them through the interface
+```
+
+Two activities sit alongside this operational flow:
+
+- Forecast evaluation checks predicted prices and ranges against subsequently reported prices.
+- Alert evaluation checks whether the alerts identify independently defined substantial price rises in a useful and timely way.
+
+## 3. Data sources and their roles
+
+### 3.1 TCB prices
+
+TCB observations are the primary data source. They supply product names, units or package sizes, report dates, minimum prices, maximum prices, and the price measure used for forecasting.
+
+Each product-and-unit combination is treated as a distinct series. This prevents prices quoted for different package sizes from being combined incorrectly.
+
+The principal price measure is the midpoint:
+
+```text
+P_t = (P_min,t + P_max,t) / 2
+```
+
+This is the midpoint of the reported range.
+
+### 3.2 Calendar information
+
+Calendar features describe conditions known at the forecast origin, including month, weekday, Ramadan timing, Eid timing, upcoming holidays, and time since the previous report.
+
+These allow the model to learn recurring timing patterns where such patterns are present.
+
+### 3.3 Weather information
+
+Selected temperature and rainfall summaries represent historical weather conditions for relevant products.
+
+Weather inputs are delayed according to their configured availability rule. The model must not receive an observation before it would have been available.
+
+The model uses historical weather summaries, rather than assuming that future realised weather is already known.
+
+### 3.4 Exchange rate
+
+The exchange-rate inputs describe the log BDT/USD level and its change over 30 calendar days. They apply to selected item groups.
+
+For a report date, the system uses the latest eligible observation dated on or before that report.
+
+### 3.5 Onion export measures
+
+A recorded measure indicates whether a listed Indian onion export restriction, duty or minimum export price is active for mapped onion items.
+
+Outside the source table's coverage, the value remains unknown rather than being assumed inactive.
+
+### 3.6 News
+
+Under the proposed project direction, news provides optional context for selected cases. For example, after identifying a price rise from TCB, relevant reporting may help describe the surrounding circumstances.
+
+News is not an input that trains the forecasting model.
+
+The existing historical alert calibration used news-derived windows. Moving to a fully TCB-based assessment requires an explicit methodological change; it cannot be achieved through wording alone.
+
+## 4. Data preparation
+
+### 4.1 Convert and standardise
+
+The preparation tools convert original reports into structured observations and standardise dates, product names, units and numeric price fields.
+
+The original source files remain unchanged.
+
+### 4.2 Validate the observations
+
+| Check | Purpose |
+|---|---|
+| Duplicate item-date keys | Prevent repeated observations |
+| Minimum not above maximum | Detect inconsistent ranges |
+| Midpoint consistency | Verify the target calculation |
+| Product and unit mapping | Keep series definitions consistent |
+| Missing and zero prices | Identify unreported observations |
+| Date ordering | Preserve chronological processing |
+| Equality with earlier observations | Ensure updates do not silently change history |
+
+Suspicious values are flagged for inspection. Genuine jumps are retained.
+
+### 4.3 Handle missing observations
+
+Missingness is handled differently for inputs and targets:
+
+- Input price: the latest reported price may be carried forward.
+- Future target price: must be an actual reported observation.
+- External driver: remains missing when unavailable or stale.
+
+Filling a missing future target would create an artificial outcome, so it is not allowed.
+
+### 4.4 Build the report index
+
+Report dates are sorted and assigned a sequential index:
+
+```text
+First report date   → report index 0
+Second report date  → report index 1
+Third report date   → report index 2
+...
+```
+
+Forecast horizons use this index. A seven-report horizon means seven recorded report positions ahead, rather than necessarily seven calendar days.
+
+### 4.5 Preserve sparse periods
+
+The sparse 2022 reporting period remains visible in the data.
+
+Relevant training windows and targets touching that period are excluded according to the project rules. The system does not create artificial daily prices across the gap.
+
+## 5. Feature engineering
+
+Features describe the information available when a forecast is issued.
+
+| Feature group | Examples | Purpose |
+|---|---|---|
+| Price history | Recent changes, rolling mean deviation, volatility | Describe the item's recent behaviour |
+| Item identity | Item and group codes | Allow one model to distinguish series |
+| Horizon | 1, 7, 14 or 30 reports | Tell the model which future distance to predict |
+| Calendar | Month, weekday, Ramadan/Eid timing | Represent recurring timing |
+| Weather | Selected temperature and rainfall summaries | Represent available weather conditions |
+| Onion measures | Recorded active measure | Represent mapped policy information |
+| Exchange rate | Level and recent change | Represent currency conditions |
+
+Price-history features include current log price, log changes over several report windows, deviation from a rolling mean, rolling volatility, and reports since the last observed change.
+
+All calculations must use observations available at or before the forecast origin.
+
+## 6. Price prediction design
+
+### 6.1 Forecasting objective
+
+For an item at report origin t, predict its price at horizons h in {1, 7, 14, 30}.
+
+The model learns the future log price change:
+
+```text
+y_(t,h) = log(P_(t+h)) - log(P_t)
+```
+
+P_t is the latest available input price. The output is converted back into a price:
+
+```text
+predicted_price_(t+h|t) = P_t × exp(predicted_log_change_(t,h))
+```
+
+### 6.2 Why use log changes?
+
+Different items have different price levels and units. Log changes reduce those scale differences and allow one model to learn across multiple items.
+
+The final output remains a price in the item's quoted unit, making it interpretable to the user.
+
+### 6.3 One model across items and horizons
+
+The system creates multiple training examples from each item-origin observation:
+
+| Item-origin observation | Horizon input | Target |
+|---|---:|---|
+| Same observation | 1 | Change to report +1 |
+| Same observation | 7 | Change to report +7 |
+| Same observation | 14 | Change to report +14 |
+| Same observation | 30 | Change to report +30 |
+
+This is called horizon stacking. A single LightGBM model learns from the combined examples.
+
+The model predicts each requested horizon directly. It does not repeatedly reuse its own intermediate predictions.
+
+## 7. How the model is trained
+
+### 7.1 Construct historical examples
+
+For every eligible historical origin:
+
+1. Identify the latest available input price.
+2. Calculate price-history features.
+3. Join eligible driver values.
+4. Create one row for each horizon.
+5. Attach the subsequently reported target price.
+6. Exclude examples with missing or ineligible targets.
+
+```text
+Information available at origin
+              +
+Requested horizon
+              ↓
+Observed future price change
+```
+
+Training adjusts the model so that its predicted changes approach the observed changes.
+
+### 7.2 What LightGBM learns
+
+LightGBM builds a sequence of decision trees. Each tree divides the training examples according to feature conditions. Later trees improve the combined prediction by reducing remaining training loss.
+
+The model can learn different relationships for different items, item groups, horizons, recent price conditions, calendar positions and available drivers.
+
+It is not given a fixed rule saying that a particular driver must increase a price. Relationships are estimated from the eligible training observations.
+
+### 7.3 Prevent future information entering training
+
+At training cutoff c, a row can be used only if its target has already occurred:
+
+```text
+t + h <= c
+```
+
+For example, a 30-report target originating shortly before the cutoff cannot enter training while its outcome is still unknown.
+
+This restriction applies even if that outcome exists in the complete historical file.
+
+### 7.4 Model development
+
+Candidate experiments examine whether different modelling approaches are suitable. The project then uses LightGBM for its integrated multi-item forecasting and tree-contribution workflow.
+
+Candidate experiments are development checks. They are separate from the operational function of issuing forecasts.
+
+### 7.5 Hyperparameter tuning
+
+Optuna searches configurations controlling:
+
+- Tree size.
+- Learning rate.
+- Number of boosting rounds.
+- Minimum examples per leaf.
+- Feature and row sampling.
+- Regularisation.
+- Loss function.
+
+Tuning uses the designated validation partition. A later confirmation partition checks the chosen setting before historical test evaluation.
+
+The model is not retuned to improve its already-observed test results.
+
+### 7.6 Rolling training
+
+Historical evaluation imitates repeated forecasting:
+
+```text
+Train using eligible history
+          ↓
+Issue forecasts at an origin
+          ↓
+Move forward through reports
+          ↓
+Add newly observed eligible outcomes
+          ↓
+Refit at the configured interval
+```
+
+The training window expands as more observations become available.
+
+### 7.7 Production model
+
+After development and evaluation, production fitting uses all eligible outcomes available through the latest origin.
+
+The saved production model then generates the current forecasts. Production fitting does not imply repeating historical evaluation.
+
+## 8. Forecast evaluation
+
+Forecast evaluation compares saved predictions with subsequently reported TCB prices.
+
+| Measure | Question answered |
+|---|---|
+| Log-change MAE | How large are errors on the model's change scale? |
+| Item-level price MAE | How large are errors in the item's quoted unit? |
+| RMSE | How strongly do large errors affect performance? |
+| MAPE | What is the average absolute percentage error? |
+| Bias | Are predictions systematically high or low? |
+| Direction accuracy | Does the model identify the direction of a nonzero horizon change? |
+| Changed-case errors | How well does it handle observations where prices differ across the horizon? |
+
+Evaluation is separated by horizon, item and group.
+
+Stable-price observations and changed-price observations are examined separately because a small overall error can conceal difficulty predicting movements.
+
+This is a regression task. A classification-style overall accuracy percentage is not the principal measure.
+
+## 9. Expected price ranges
+
+### 9.1 Purpose
+
+A point forecast alone does not describe uncertainty. The expected range indicates how far an actual price might differ from the forecast, based on previously observed forecast errors.
+
+### 9.2 Historical forecast errors
+
+For a completed forecast:
+
+```text
+e_(t,h) = log(actual_price_(t+h)) - log(predicted_price_(t+h|t))
+```
+
+The system collects eligible historical residuals for the same item and horizon. Only errors whose outcomes were already observable at the forecast origin may be used.
+
+### 9.3 Constructing bounds
+
+Residual quantiles adjust the point forecast:
+
+```text
+lower_bound_(t+h|t) = predicted_price_(t+h|t) × exp(q_lower)
+upper_bound_(t+h|t) = predicted_price_(t+h|t) × exp(q_upper)
+```
+
+A 0.05 lower quantile and a 0.95 upper quantile form a nominal 90% central interval.
+
+The 0.95 upper quantile also defines a nominal 95% one-sided upper bound.
+
+### 9.4 Range evaluation
+
+Evaluate ranges using upper-bound coverage, central-interval coverage, width, quantile loss and interval score.
+
+Coverage and width must be assessed together: very wide ranges can cover many observations while being uninformative.
+
+The daily alert calibration and production four-horizon calibration currently use different saved-residual procedures and must be documented separately.
+
+## 10. Alert generation
+
+### 10.1 Alert objective
+
+The alert component identifies persistent observations above previously issued forecast bounds.
+
+The forecast is issued first. The actual price arrives later. The alert decision is then made.
+
+### 10.2 Daily decision flow
+
+For a new report at time t:
+
+1. Retrieve the seven-report-ahead forecast issued at t-7.
+2. Retrieve the upper bound issued with it.
+3. Read the actual price at t.
+4. Record whether the actual price exceeds the bound.
+5. Count exceedances within the latest five reports.
+6. Activate the alert if at least three exceedances occurred.
+
+```text
+B_t = 1 if P_t > upper_bound_(t|t-7), otherwise 0
+A_t = 1 if sum(B_t, B_(t-1), ..., B_(t-4)) >= 3, otherwise 0
+```
+
+### 10.3 Alert episodes
+
+The system distinguishes:
+
+- Exceedance: one observation above its bound.
+- Active alert: the persistence rule is satisfied.
+- Alert start: status changes from inactive to active.
+- Alert episode: a consecutive run of active status.
+
+This avoids treating every active report as a new incident.
+
+### 10.4 Why require persistence?
+
+A persistence rule reduces responses to isolated spikes. Its tradeoff is delayed detection or missed short-lived movements.
+
+The rule does not identify every economically important situation. A gradual increase may remain within the range, and a high but stable price may generate no alert.
+
+## 11. Selecting alert settings
+
+Alert settings determine the balance between sensitivity and alert burden.
+
+Relevant settings include forecast horizon, residual window, minimum calibration observations, upper quantile, required exceedance count and persistence window.
+
+They should be selected using validation observations and then fixed before evaluation. They must not be adjusted repeatedly to catch particular already-examined episodes.
+
+The existing implementation has a historically selected level. Replacing its news-window calibration with a TCB-based procedure requires a separately documented revision.
+
+## 12. Proposed TCB-based alert validation
+
+### 12.1 Primary reference
+
+TCB prices would establish whether a substantial recorded rise occurred. The reference must be independent of the forecast-bound rule.
+
+One possible building block is:
+
+```text
+R_(t,w) = P_t / P_(t-w) - 1
+```
+
+w is a fixed report window. The complete definition must specify:
+
+- Required increase.
+- Measurement window.
+- Persistence.
+- Eligible observations.
+- Item or group treatment.
+- Episode start and end.
+- Rules for merging nearby episodes.
+
+**These choices remain to be fixed; this draft does not invent a threshold.**
+
+### 12.2 Why independence matters
+
+If a real rise is defined as "the model's bound was exceeded," and the alert also means "the model's bound was exceeded," evaluation becomes circular.
+
+An independent TCB criterion allows the project to ask: does the forecast-based alert identify substantial recorded rises in a timely way?
+
+### 12.3 Matching alerts to rise episodes
+
+Matching must use the correct item and a defined timing rule.
+
+The design should specify:
+
+- Whether one alert can match only one rise episode.
+- How repeated alerts within an episode are treated.
+- Whether an alert already active at episode onset receives credit.
+- How early and late matches are handled.
+- Whether unmatched alerts remain unmatched rather than automatically being declared false.
+
+### 12.4 Alert evaluation measures
+
+| Measure | Purpose |
+|---|---|
+| Detected episodes | Count reference rises matched by alerts |
+| Missed episodes | Identify rises without a matching alert |
+| Detection delay | Measure timeliness from reference onset |
+| Matched and unmatched alerts | Describe alert burden |
+| Magnitude and duration | Identify which kinds of rises are detected |
+| Item/group breakdowns | Reveal uneven behaviour |
+| Sensitivity checks | Assess dependence on reasonable reference definitions |
+
+Precision, recall and F1 require a consistent counting unit and matching scheme.
+
+The new assessment should use validation data for its design. Analysis of an already-examined historical period must be labelled retrospective; future unseen reports provide fresh confirmation.
+
+## 13. Optional news context
+
+News can be reviewed after TCB identifies a movement.
+
+```text
+TCB price-rise episode
+          ↓
+Associated forecast and alert
+          ↓
+Relevant dated reporting
+          ↓
+Case description
+```
+
+This keeps two roles separate:
+
+- TCB provides the numerical price evidence.
+- News provides contextual information.
+
+A news explanation is not automatically a verified cause.
+
+Existing news-based evaluation artifacts remain historical records and should not be relabelled as completed TCB-based validation.
+
+## 14. Forecast explanations
+
+The system groups additive model contributions into price history, calendar, weather, onion export measures and exchange rate.
+
+For a prediction:
+
+```text
+predicted_log_change = model_baseline + sum(feature_contributions)
+```
+
+The contributions describe how inputs move the model output relative to its baseline.
+
+The interface can show the grouped contributions beside a forecast or alert. These contributions explain the fitted model's calculation. Their stability should be checked across refits.
+
+For exact historical explanations, use the model that originally issued the forecast. Explanations generated using a later model should be labelled retrospective.
+
+## 15. Outputs and interface
+
+| Output | Contents |
+|---|---|
+| Forecast file | Item, origin, horizon, predicted price and bounds |
+| Alert file | Item, alert start, observed price and associated forecast information |
+| Contribution file | Grouped model contributions associated with inspected observations |
+| Saved model | Fitted production estimator |
+| Provenance records | Configuration, source hashes and execution details |
+
+The interface allows users to select an item, inspect forecasts and ranges, review alerts, and examine contribution charts.
+
+The interface displays saved artifacts. Opening it does not itself validate predictions or refresh data.
+
+## 16. Updating the system
+
+When new reports arrive:
+
+1. Convert and append observations.
+2. Verify that earlier records remain unchanged.
+3. Run panel checks.
+4. Refresh supporting drivers.
+5. Recalculate features.
+6. Fit the production model using the fixed design.
+7. Generate new forecasts and ranges.
+8. Update alerts from eligible newly observed outcomes.
+9. Generate corresponding explanations.
+10. Save consistent exports and provenance.
+11. Refresh the interface.
+
+Forecast, alert and explanation files must belong to a compatible update. Fresh forecasts should not be presented alongside stale alert artifacts.
+
+The current update helper requires further verification before this complete process can be described as automatic.
+
+## 17. Reproducibility
+
+The system should preserve source-file hashes, configuration, code revision, model settings, training cutoff, random seed, fitted models, predictions, calibration artifacts, alert decisions and evaluation tables.
+
+Writes should be atomic, and completion markers should distinguish complete artifacts from interrupted work.
+
+Saved outputs should be reused for reporting and diagnosis. Routine report preparation should not trigger training or repeat sealed evaluation.
+
+## 18. Acceptance checks
+
+| Component | Required check |
+|---|---|
+| Data | Dates, keys, prices and units pass validation |
+| Availability | Features contain no future information |
+| Training | Targets are observable by each cutoff |
+| Forecasts | Eligible items receive all requested horizons |
+| Ranges | Calibration uses eligible residuals; coverage and width are measured |
+| Alerts | Each decision traces to an actual price and previously issued bound |
+| TCB assessment | Independent rise criterion and matching rules are fixed and implemented |
+| Explanations | Contributions correspond to the stated fitted model |
+| Updates | Forecasts, alerts and explanations refresh consistently |
+| Interface | Saved outputs display correctly |
+| Reproducibility | Artifacts and provenance support inspection |
+
+## 19. Suggested report organisation
+
+| Chapter | Contents |
+|---|---|
+| Introduction | Problem, motivation, objectives, scope and intended users |
+| Literature Review | Related forecasting and monitoring approaches; project positioning |
+| Methodology | Data preparation, features, model training, ranges, alerts and evaluation design |
+| Implementation and Evaluation | Software architecture, execution procedure, acceptance checks and measured behaviour |
+| Conclusion and Future Work | Delivered functions, methodological limitations and remaining work |
+
+This design keeps the project centred on building and evaluating an integrated price forecasting and monitoring system, while clearly separating implemented functionality from the proposed TCB-based alert assessment.
