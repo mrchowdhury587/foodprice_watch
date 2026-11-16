@@ -1,0 +1,6 @@
+group,features,frequency,availability,items,last_report_day_with_a_value
+price history,"built at model time from the panel: log changes, deviation from the rolling mean, volatility, reports since change",report day,none,all,
+calendar,"month, dow, days_to_ramadan, days_to_eid_fitr, days_to_eid_adha, in_ramadan, holiday_next7, days_since_prev_report","daily, known ahead",0,all,2026-10-24
+weather,"wx_bd_tmax_7d, wx_bd_tmean_30d, wx_bd_rain_7d (chosen on 2024 by the earlier run)",daily,"+5 d, carried at most 7 d",7 items,2026-10-24
+onion export measures,"own_export_measure: 1 while an Indian onion duty, minimum price or ban is in force",event,start date; empty outside the table's coverage,2 items,2025-03-27
+exchange rate,"fx_lvl (log BDT per USD), fx_ch30 (change over 30 days)",daily,"last value on or before the report day, carried at most 7 d",34 items,2026-10-24

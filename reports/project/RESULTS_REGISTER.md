@@ -48,3 +48,108 @@ Run 2026-11-15, code commit `5a7167f`. Commands: `python tools/tcb_convert.py --
 | rows added | 1,080 (18 report days, 2026-10-25 to 2026-11-12, 60 rows each) |
 | extended file | 77,520 rows, 1,430 report days, 2021-05-17 to 2026-11-12, 63 series |
 | untranslated or auto-translated names in the new days | 0 |
+
+<!-- S27 -->
+## S27 sealed test and evaluation (2025-01 to 2026-10, 87 origins)
+
+Run 2026-11-16, code commit `b58aba5`.
+
+Command: `python -m fpw.runner S27`
+
+File(s): `reports/project/tables/P7_accuracy_by_horizon.csv`
+
+| measure | value | file |
+|---|---|---|
+| h=1: mean absolute error of the log price change | 0.00275 | `P7_accuracy_by_horizon.csv` |
+| h=1: error relative to tomorrow = today (geometric mean over items) | 1.01 | `P7_accuracy_by_horizon.csv` |
+| h=1: mean absolute error in Tk | 3.114 | `P7_accuracy_by_horizon.csv` |
+| h=1: direction accuracy on days the price moved | 0.1451 | `P7_accuracy_by_horizon.csv` |
+| h=1: bias in Tk (forecast - actual) | -1.247 | `P7_accuracy_by_horizon.csv` |
+| h=7: mean absolute error of the log price change | 0.01203 | `P7_accuracy_by_horizon.csv` |
+| h=7: error relative to tomorrow = today (geometric mean over items) | 1.001 | `P7_accuracy_by_horizon.csv` |
+| h=7: mean absolute error in Tk | 23.77 | `P7_accuracy_by_horizon.csv` |
+| h=7: direction accuracy on days the price moved | 0.1881 | `P7_accuracy_by_horizon.csv` |
+| h=7: bias in Tk (forecast - actual) | -4.429 | `P7_accuracy_by_horizon.csv` |
+| h=14: mean absolute error of the log price change | 0.01991 | `P7_accuracy_by_horizon.csv` |
+| h=14: error relative to tomorrow = today (geometric mean over items) | 1.001 | `P7_accuracy_by_horizon.csv` |
+| h=14: mean absolute error in Tk | 43.18 | `P7_accuracy_by_horizon.csv` |
+| h=14: direction accuracy on days the price moved | 0.2785 | `P7_accuracy_by_horizon.csv` |
+| h=14: bias in Tk (forecast - actual) | -6.031 | `P7_accuracy_by_horizon.csv` |
+| h=30: mean absolute error of the log price change | 0.03228 | `P7_accuracy_by_horizon.csv` |
+| h=30: error relative to tomorrow = today (geometric mean over items) | 1.001 | `P7_accuracy_by_horizon.csv` |
+| h=30: mean absolute error in Tk | 79.17 | `P7_accuracy_by_horizon.csv` |
+| h=30: direction accuracy on days the price moved | 0.38 | `P7_accuracy_by_horizon.csv` |
+| h=30: bias in Tk (forecast - actual) | -6.393 | `P7_accuracy_by_horizon.csv` |
+| h=1: Diebold-Mariano p-value vs tomorrow = today (supporting evidence) | 6.396e-05 | `P7_dm_vs_naive.csv` |
+| h=7: Diebold-Mariano p-value vs tomorrow = today (supporting evidence) | 0.01103 | `P7_dm_vs_naive.csv` |
+| h=14: Diebold-Mariano p-value vs tomorrow = today (supporting evidence) | 0.9169 | `P7_dm_vs_naive.csv` |
+| h=30: Diebold-Mariano p-value vs tomorrow = today (supporting evidence) | 0.5 | `P7_dm_vs_naive.csv` |
+| test origins | 87 | `P7_accuracy_by_horizon.csv` |
+| scored forecasts | 17964 | `P7_accuracy_by_horizon.csv` |
+| model beats tomorrow = today at every horizon (relative error < 1) | False | `P7_accuracy_by_horizon.csv` |
+
+<!-- /S27 -->
+
+<!-- S28 -->
+## S28 ranges and alerts (shock episodes scored once)
+
+Run 2026-11-16, code commit `8f74ac2`.
+
+Command: `python -m fpw.runner S28`
+
+File(s): `reports/project/tables/P8_event_scores.csv`
+
+| measure | value | file |
+|---|---|---|
+| alert level (upper bound quantile) | 0.95 | `state/prereg_S28.yaml` |
+| false alarms per item-year, 2024 non-event | 1.923 | `P8_level_curve.csv` |
+| events detected | 11 | `P8_event_scores.csv` |
+| events scored | 16 | `P8_event_scores.csv` |
+| share of alert runs inside an event window | 0.06061 | `P8_alert_summary.csv` |
+| alert runs | 429 | `P8_alert_summary.csv` |
+| placebo p-value (random dates) | 0.2591 | `P8_alert_summary.csv` |
+| placebo mean recall | 0.5925 | `P8_alert_summary.csv` |
+| upper-bound coverage | 0.9413 | `P8_range_quality.csv` |
+| Kupiec p-value | 3.578e-20 | `P8_range_quality.csv` |
+
+<!-- /S28 -->
+
+<!-- S29 -->
+## S29 driver breakdown
+
+Run 2026-11-16, code commit `8f74ac2`.
+
+Command: `python -m fpw.runner S29`
+
+File(s): `reports/project/tables/P9_driver_overall.csv`
+
+| measure | value | file |
+|---|---|---|
+| share of the forecast change from calendar | 0.1383 | `P9_driver_overall.csv` |
+| share of the forecast change from exchange_rate | 0.1699 | `P9_driver_overall.csv` |
+| share of the forecast change from onion_export_measures | 0.09628 | `P9_driver_overall.csv` |
+| share of the forecast change from price_history | 0.556 | `P9_driver_overall.csv` |
+| share of the forecast change from weather | 0.03954 | `P9_driver_overall.csv` |
+| largest spread of a group share across three refits | 0.5673 | `P9_driver_stability.csv` |
+| alert days explained | 3081 | `outputs/export/alert_drivers.csv` |
+
+<!-- /S29 -->
+
+<!-- S30 -->
+## S30 production export
+
+Run 2026-11-16, code commit `b58aba5`.
+
+Command: `python -m fpw.runner S30`
+
+File(s): `outputs/export/forecasts.parquet`
+
+| measure | value | file |
+|---|---|---|
+| items forecast | 54 | `outputs/export/forecasts.parquet` |
+| forecast rows | 216 | `outputs/export/forecasts.parquet` |
+| latest origin | 2026-10-24 | `outputs/export/forecasts.parquet` |
+| range level | 0.95 | `outputs/export/forecasts.parquet` |
+| rows without a range | 0 | `outputs/export/forecasts.parquet` |
+
+<!-- /S30 -->

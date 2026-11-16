@@ -1,0 +1,17 @@
+event_id,product,onset,news_peak,items,detected,first_alert,lead_days_vs_news_peak
+BD-S09,Sugar,2023-06-01,2023-06-25,1,False,,
+BD-S11,Egg - Farm,2023-08-01,2023-08-13,1,True,2023-08-13,0.0
+BD-S12,Onion - Imported,2023-08-01,2023-08-21,2,True,2023-08-17,-4.0
+BD-S12,Onion - Local,2023-08-01,2023-08-21,2,True,2023-08-17,-4.0
+BD-S13,Onion - Imported,2023-10-01,2023-12-09,2,True,2023-11-01,-38.0
+BD-S13,Onion - Local,2023-10-01,2023-12-09,2,True,2023-11-01,-38.0
+BD-S14,Potato,2023-10-01,2023-11-13,1,True,2023-11-01,-12.0
+BD-S15,Rice - Coarse (Swarna/China IRRI),2023-10-01,2025-06-10,2,True,2023-11-30,-558.0
+BD-S15,Rice - Medium (Paijam),2023-10-01,2025-06-10,2,True,2023-11-30,-558.0
+BD-S16,Egg - Farm,2024-05-01,2024-05-19,1,True,2024-05-08,-11.0
+BD-S17,Potato,2024-07-01,2024-08-18,1,False,,
+BD-S19,Potato,2024-09-01,2024-09-05,1,False,,
+BD-S20,Egg - Farm,2024-10-01,2024-10-18,1,False,,
+BD-S21,Soybean Oil - Bottled,2024-10-01,2025-02-09,4,True,2024-10-07,-125.0
+BD-S21,Soybean Oil - Loose,2024-10-01,2025-02-09,4,True,2024-10-07,-125.0
+BD-S22,Green Chilli,2026-07-01,2026-07-31,1,False,,

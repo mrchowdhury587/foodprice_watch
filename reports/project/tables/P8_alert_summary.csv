@@ -1,0 +1,2 @@
+observed_recall,placebo_mean,placebo_p,draws,precision,alert_runs,level
+0.6875,0.5925,0.2591362126245847,300,0.06060606060606061,429,0.95
