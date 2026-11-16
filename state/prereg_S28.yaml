@@ -1,0 +1,24 @@
+chosen_level: 0.95
+event_window_days:
+  after_peak: 30
+  before_onset: 14
+events_used_for_threshold: false
+false_alarm_target_per_item_year: 2.0
+false_alarms_per_item_year_by_level:
+  '0.9': 3.07
+  '0.95': 1.923
+  '0.975': 1.628
+  '0.99': 1.442
+horizon: 7
+min_obs: 30
+model_trained_on_events: false
+persistence:
+  k: 3
+  m: 5
+purpose: Fixed before any shock episode is scored.
+stage: S28
+threshold_period:
+- '2024-01-01'
+- '2024-12-31'
+threshold_rule: lowest level with at most 2.0 false alarms per item-year in 2024 outside the event windows
+window: 120
