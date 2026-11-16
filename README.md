@@ -16,7 +16,7 @@ Plan: [docs/PROJECT_PLAN_2026-11-17.md](docs/PROJECT_PLAN_2026-11-17.md). Settin
 | [04a_forecast_choice](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/04a_forecast_choice.ipynb) | "Tomorrow = today", ETS and 16 LightGBM configurations on 2024 only; picks the LightGBM configuration (tables M1, M2) | ready |
 | [04b_forecast_test](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/04b_forecast_test.ipynb) | Naive, ETS and the chosen LightGBM on 2025-26 (retrospective); 7-day forecasts since 2023-06 for the alert ranges (tables M3, M4) | ready |
 | [05a_alert_choice](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/05a_alert_choice.ipynb) | Settings of the three alert rules (ML range, simple range, fixed threshold) chosen on 2024 (table A1) | ready |
-| 05b_alert_scoring | The three rules scored against sustained rises, 2024 and 2025-26 (retrospective) | after the 05a choice is committed |
+| [05b_alert_scoring](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/05b_alert_scoring.ipynb) | The three rules scored against sustained rises, 2024 and 2025-26 (retrospective); overlap, range coverage, per item (tables A2-A5) | ready |
 | 06_report_tables | Final tables and figures | planned |
 
 Code comes from GitHub `main` each session; Google Drive holds data and outputs only.

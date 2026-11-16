@@ -1,4 +1,4 @@
-"""Writes notebooks/01-05a as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
+"""Writes notebooks/01-05b as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
 import json, sys
 from pathlib import Path
 
@@ -536,8 +536,124 @@ print(f"  chosen_by: notebook 05a, code {CODE_COMMIT}, 2024 only")
 """),
 ]
 
+alert_scoring_nb = [
+    ("markdown", """
+# Food Price Watch 05b: alert rules scored against sustained rises
+Scores the three alert rules with the settings fixed on 2024 (notebook 05a, `config/settings.yaml` `alert_choice`) against the sustained 10 % rise episodes of notebook 03:
+A. ML range (LightGBM), B. simple range ("tomorrow = today"), C. fixed 7-report rise (a reference point: it is close to the rise definition itself).
+Periods: 2024 (validation, the year the settings were chosen on) and 2025-01-01 to 2026-10-24 (**retrospective**: the earlier run already looked at it).
+Alerts are abnormal-rise detection, not early warning. Writes tables `A2`-`A5` (counts and rates) and `processed/alerts_8.csv` (Drive only). Run top to bottom and paste the last cell's output back.
+"""),
+    *SETUP,
+    ("code", """
+# The settings must have been fixed and committed before this notebook scores anything.
+import subprocess
+choice = SETTINGS.get('alert_choice') or {}
+assert all(r_ in choice and 'setting' in choice[r_] for r_ in 'ABC'), 'alert_choice is empty: run 05a and commit its choice first'
+log = subprocess.run(['git', 'log', '--reverse', '--format=%h %ad', '--date=short', '-S', 'alert_choice:', '--', 'config/settings.yaml'],
+                     capture_output=True, text=True).stdout.strip().splitlines()
+fixed = subprocess.run(['git', 'log', '--reverse', '--format=%h %ad', '--date=short', '-S', 'A: {setting:', '--', 'config/settings.yaml'],
+                       capture_output=True, text=True).stdout.strip().splitlines()
+choice_commit = fixed[0] if fixed else 'not found in git history'
+print('settings (chosen on 2024):', {r_: choice[r_]['setting'] for r_ in 'ABC'}, '| first committed in', choice_commit)
+"""),
+    ("code", """
+import numpy as np
+import pandas as pd
+from foodwatch import alerts as al, behaviour as bh
+a, r = SETTINGS['alerts'], SETTINGS['rises']
+k, m, hz = a['persistence']['k'], a['persistence']['m'], a['horizon']
+before, after = a['match']['before_reports'], a['match']['after_reports']
+PERIODS = {'2024 validation': SETTINGS['periods']['validation'], '2025-26 retrospective': SETTINGS['periods']['test']}
+D = pd.read_csv(data('data'), parse_dates=['Date'])
+F7 = pd.read_csv(data('forecasts_h7'))
+h_f7 = sha256(data('forecasts_h7'))
+EP = bh.episodes(bh.rise_days(D, r['window_reports']), r['threshold'], r['persist_reports'], r['merge_gap_reports'])
+P = {'A': al.bounds(al.table(F7, 'lgbm', hz), hz, a['levels'], a['window'], a['min_obs']),
+     'B': al.bounds(al.table(F7, 'naive', hz), hz, a['levels'], a['window'], a['min_obs'])}
+P['C'] = P['B']
+EX, ON, RUNS = {}, {}, {}
+for rule in 'ABC':
+    s = choice[rule]['setting']
+    EX[rule], ON[rule] = al.range_alerts(P[rule], s, k, m) if rule != 'C' else al.threshold_alerts(P[rule], s, k, m)
+    RUNS[rule] = al.runs(P[rule], ON[rule])
+"""),
+    ("code", """
+# Score every rule in both periods; overlap of A and B; range coverage; per item.
+rows, ov, cov, per_item, matched = [], [], [], [], {}
+for pname, per in PERIODS.items():
+    eps = al.in_period(EP, 'onset_date', per)
+    iy = al.item_years(P['B'], per)
+    tday = al.in_period(P['B'], 'tdate', per).target_idx
+    lo, hi = int(tday.min()), int(tday.max())
+    for rule in 'ABC':
+        rn = al.in_period(RUNS[rule], 'start_date', per)
+        e, rn2 = al.match(rn, eps, before, after)
+        matched[(pname, rule)] = e
+        rows.append(dict(period=pname, rule=rule, setting=choice[rule]['setting'], **al.prf(e, rn2, iy),
+                         **al.placebo(rn, eps, before, after, lo, hi, a['placebo_draws'])))
+        for it in sorted(P['B'].item_id.unique()):
+            per_item.append(dict(period=pname, rule=rule, item_id=it, episodes=int((e.item_id == it).sum()),
+                                 detected=int(e[e.item_id == it].detected.sum()), alert_runs=int((rn2.item_id == it).sum())))
+    ov.append(dict(period=pname, **al.overlap(matched[(pname, 'A')], matched[(pname, 'B')])))
+    for rule in 'AB':
+        cov.append(dict(period=pname, rule=rule, **al.coverage(P[rule], choice[rule]['setting'], per)))
+A2 = pd.DataFrame(rows).round(4); A3 = pd.DataFrame(ov); A4 = pd.DataFrame(cov).round(4); A5 = pd.DataFrame(per_item)
+"""),
+    ("code", """
+# Checks: placebo p valid; runs and episodes inside their period; 2024 results equal 05a's chosen rows; nothing before the forecasts start.
+A1 = pd.read_csv(DATA_ROOT / SETTINGS['files']['tables'] / 'A1_alert_choice.csv')
+a1 = A1[A1.chosen.astype(str).str.lower() == 'true'].set_index('rule')
+v = A2[A2.period == '2024 validation'].set_index('rule')
+both = P['A'][['item_id', 'target_idx', 'resid']].merge(P['B'][['item_id', 'target_idx', 'resid']], on=['item_id', 'target_idx']).dropna()
+chk = dict(
+    placebo_p_valid=bool(A2.placebo_p.between(0, 1, inclusive='right').all()),
+    same_as_05a=bool(all(int(v.loc[r_, 'detected']) == int(a1.loc[r_, 'detected']) and int(v.loc[r_, 'alert_runs']) == int(a1.loc[r_, 'alert_runs']) for r_ in 'ABC')),
+    first_alert_date=str(min(RUNS[r_].start_date.min() for r_ in 'ABC').date()),
+    episodes_per_period={p_: int(len(al.in_period(EP, 'onset_date', per))) for p_, per in PERIODS.items()},
+    corr_errors_A_B=round(float(np.corrcoef(both.resid_x, both.resid_y)[0, 1]), 4),
+)
+chk['ok'] = chk['placebo_p_valid'] and chk['same_as_05a']
+assert chk['ok'], chk
+"""),
+    ("code", """
+T = DATA_ROOT / SETTINGS['files']['tables']
+for name, df in [('A2_rule_comparison', A2), ('A3_rule_overlap', A3), ('A4_range_coverage', A4), ('A5_alerts_by_item', A5)]:
+    write_csv(df, T / f'{name}.csv')
+alerts_long = pd.concat([P[r_][['item_id', 'target_date', 'target_idx']].assign(rule=r_, exceed=EX[r_].values, alert=ON[r_].values) for r_ in 'ABC'],
+                        ignore_index=True)
+h_al = write_csv(alerts_long, data('alerts'))
+"""),
+    ("code", """
+pd.set_option('display.width', 250); pd.set_option('display.max_columns', 30)
+names = {'A': 'ML range', 'B': 'simple range', 'C': 'fixed 7-report rise'}
+print('=== 05b alert rules vs sustained 10 % rises: 2024 validation and 2025-26 RETROSPECTIVE ===')
+print('code commit:', CODE_COMMIT, '| forecasts_h7.csv sha256', h_f7[:16])
+print('settings fixed on 2024:', {r_: choice[r_]['setting'] for r_ in 'ABC'}, '| first committed in', choice_commit)
+print('checks:', 'PASS' if chk['ok'] else 'FAIL', {k_: v_ for k_, v_ in chk.items() if k_ != 'ok'})
+print('\\nA2 rule comparison (recall = rises caught; precision = alert runs that match a rise; delay in report days after onset)')
+print(A2[['period', 'rule', 'setting', 'episodes', 'detected', 'recall', 'placebo_recall', 'placebo_p', 'alert_runs', 'precision', 'f1',
+          'median_delay_reports', 'runs_per_item_year', 'unmatched_per_item_year']].to_string(index=False))
+print('\\nA3 rises caught by the ML range (A) and the simple range (B)'); print(A3.to_string(index=False))
+print('\\nA4 range coverage (share of days at or below the upper bound; nominal = level)'); print(A4.to_string(index=False))
+print('\\nA5 per item: rises caught / episodes (alert runs)')
+A5v = A5.assign(cell=A5.detected.astype(str) + '/' + A5.episodes.astype(str) + ' (' + A5.alert_runs.astype(str) + ')')
+print(A5v.pivot_table(index='item_id', columns=['period', 'rule'], values='cell', aggfunc='first').rename(index=lambda s: s.split(' | ')[0]).to_string())
+print()
+for pname in PERIODS:
+    x = A2[A2.period == pname].set_index('rule')
+    for r_ in 'ABC':
+        print(f"{pname} | {r_} {names[r_]}: caught {int(x.loc[r_, 'detected'])}/{int(x.loc[r_, 'episodes'])} = {x.loc[r_, 'recall']:.2f} "
+              f"vs random dates {x.loc[r_, 'placebo_recall']:.2f} (p = {x.loc[r_, 'placebo_p']:.3f}); {int(x.loc[r_, 'alert_runs'])} alert runs")
+    nb_, na_ = int(x.loc['B', 'detected']), int(x.loc['A', 'detected'])
+    cmp_ = 'more rises than' if nb_ > na_ else ('as many rises as' if nb_ == na_ else 'fewer rises than')
+    print(f"{pname}: the simple range catches {cmp_} the ML range ({nb_} vs {na_})")
+print('\\nalerts file:', SETTINGS['files']['alerts'], '| rows', len(alerts_long), '| sha256', h_al[:16])
+"""),
+]
+
 OUT.mkdir(parents=True, exist_ok=True)
 for name, cells in [("01_data_intake.ipynb", intake), ("02_data_processing.ipynb", processing), ("03_price_behaviour.ipynb", behaviour_nb),
-                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb)]:
+                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb), ("05b_alert_scoring.ipynb", alert_scoring_nb)]:
     (OUT / name).write_text(json.dumps(nb(cells), indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print("wrote", OUT / name)

@@ -97,6 +97,7 @@ files:
   rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)
   forecasts_test: processed/forecasts_test.csv   # 04b: weekly-origin test forecasts, naive / ETS / LightGBM (contains prices)
   forecasts_h7: processed/forecasts_h7.csv       # 04b: 7-day forecasts from every report day since 2023-06-01 (contains prices)
+  alerts: processed/alerts_8.csv                 # 05b: exceedance and alert flags per item, target day and rule
   checks: processed/checks.json
   figures: reports/figures
   manifest: raw/MANIFEST.csv
