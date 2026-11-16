@@ -37,8 +37,9 @@ Per-item summary: `reports/tables/D1_panel_summary.csv`.
 
 File hashes from this run were panel `04055f91f781a836…` and features `bd2667c5d317e625…`.
 
-**This run is superseded; notebook 02 must be rerun.** After it, two things changed:
+**This run is superseded; notebook 02 must be rerun.** After it, three things changed:
 - The CSV writer now uses LF line ends and 10 significant digits, so checksums match on Windows and Colab.
 - `fx_ch30` was fixed: it was empty on 28 % of report days for the exchange-rate items (see `DEVIATIONS.md`).
+- The two files are merged into one, `processed/data_8.csv` (20 columns).
 
-The local run of the fixed code gives panel `e9ccc23e5bc71d88…`, features `0ea86bf5a1da5dc1…`, and `fx_ch30_empty_on_fx_items` 0.
+The local run of the current code gives `data_8.csv` sha256 `381ef71d10092bde…`, with every check passing and the comparison with the earlier run passing.

@@ -1,7 +1,7 @@
-"""The item x report-day panel for the 8 items.
+"""The item x report-day price rows for the 8 items.
 
 Rules: time runs in report days (days TCB published a sheet); a blank or zero price is "not reported" and is never filled;
-real jumps are kept; the sparse 2022 period is flagged, never bridged.
+real jumps are kept; the sparse 2022 period is flagged (gap_2022), never bridged.
 """
 import numpy as np
 import pandas as pd
@@ -18,22 +18,20 @@ def reports_since_change(values):
     return out
 
 
-def build(raw, items, gap, groups):
+def build(raw, items, gap):
     """raw: all TCB rows (from load.prices). items: the item_ids to keep. gap: (first, last) date of the 2022 gap.
-    groups: item_id -> item group. Report days are numbered over the whole file, so report_idx means the same day as before."""
+    Report days are numbered over the whole file, so report_idx means the same day as in the earlier run.
+    Week_Ago_Min and zero_price are kept for the checks only; they are not written to the data file."""
     dates = pd.DataFrame({"Date": sorted(raw.Date.unique())})
     dates["report_idx"] = np.arange(len(dates))
     dates["days_since_prev_report"] = dates.Date.diff().dt.days
     dates["gap_2022"] = dates.Date.between(pd.Timestamp(gap[0]), pd.Timestamp(gap[1]))
     missing = set(items) - set(raw.item_id)
     assert not missing, f"items not in the price file: {sorted(missing)}"
-    cols = ["Date", "item_id", "Category", "Product", "Unit", "Price_Min", "Price_Max", "Price_Avg", "Week_Ago_Min"]
+    cols = ["Date", "item_id", "Price_Min", "Price_Max", "Price_Avg", "Week_Ago_Min"]
     p = raw.loc[raw.item_id.isin(items), cols].merge(dates, on="Date", how="left")
     p = p.sort_values(["item_id", "Date"]).reset_index(drop=True)
     p["zero_price"] = (p[["Price_Min", "Price_Max", "Price_Avg"]] <= 0).any(axis=1)
     p.loc[p.zero_price, "Price_Avg"] = np.nan
-    p["is_reported"] = p.Price_Avg.notna()
-    p["log_price"] = np.log(p.Price_Avg)
     p["reports_since_change"] = p.groupby("item_id")["Price_Avg"].transform(lambda s: pd.Series(reports_since_change(s.values), index=s.index))
-    p["group"] = p.item_id.map(groups)
     return p

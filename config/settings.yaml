@@ -13,7 +13,8 @@ raw_files:
   weather: weather_open_meteo_13_locations_2019_2026.csv
 
 # The 8 focus items (chosen 2026-11-16 for how often their prices move and for being everyday purchases; chosen after
-# earlier results were seen). group = the item group of the earlier run. weather / fx = whether the driver is a model input.
+# earlier results were seen). group = the item group of the earlier run, for reporting only (not in the data file).
+# weather / fx = whether the driver is a model input for the item; for other items those columns are empty.
 items:
   - {id: "Chicken - Broiler | per kg",      group: volatile_perishable, weather: false, fx: false}
   - {id: "Onion - Local | per kg",          group: volatile_perishable, weather: true,  fx: false}
@@ -31,13 +32,13 @@ periods:
   test: ["2025-01-01", "2026-10-24"]         # already looked at by the earlier run, so results are labelled retrospective
 
 drivers:
-  weather_cols: [wx_bd_tmax_7d, wx_bd_tmean_30d, wx_bd_rain_7d]   # Bangladesh mean of locations 0-10; chosen on 2024 by the earlier run
+  # weather columns (fixed in src/foodwatch/features.py): wx_tmax_7d, wx_tmean_30d, wx_rain_7d, Bangladesh mean of locations 0-10;
+  # chosen on 2024 by the earlier run
   weather_lag_days: 5        # weather of day d is usable from d + 5
   carry_cap_days: 7          # a driver value older than this on a report day is left empty
 
 files:
-  panel: processed/panel_8.csv
-  features: processed/features_8.csv
+  data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
   checks: processed/checks.json
   manifest: raw/MANIFEST.csv
   tables: reports/tables

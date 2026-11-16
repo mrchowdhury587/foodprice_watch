@@ -1,13 +1,17 @@
-"""Driver features: calendar, exchange rate, weather. Formulas as in the earlier run (archive/old_pipeline/src/fpw/features.py).
+"""Driver columns: calendar, exchange rate, weather. Formulas as in the earlier run (archive/old_pipeline/src/fpw/features.py).
 
 Leakage rule: a driver value is used on report day t only if it was available on or before t.
   weather: day d is available from d + lag_days; exchange rate: the last rate dated on or before t.
-  A value older than cap_days at t is left empty. Missing stays empty, never 0.
+  A value older than cap_days at t is left empty. Missing stays empty, never 0. A driver an item does not use is empty.
 """
 import numpy as np
 import pandas as pd
 
-CAL = ["month", "dow", "days_to_ramadan", "days_to_eid_fitr", "days_to_eid_adha", "in_ramadan", "days_since_prev_report"]
+CAL = ["month", "dow", "days_to_ramadan", "days_to_eid_fitr", "days_to_eid_adha", "in_ramadan"]
+WEATHER = ["wx_tmax_7d", "wx_tmean_30d", "wx_rain_7d"]
+FX = ["fx_lvl", "fx_ch30"]
+COLUMNS = ["Date", "item_id", "Price_Min", "Price_Max", "Price_Avg", "report_idx", "gap_2022", "days_since_prev_report",
+           "reports_since_change", *CAL, *WEATHER, *FX]
 
 
 def asof(dates, src, valcols, cap_days):
@@ -43,7 +47,6 @@ def calendar(dates, ramadan_eid):
     cal["in_ramadan"] = False
     for r in re_.itertuples():
         cal.loc[cal.Date.between(r.ramadan_start, r.eid_ul_fitr - pd.Timedelta(days=1)), "in_ramadan"] = True
-    cal["days_since_prev_report"] = cal.Date.diff().dt.days
     return cal
 
 
@@ -51,8 +54,8 @@ def weather_table(w, lag_days):
     """Bangladesh mean of locations 0-10, rolled daily. `available` = last day of the window + lag_days."""
     bd = w[w.location_id <= 10].groupby("time").agg(rain=("precipitation_sum", "mean"), tmax=("temperature_2m_max", "mean"),
                                                    tmean=("temperature_2m_mean", "mean")).asfreq("D")
-    t = pd.DataFrame({"wx_bd_rain_7d": bd.rain.rolling(7).sum(), "wx_bd_tmax_7d": bd.tmax.rolling(7).mean(),
-                      "wx_bd_tmean_30d": bd.tmean.rolling(30).mean()})
+    t = pd.DataFrame({"wx_tmax_7d": bd.tmax.rolling(7).mean(), "wx_tmean_30d": bd.tmean.rolling(30).mean(),
+                      "wx_rain_7d": bd.rain.rolling(7).sum()})
     t["available"] = t.index + pd.Timedelta(days=lag_days)
     return t.reset_index(drop=True)
 
@@ -70,25 +73,18 @@ def fx_table(fx, cap_days=7):
     return fx
 
 
-def build(panel, ramadan_eid, weather, fx, *, weather_cols, weather_items, fx_items, lag_days, cap_days):
-    """One row per (item, report day) of the panel. Prices are copied, never changed.
-    Returns (features, availability) where availability holds the source date used for each report day (for the checks)."""
-    p = panel[["Date", "item_id", "group", "gap_2022", "report_idx", "is_reported", "Price_Avg", "log_price"]].copy()
-    dates = pd.DataFrame({"Date": sorted(p.Date.unique())})
+def add_drivers(panel, ramadan_eid, weather, fx, *, weather_items, fx_items, lag_days, cap_days):
+    """The price rows plus calendar, weather and exchange-rate columns (write `COLUMNS` of it to the data file).
+    Returns (table, availability) where availability holds the source date used on each report day (for the checks)."""
+    dates = pd.DataFrame({"Date": sorted(panel.Date.unique())})
     cal = calendar(dates, ramadan_eid)
-    wx = asof(dates, weather_table(weather, lag_days), list(weather_cols), cap_days).rename(columns={"available": "wx_available"})
-    fxa = asof(dates, fx_table(fx, cap_days), ["fx_lvl", "fx_ch30"], cap_days).rename(columns={"available": "fx_available"})
-    F = p.merge(cal, on="Date", how="left").merge(wx, on="Date", how="left").merge(fxa, on="Date", how="left")
-    w = F.item_id.isin(weather_items)
-    F["has_weather"] = w.astype(int)
-    for i, c in enumerate(weather_cols, 1):
-        F[f"weather_{i}"] = np.where(w, F[c], np.nan)
-    x = F.item_id.isin(fx_items)
-    F["has_fx"] = x.astype(int)
-    F["fx_lvl"] = np.where(x, F.fx_lvl, np.nan)
-    F["fx_ch30"] = np.where(x, F.fx_ch30, np.nan)
-    avail = F[["Date", "item_id", "wx_available", "fx_available"]].copy()
-    keep = ["Date", "item_id", "group", "gap_2022", "report_idx", "is_reported", "Price_Avg", "log_price", *CAL,
-            *[f"weather_{i}" for i in range(1, len(weather_cols) + 1)], "has_weather", "fx_lvl", "fx_ch30", "has_fx"]
-    F = F[keep].sort_values(["item_id", "Date"]).reset_index(drop=True)
-    return F, avail
+    wx = asof(dates, weather_table(weather, lag_days), WEATHER, cap_days).rename(columns={"available": "wx_available"})
+    fxa = asof(dates, fx_table(fx, cap_days), FX, cap_days).rename(columns={"available": "fx_available"})
+    D = panel.merge(cal, on="Date", how="left").merge(wx, on="Date", how="left").merge(fxa, on="Date", how="left")
+    for c in WEATHER:
+        D.loc[~D.item_id.isin(weather_items), c] = np.nan
+    for c in FX:
+        D.loc[~D.item_id.isin(fx_items), c] = np.nan
+    D = D.sort_values(["item_id", "Date"]).reset_index(drop=True)
+    avail = D[["Date", "item_id", "wx_available", "fx_available"]].copy()
+    return D, avail
