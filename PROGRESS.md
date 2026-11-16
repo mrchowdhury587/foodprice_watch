@@ -119,3 +119,11 @@
 ## 2026-11-16 — pipeline code complete (S24-S33), Colab runs pending
 - Code written and unit-tested locally for S24-S30, dashboard `app/dashboard.py` (smoke-tested on made-up exports), `tools/update.py`, docs. S25 ETS crash fixed (series under 30 observations fall back to "no change").
 - Not done: S24-S30 have not yet finished on Colab; the only numbers so far are S00, S22, S23.
+
+## 2026-11-16 — S24-S30 finished on Colab
+- S25: no candidate beat tomorrow=today on 2024 (naive 0.0231, ETS 0.0235, LightGBM 0.0241); LightGBM kept by user decision (DEVIATIONS.md). S26: 50 Optuna trials, tuned setting kept.
+- S27 (sealed test, scored once): relative error to tomorrow=today 1.0096 / 1.0013 / 1.0009 / 1.0007 at h = 1/7/14/30; not better at any horizon; Diebold-Mariano p 0.0001 / 0.011 / 0.92 / 0.50.
+- S28: level 0.95 fixed from 2024; 11 of 16 event-product rows detected; placebo p 0.26; 6% of alert runs inside an event window; Kupiec rejects at 0.95.
+- S29: driver shares unstable across refits (weather 47% / 61% / 4%); exchange-rate sign check had no value.
+- S30: forecasts for 54 items at 4 horizons, origin 2026-10-24, exports on Drive only.
+- Open: result tables live on Drive (copy to reports/project/ when the user agrees to a download); S31 dashboard needs the export files on the work PC.
