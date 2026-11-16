@@ -35,4 +35,10 @@ The price file has 1,412 report days and 63 items. Each of the 8 focus items has
 
 Per-item summary: `reports/tables/D1_panel_summary.csv`.
 
-File hashes from this run were panel `04055f91f781a836…` and features `bd2667c5d317e625…`. After this run the CSV writer was fixed to LF line ends and 10 significant digits (code after 990215e), so checksums are the same on Windows and Colab. A rerun gives new checksums with the same content; the local run gives panel `e9ccc23e5bc71d88…`, features `99521b6bcb444d45…`.
+File hashes from this run were panel `04055f91f781a836…` and features `bd2667c5d317e625…`.
+
+**This run is superseded; notebook 02 must be rerun.** After it, two things changed:
+- The CSV writer now uses LF line ends and 10 significant digits, so checksums match on Windows and Colab.
+- `fx_ch30` was fixed: it was empty on 28 % of report days for the exchange-rate items (see `DEVIATIONS.md`).
+
+The local run of the fixed code gives panel `e9ccc23e5bc71d88…`, features `0ea86bf5a1da5dc1…`, and `fx_ch30_empty_on_fx_items` 0.

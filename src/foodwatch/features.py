@@ -57,11 +57,16 @@ def weather_table(w, lag_days):
     return t.reset_index(drop=True)
 
 
-def fx_table(fx):
-    """Log taka per dollar and its change over 30 calendar days."""
+def fx_table(fx, cap_days=7):
+    """Log taka per dollar and its change over 30 calendar days. The earlier value is the last quote on or before the date
+    30 days back (Yahoo has no Saturday quotes and few on Fridays and Sundays, so an exact-day lookup is often empty)."""
     fx = fx.sort_values("date").copy()
     fx["fx_lvl"] = np.log(fx.bdt_per_usd)
-    fx["fx_ch30"] = fx.fx_lvl - fx.set_index("date").fx_lvl.shift(30, freq="D").reindex(fx.date).values
+    back = pd.DataFrame({"date": fx.date, "back": fx.date - pd.Timedelta(days=30)})
+    prev = pd.merge_asof(back.sort_values("back"), fx[["date", "fx_lvl"]].rename(columns={"date": "prev_date", "fx_lvl": "prev"}),
+                         left_on="back", right_on="prev_date", direction="backward").set_index("date")
+    prev.loc[(prev.back - prev.prev_date).dt.days > cap_days, "prev"] = np.nan
+    fx["fx_ch30"] = fx.fx_lvl - prev.prev.reindex(fx.date).values
     return fx
 
 
@@ -72,7 +77,7 @@ def build(panel, ramadan_eid, weather, fx, *, weather_cols, weather_items, fx_it
     dates = pd.DataFrame({"Date": sorted(p.Date.unique())})
     cal = calendar(dates, ramadan_eid)
     wx = asof(dates, weather_table(weather, lag_days), list(weather_cols), cap_days).rename(columns={"available": "wx_available"})
-    fxa = asof(dates, fx_table(fx), ["fx_lvl", "fx_ch30"], cap_days).rename(columns={"available": "fx_available"})
+    fxa = asof(dates, fx_table(fx, cap_days), ["fx_lvl", "fx_ch30"], cap_days).rename(columns={"available": "fx_available"})
     F = p.merge(cal, on="Date", how="left").merge(wx, on="Date", how="left").merge(fxa, on="Date", how="left")
     w = F.item_id.isin(weather_items)
     F["has_weather"] = w.astype(int)

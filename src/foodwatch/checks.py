@@ -32,18 +32,21 @@ def feature_checks(F, avail, lag_days, cap_days):
              driver_older_than_cap=int(((wx_age > cap_days) | (fx_age > cap_days)).sum()),
              weather_empty_on_weather_items=int(F.loc[F.has_weather == 1, "weather_1"].isna().sum()),
              fx_empty_on_fx_items=int(F.loc[F.has_fx == 1, "fx_lvl"].isna().sum()),
+             fx_ch30_empty_on_fx_items=int(F.loc[F.has_fx == 1, "fx_ch30"].isna().sum()),
              driver_on_unmapped_items=int(F.loc[F.has_weather == 0, "weather_1"].notna().sum() + F.loc[F.has_fx == 0, "fx_lvl"].notna().sum()),
              last_weather_day=str(F.loc[F.weather_1.notna(), "Date"].max().date()),
              last_fx_day=str(F.loc[F.fx_lvl.notna(), "Date"].max().date()))
     c["ok"] = (c["infinite_values"] == 0 and c["weather_used_before_available"] == 0 and c["fx_used_before_available"] == 0
-               and c["driver_older_than_cap"] == 0 and c["driver_on_unmapped_items"] == 0)
+               and c["driver_older_than_cap"] == 0 and c["driver_on_unmapped_items"] == 0
+               and c["fx_ch30_empty_on_fx_items"] <= 0.01 * max(1, int((F.has_fx == 1).sum())))
     return c
 
 
 def compare_with_old(p, F, old_panel, old_features, fx_switch="2024-03-02"):
     """Regression check against the earlier run's panel and features for the same items.
     Panel and calendar/weather columns must be identical. The exchange rate differs by design: the earlier run used Yahoo x 1.0151
-    before fx_switch and another source after, so before fx_switch fx_lvl must differ by the constant log(1.0151) and fx_ch30 must match."""
+    before fx_switch and another source after, so before fx_switch fx_lvl must differ by the constant log(1.0151) and fx_ch30 must match
+    wherever the earlier run had a value."""
     key = ["Date", "item_id"]
     op = old_panel[old_panel.item_id.isin(p.item_id.unique())]
     a = p.merge(op, on=key, how="outer", suffixes=("", "_old"), indicator=True)
@@ -61,7 +64,10 @@ def compare_with_old(p, F, old_panel, old_features, fx_switch="2024-03-02"):
     pre = b[(b.Date < pd.Timestamp(fx_switch)) & b.fx_lvl.notna() & b.fx_lvl_old.notna()]
     out["fx_lvl_offset_before_switch"] = round(float((pre.fx_lvl_old - pre.fx_lvl).mean()), 5)
     out["fx_lvl_offset_sd_before_switch"] = round(float((pre.fx_lvl_old - pre.fx_lvl).std()), 6)
-    out["fx_ch30_diff_before_switch"] = int((~np.isclose(pre.fx_ch30.fillna(-999), pre.fx_ch30_old.fillna(-999), atol=1e-9)).sum())
+    # the earlier run left fx_ch30 empty when no quote existed exactly 30 days back; compare only where it had a value
+    both30 = pre[pre.fx_ch30_old.notna()]
+    out["fx_ch30_diff_before_switch"] = int((~np.isclose(both30.fx_ch30.fillna(-999), both30.fx_ch30_old, atol=1e-9)).sum())
+    out["fx_ch30_filled_where_old_empty"] = int((pre.fx_ch30_old.isna() & pre.fx_ch30.notna()).sum())
     post = b[(b.Date >= pd.Timestamp(fx_switch)) & b.fx_lvl.notna() & b.fx_lvl_old.notna()]
     out["fx_lvl_mean_abs_diff_after_switch"] = round(float((post.fx_lvl_old - post.fx_lvl).abs().mean()), 5)
     out["fx_ch30_mean_abs_diff_after_switch"] = round(float((post.fx_ch30_old - post.fx_ch30).abs().mean()), 5)
