@@ -140,6 +140,25 @@ The random-date control puts the detection rate in perspective. When each episod
 \par\smallskip{\footnotesize Source: \path{reports/project/tables/P8_event_scores.csv}.}
 \end{table}
 
+\subsection{Alerts Against TCB Price Rises}
+The news-based episodes are few and their windows are long, so I also scored the same alerts against the price rises defined from TCB prices alone (Section~\ref{sec:riserule} and Table~\ref{tab:rise}). With the 10\% rule there were 43 rises in 2024 and 64 in 2025--26. In 2024 the alerts started inside the matching window of 28 of the 43 rises (recall 0.65), and in 2025--26 for 48 of 64 (recall 0.75). The median alert came 2 report days after the onset of the rise, so these alerts are a detection of a rise that has already started and not a warning. When the alert runs were shifted to random dates, the mean recall was 0.23 in 2024 and 0.25 in 2025--26, and none of the 300 random draws reached the observed recall ($p=0.003$, the smallest value 300 draws can give). On this reference the alerts are therefore better than chance, unlike on the 12 news episodes, where the control did almost as well. I think the difference comes from the reference: the news windows are long and few, while the TCB rises are many and short.
+
+Precision is low. Only 28 of 135 alert runs in 2024 (0.21) and 48 of 238 in 2025--26 (0.20) matched a 10\% rise, which gives an F1 of about 0.32 in both periods. The other runs were above the forecast range on 3 of 5 days without the price rising by 10\% within 14 report days. Some of these were smaller rises. At the 7\% rule, precision in 2024 was 0.40 and recall 0.70, and at the 15\% rule precision fell to 0.10 (Table~\ref{tab:rise}). The result depends on the rule, which is why I report all three, but the main rule was the one fixed beforehand. The alert runs in the two periods (135 and 238) do not add up to the 429 runs in Table~\ref{tab:level}, because that table also counts the second half of 2023 and the days after October 2026.
+
+\begin{table}[H]\centering\small
+\caption[Alerts against TCB price rises]{Alerts scored against rises in TCB prices (rise over 14 report days kept for 5 report days). Recall is the share of rises with a matched alert run, precision the share of alert runs that matched a rise, and the last column (random recall) the mean recall when the alert dates were shifted at random (300 draws). The 10\% rule was fixed before scoring; 7\% and 15\% are sensitivity checks. 2025--26 (retro.) is retrospective because the earlier version of this study had already scored it.}\label{tab:rise}
+\input{tables/rise_scores}
+\par\smallskip{\footnotesize Source: \path{reports/project/tables/P10_alerts_vs_rises.csv}.}
+\end{table}
+
+By item group (Table~\ref{tab:risegroup}), spices were detected best (8 of 9 rises in 2024 and all 7 in 2025--26). Imported staples were detected least in 2024 (9 of 17) and best in 2025--26 (17 of 18), so I would not read much into a single group with so few rises. The volatile perishables had the highest precision in 2025--26 (0.47). The administered and non-food items had no rise of 10\% in 2024.
+
+\begin{table}[H]\centering\small
+\caption[Alerts against TCB price rises by item group]{Alerts against TCB price rises by item group, 10\% rule.}\label{tab:risegroup}
+\input{tables/rise_by_group}
+\par\smallskip{\footnotesize Source: \path{reports/project/tables/P10_alerts_vs_rises_by_group.csv}.}
+\end{table}
+
 \subsection{Driver Breakdown}
 On the last 120 report days, price history accounts for 56\% of the average size of the model's contributions, the exchange rate for 17\%, the calendar for 14\%, the onion export measure for 10\% and weather for 4\% (Table~\ref{tab:drivers}). Because the model forecasts nearly zero change, these are shares of small numbers. They describe what the model leans on, not how much a driver moved a price. The shares look similar across item groups, with price history at 46\% to 68\% in every group, and the exchange rate larger for non-food items and spices (about 24\% and 22\%).
 
@@ -168,6 +187,6 @@ A local Streamlit dashboard and a Gradio app in Colab read the three export file
 \section{Discussion}
 The main result is that the forecasts add nothing to persistence on these data. The prices change on few days, the model's best move is to predict no change, and the inputs I could measure did not predict the days when a price does change. The ETS and LightGBM results on 2024 and the walk-forward checks point the same way, and the learning curve shows the model has little to learn from its inputs. This agrees with the AgriPriceBD benchmark, where naive persistence was best for four of five commodities \cite{agripricebd}, so it is not a flaw of one model.
 
-The ranges are usable as an expected band, since the upper bound is exceeded close to the nominal rate, but they are narrow because the model forecasts little movement. The alerts are weaker than the ranges suggest. The detection rate of 7 of 12 episodes is no better than random dates, only 6\% of alert runs lie inside a documented episode, and the long episode windows make detection easy. The system can flag unusual rises for a person to look at; it cannot yet say which flagged rises matter. The driver breakdown is the least reliable part, because its shares change a great deal when the model is refitted.
+The ranges are usable as an expected band, since the upper bound is exceeded close to the nominal rate, but they are narrow because the model forecasts little movement. The alerts are weaker than the ranges suggest. On the 12 news episodes the detection rate of 7 of 12 is no better than random dates, only 6\% of alert runs lie inside a documented episode, and the long episode windows make detection easy. Against rises defined from TCB prices the picture is better and more mixed: the alerts caught 65\% of the 10\% rises in 2024 and 75\% in 2025--26, clearly more than random dates, about 2 report days after the rise began, but only one alert run in five matched such a rise. The system can flag unusual rises for a person to look at; it cannot yet say which flagged rises matter. The driver breakdown is the least reliable part, because its shares change a great deal when the model is refitted.
 
 What can be relied on is the process: the settings were fixed before the test, the test was scored once, a rerun reproduced the same numbers, and every number in this report is listed in a results register with its file and command.
