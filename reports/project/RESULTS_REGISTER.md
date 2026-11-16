@@ -153,3 +153,35 @@ File(s): `outputs/export/forecasts.parquet`
 | rows without a range | 0 | `outputs/export/forecasts.parquet` |
 
 <!-- /S30 -->
+
+<!-- S34 -->
+## S34 alerts judged against TCB price rises (rule fixed in state/prereg_S34.yaml; 2025-26 is retrospective)
+
+Run 2026-11-16, code commit `9317269`.
+
+Command: `python -m fpw.runner S34`
+
+File(s): `reports/project/tables/P10_alerts_vs_rises.csv`
+
+| measure | value | file |
+|---|---|---|
+| validation_2024: episodes | 43 | `P10_alerts_vs_rises.csv` |
+| validation_2024: detected | 28 | `P10_alerts_vs_rises.csv` |
+| validation_2024: recall | 0.6512 | `P10_alerts_vs_rises.csv` |
+| validation_2024: alert_runs | 135 | `P10_alerts_vs_rises.csv` |
+| validation_2024: matched_runs | 28 | `P10_alerts_vs_rises.csv` |
+| validation_2024: precision | 0.2074 | `P10_alerts_vs_rises.csv` |
+| validation_2024: f1 | 0.3146 | `P10_alerts_vs_rises.csv` |
+| validation_2024: median_delay_reports | 2 | `P10_alerts_vs_rises.csv` |
+| validation_2024: placebo_p | 0.003322 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: episodes | 64 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: detected | 48 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: recall | 0.75 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: alert_runs | 238 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: matched_runs | 48 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: precision | 0.2017 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: f1 | 0.3179 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: median_delay_reports | 2 | `P10_alerts_vs_rises.csv` |
+| retrospective_2025_26: placebo_p | 0.003322 | `P10_alerts_vs_rises.csv` |
+
+<!-- /S34 -->

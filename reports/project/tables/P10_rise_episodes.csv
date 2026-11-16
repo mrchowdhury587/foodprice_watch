@@ -1,0 +1,108 @@
+item_id,stratum,period,onset_date,end_date,peak_R,detected,delay_reports
+Cardamom (Small) | per kg,spice,validation_2024,2024-01-01,2024-01-24,0.34090909090909083,True,3.0
+Garlic - Imported | per kg,imported_staple,validation_2024,2024-01-05,2024-01-11,0.17073170731707266,False,
+Clove | per kg,spice,validation_2024,2024-01-06,2024-01-16,0.18750000000000044,True,-2.0
+Mung Dal (by quality) | per kg,domestic_staple,validation_2024,2024-01-11,2024-02-04,0.28260869565217406,True,2.0
+Turmeric - Imported | per kg,imported_staple,validation_2024,2024-01-15,2024-01-28,0.10000000000000098,True,2.0
+Garlic - Local | per kg,volatile_perishable,validation_2024,2024-01-21,2024-01-25,0.17391304347826098,False,
+Onion - Local | per kg,volatile_perishable,validation_2024,2024-01-28,2024-02-24,0.33333333333333437,False,
+Chickpea (by quality) | per kg,imported_staple,validation_2024,2024-02-01,2024-02-07,0.13513513513513442,True,2.0
+Onion - Imported | per kg,imported_staple,validation_2024,2024-02-04,2024-02-11,0.2941176470588236,False,
+Anchor Dal (Split Pea) | per kg,imported_staple,validation_2024,2024-03-03,2024-03-09,0.13333333333333397,True,0.0
+Potato | per kg,domestic_staple,validation_2024,2024-03-07,2024-04-26,0.5454545454545454,True,5.0
+Ginger - Imported | per kg,imported_staple,validation_2024,2024-03-13,2024-03-20,0.18421052631578938,True,-4.0
+Mung Dal (by quality) | per kg,domestic_staple,validation_2024,2024-03-25,2024-04-09,0.10937500000000044,False,
+Turmeric - Local | per kg,spice,validation_2024,2024-03-30,2024-05-08,0.17241379310344884,True,2.0
+Garlic - Local | per kg,volatile_perishable,validation_2024,2024-04-03,2024-05-17,0.47999999999999887,True,-5.0
+Ginger - Local | per kg,volatile_perishable,validation_2024,2024-04-08,2024-05-13,0.5454545454545454,True,2.0
+Hilsa Fish | per kg,volatile_perishable,validation_2024,2024-04-08,2024-04-26,0.12500000000000044,True,2.0
+Turmeric - Imported | per kg,imported_staple,validation_2024,2024-04-08,2024-04-24,0.14814814814814814,True,2.0
+Dried Chilli - Local | per kg,spice,validation_2024,2024-04-19,2024-04-26,0.13698630136986267,True,-4.0
+Onion - Local | per kg,volatile_perishable,validation_2024,2024-04-19,2024-05-12,0.31578947368421106,True,-1.0
+Ginger - Imported | per kg,imported_staple,validation_2024,2024-04-21,2024-04-26,0.2105263157894739,False,
+Cardamom (Small) | per kg,spice,validation_2024,2024-05-02,2024-05-14,0.13333333333333397,False,
+Egg - Farm | per hali (4 pcs),volatile_perishable,validation_2024,2024-05-06,2024-05-19,0.19512195121951192,True,2.0
+Turmeric - Imported | per kg,imported_staple,validation_2024,2024-05-10,2024-05-15,0.1052631578947365,False,
+Coriander Seed | per kg,spice,validation_2024,2024-05-15,2024-05-21,0.13636363636363535,True,0.0
+Onion - Local | per kg,volatile_perishable,validation_2024,2024-05-30,2024-07-24,0.31428571428571406,False,
+Onion - Imported | per kg,imported_staple,validation_2024,2024-05-31,2024-06-08,0.24137931034482785,False,
+Potato | per kg,domestic_staple,validation_2024,2024-06-03,2024-06-07,0.11650485436893199,False,
+Ginger - Imported | per kg,imported_staple,validation_2024,2024-06-04,2024-06-20,0.18750000000000044,False,
+Bay Leaf | per kg,spice,validation_2024,2024-06-10,2024-06-28,0.4285714285714275,True,2.0
+Ginger - Local | per kg,volatile_perishable,validation_2024,2024-06-24,2024-07-07,0.117647058823529,False,
+Onion - Imported | per kg,imported_staple,validation_2024,2024-07-11,2024-07-18,0.17948717948717974,False,
+Dates (Ordinary Quality) | per kg,imported_staple,validation_2024,2024-08-14,2024-08-28,0.2727272727272718,True,-1.0
+Onion - Imported | per kg,imported_staple,validation_2024,2024-09-02,2024-09-07,0.19444444444444398,True,-3.0
+Onion - Imported | per kg,imported_staple,validation_2024,2024-10-09,2024-10-17,0.13157894736842057,False,
+Chicken - Broiler | per kg,volatile_perishable,validation_2024,2024-10-12,2024-10-17,0.1428571428571419,True,-4.0
+Onion - Local | per kg,volatile_perishable,validation_2024,2024-10-27,2024-11-09,0.2173913043478255,True,2.0
+Potato | per kg,domestic_staple,validation_2024,2024-11-05,2024-11-28,0.2173913043478266,True,0.0
+Rice Bran Oil - Bottled | 5 litre,imported_staple,validation_2024,2024-11-06,2024-11-19,0.12777777777777755,True,2.0
+Coriander Seed | per kg,spice,validation_2024,2024-11-10,2024-11-20,0.19565217391304368,True,2.0
+Garlic - Imported | per kg,imported_staple,validation_2024,2024-11-10,2024-11-21,0.16279069767441845,True,2.0
+Rui Fish (Rohu) | per kg,volatile_perishable,validation_2024,2024-11-11,2024-11-24,0.15384615384615374,True,2.0
+Bay Leaf | per kg,spice,validation_2024,2024-12-14,2024-12-30,0.117647058823529,True,2.0
+Chicken - Broiler | per kg,volatile_perishable,retrospective_2025_26,2025-01-01,2025-01-05,0.1351351351351353,False,
+Cardamom (Small) | per kg,spice,retrospective_2025_26,2025-01-06,2025-01-19,0.1392405063291149,True,2.0
+Cinnamon | per kg,spice,retrospective_2025_26,2025-01-06,2025-01-19,0.2427184466019412,True,2.0
+Clove | per kg,spice,retrospective_2025_26,2025-01-06,2025-01-11,0.13333333333333286,True,2.0
+Dried Chilli - Local | per kg,spice,retrospective_2025_26,2025-01-24,2025-02-02,0.10000000000000098,True,-2.0
+Rui Fish (Rohu) | per kg,volatile_perishable,retrospective_2025_26,2025-02-13,2025-02-28,0.10294117647058765,False,
+Onion - Imported | per kg,imported_staple,retrospective_2025_26,2025-02-18,2025-02-23,0.20909090909090855,True,-5.0
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2025-02-27,2025-03-12,0.47999999999999887,True,-10.0
+Turmeric - Imported | per kg,imported_staple,retrospective_2025_26,2025-03-04,2025-03-17,0.21818181818181737,True,2.0
+Hilsa Fish | per kg,volatile_perishable,retrospective_2025_26,2025-03-08,2025-03-17,0.12500000000000044,True,-2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2025-04-15,2025-04-30,0.4375,True,-2.0
+Hilsa Fish | per kg,volatile_perishable,retrospective_2025_26,2025-04-20,2025-05-04,0.4444444444444442,True,2.0
+Garlic - Local | per kg,volatile_perishable,retrospective_2025_26,2025-05-06,2025-05-12,0.17391304347826098,True,-5.0
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2025-05-12,2025-05-17,0.47999999999999887,True,4.0
+Chicken - Local (Deshi) | per kg,volatile_perishable,retrospective_2025_26,2025-05-19,2025-06-01,0.16379310344827624,True,2.0
+Hilsa Fish | per kg,volatile_perishable,retrospective_2025_26,2025-06-19,2025-06-29,0.10714285714285787,False,
+Potato | per kg,domestic_staple,retrospective_2025_26,2025-07-08,2025-07-21,0.22222222222222276,True,1.0
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2025-08-02,2025-08-18,0.5624999999999998,True,2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2025-08-03,2025-08-18,0.33333333333333326,True,2.0
+Lentil (Masur) - Small Grain | per kg,domestic_staple,retrospective_2025_26,2025-08-04,2025-08-18,0.13207547169811318,True,1.0
+Egg - Farm | per hali (4 pcs),volatile_perishable,retrospective_2025_26,2025-08-14,2025-08-21,0.1807228915662651,True,-6.0
+Atta (Wheat Flour) - Packet | per kg (packet),imported_staple,retrospective_2025_26,2025-08-18,2025-08-25,0.14285714285714257,True,-4.0
+Potato | per kg,domestic_staple,retrospective_2025_26,2025-08-18,2025-08-22,0.10000000000000031,False,
+Atta (Wheat Flour) - Loose | per kg,imported_staple,retrospective_2025_26,2025-08-20,2025-08-25,0.117647058823529,True,0.0
+Hilsa Fish | per kg,volatile_perishable,retrospective_2025_26,2025-08-21,2025-09-01,0.10714285714285787,False,
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2025-10-04,2025-10-08,0.11428571428571388,False,
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2025-11-02,2025-11-16,0.5666666666666669,True,2.0
+Garlic - Imported | per kg,imported_staple,retrospective_2025_26,2025-11-11,2025-11-15,0.15151515151515182,True,-7.0
+Potato | per kg,domestic_staple,retrospective_2025_26,2025-11-27,2025-12-10,0.6666666666666672,True,2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2025-12-04,2025-12-09,0.2727272727272718,False,
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2025-12-15,2025-12-26,0.2962962962962965,True,2.0
+Hilsa Fish | per kg,volatile_perishable,retrospective_2025_26,2025-12-30,2026-01-13,0.4230769230769229,True,2.0
+Potato | per kg,domestic_staple,retrospective_2025_26,2026-01-08,2026-01-21,0.30000000000000027,True,2.0
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2026-01-14,2026-01-27,0.3599999999999999,True,2.0
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2026-02-23,2026-03-03,0.14705882352941146,False,
+Garlic - Imported | per kg,imported_staple,retrospective_2025_26,2026-03-08,2026-03-14,0.16250000000000098,True,-11.0
+Chicken - Broiler | per kg,volatile_perishable,retrospective_2025_26,2026-03-09,2026-03-25,0.2394366197183102,True,0.0
+Potato | per kg,domestic_staple,retrospective_2025_26,2026-03-29,2026-04-16,0.4473684210526321,False,
+Dried Chilli - Imported | per kg,imported_staple,retrospective_2025_26,2026-03-30,2026-04-07,0.40298507462686595,True,4.0
+Dried Chilli - Local | per kg,spice,retrospective_2025_26,2026-03-30,2026-04-07,0.34545454545454457,True,4.0
+Ginger - Local | per kg,volatile_perishable,retrospective_2025_26,2026-04-12,2026-04-25,0.13333333333333397,False,
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2026-04-15,2026-04-25,0.1212121212121211,True,1.0
+Garlic - Local | per kg,volatile_perishable,retrospective_2025_26,2026-04-16,2026-04-21,0.29999999999999916,False,
+Egg - Farm | per hali (4 pcs),volatile_perishable,retrospective_2025_26,2026-04-20,2026-05-04,0.1486486486486489,True,2.0
+Chicken - Local (Deshi) | per kg,volatile_perishable,retrospective_2025_26,2026-05-05,2026-05-18,0.12500000000000044,True,2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2026-05-14,2026-06-02,0.19999999999999973,True,2.0
+Egg - Farm | per hali (4 pcs),volatile_perishable,retrospective_2025_26,2026-05-18,2026-06-01,0.17647058823529393,True,2.0
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2026-05-19,2026-05-24,0.25,True,-3.0
+Dates (Ordinary Quality) | per kg,imported_staple,retrospective_2025_26,2026-05-21,2026-06-10,0.12500000000000044,True,2.0
+Potato | per kg,domestic_staple,retrospective_2025_26,2026-06-21,2026-07-05,0.22222222222222276,False,
+Garlic - Local | per kg,volatile_perishable,retrospective_2025_26,2026-07-01,2026-07-06,0.1499999999999997,False,
+Chicken - Broiler | per kg,volatile_perishable,retrospective_2025_26,2026-07-12,2026-07-19,0.117647058823529,False,
+Garlic - Imported | per kg,imported_staple,retrospective_2025_26,2026-07-17,2026-07-30,0.21875000000000044,True,2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2026-07-20,2026-08-07,0.4375,True,2.0
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2026-07-21,2026-08-02,0.2000000000000004,True,2.0
+Atta (Wheat Flour) - Loose | per kg,imported_staple,retrospective_2025_26,2026-07-23,2026-08-06,0.117647058823529,True,2.0
+Bay Leaf | per kg,spice,retrospective_2025_26,2026-08-13,2026-08-25,0.10000000000000098,True,1.0
+Chickpea (by quality) | per kg,imported_staple,retrospective_2025_26,2026-09-07,2026-09-19,0.1052631578947365,True,2.0
+Garlic - Local | per kg,volatile_perishable,retrospective_2025_26,2026-09-11,2026-09-24,0.15789473684210575,True,2.0
+Bay Leaf | per kg,spice,retrospective_2025_26,2026-09-17,2026-09-30,0.2790697674418614,True,2.0
+Garlic - Imported | per kg,imported_staple,retrospective_2025_26,2026-09-17,2026-09-26,0.1818181818181821,True,2.0
+Onion - Local | per kg,volatile_perishable,retrospective_2025_26,2026-10-09,2026-10-18,0.15789473684210575,False,
+Garlic - Local | per kg,volatile_perishable,retrospective_2025_26,2026-10-15,2026-10-23,0.14285714285714302,False,
+Ginger - Imported | per kg,imported_staple,retrospective_2025_26,2026-10-16,2026-10-24,0.33333333333333326,True,2.0
