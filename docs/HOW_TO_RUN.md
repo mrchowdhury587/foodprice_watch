@@ -15,6 +15,8 @@ After each notebook, copy the printed summary (last cell) to the assistant. A st
 | 4 | `04_alerts_explanation` | S28, S29 | ~30 min | S28 first stops and prints `prereg_S28.yaml`: **paste it to the assistant**, who commits it; then run all again so it scores the 12 shock episodes. |
 | 5 | `05_production_export` | S30 | ~5 min | writes `outputs/export/forecasts.parquet, alerts.csv, alert_drivers.csv` and the model (Drive only). |
 
+| 6 | `06_view_and_download` | none | ~2 min | shows forecasts, alerts and driver sizes inside Colab and downloads two zip files (export files for the local dashboard; report tables, figures and results register) to your Downloads folder. |
+
 If S25's winner is not LightGBM, S26-S29 stop and ask; tell the assistant.
 
 ## Dashboard (your computer)
