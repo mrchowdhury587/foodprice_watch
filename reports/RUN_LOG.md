@@ -15,7 +15,31 @@ The 4 raw files are in `MyDrive/FoodPriceWatch_v2/raw/`.
 
 The price file has 1,412 report days and 63 items. Each of the 8 focus items has 1,412 rows.
 
-## 02_data_processing (2026-11-17, account mhpcoder, code 990215e)
+## 02_data_processing (2026-11-17, account mhpcoder, code 2a93d78) — current
+
+One data table `processed/data_8.csv`: 11,296 rows, 20 columns, sha256 `381ef71d10092bde…` (identical to the local run), checks PASS.
+
+| measure | value |
+|---|---|
+| items / report days | 8 / 1,412 (2021-05-17 to 2026-10-24) |
+| not reported (blank price) | 8 |
+| duplicate keys, Avg != mid, Min > Max, zero or negative | 0, 0, 0, 0 |
+| report days in the 2022 gap | 24 |
+| week-ago column matches the price 7 days earlier | 0.9961 |
+| infinite values | 0 |
+| items with weather / with exchange rate | 2 / 4 |
+| driver values used before their availability date | 0 |
+| driver values older than the 7-day cap | 0 |
+| driver empty on an item that uses it / driver on an item that does not | 0 / 0 |
+| last report day with weather / exchange rate | 2026-10-24 / 2026-10-24 |
+| comparison with the earlier run (prices, day numbers, calendar, weather identical) | PASS |
+| exchange rate before 2024-03-02: constant log offset / sd | 0.01499 / 0.0 (the earlier run scaled Yahoo by 1.0151) |
+| fx_ch30 before 2024-03-02: mismatches where the earlier run had a value / values now filled where it was empty | 0 / 624 |
+| exchange rate after 2024-03-02: mean abs diff of fx_lvl / fx_ch30 | 0.01457 / 0.00292 (the earlier run used the npm file) |
+
+Per-item summary: `reports/tables/D1_panel_summary.csv` (unchanged).
+
+## 02_data_processing (2026-11-17, account mhpcoder, code 990215e) — superseded by the run above
 
 | measure | value |
 |---|---|
