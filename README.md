@@ -14,7 +14,7 @@ Plan: [docs/PROJECT_PLAN_2026-11-17.md](docs/PROJECT_PLAN_2026-11-17.md). Settin
 | [02_data_processing](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/02_data_processing.ipynb) | One data table `processed/data_8.csv` (prices + calendar, weather, exchange rate), checks, comparison with the earlier run | ready |
 | [03_price_behaviour](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/03_price_behaviour.ipynb) | How often and how much prices move, unchanged runs, price steps, sustained rise episodes (`processed/rise_episodes_8.csv`), before-Ramadan changes; tables B1-B6, figures F1-F2 | ready |
 | [04a_forecast_choice](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/04a_forecast_choice.ipynb) | "Tomorrow = today", ETS and 16 LightGBM configurations on 2024 only; picks the LightGBM configuration (tables M1, M2) | ready |
-| 04b_forecast_test | The chosen models on 2025-26 (retrospective), 7-day forecasts for the alert ranges (tables M3, M4) | after the 04a choice is committed |
+| [04b_forecast_test](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/04b_forecast_test.ipynb) | Naive, ETS and the chosen LightGBM on 2025-26 (retrospective); 7-day forecasts since 2023-06 for the alert ranges (tables M3, M4) | ready |
 | 05_alert_rules | ML range, simple range, fixed threshold, scored against sustained rises | planned |
 | 06_report_tables | Final tables and figures | planned |
 
