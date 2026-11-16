@@ -1,0 +1,105 @@
+error_analysis:
+- by item group
+- by item
+- by horizon
+- Ramadan/Eid vs normal months
+- rising vs falling periods
+- before/after mid-2024
+- actual vs forecast plots
+- error distribution
+- bias over time
+- worst-20 forecasts
+- learning curve
+- Diebold-Mariano vs tomorrow=today (supporting only)
+features:
+- lp
+- r1
+- r7
+- r14
+- r30
+- dev30
+- vol30
+- rsc
+- item_code
+- stratum_code
+- horizon
+- month
+- dow
+- days_to_ramadan
+- days_to_eid_fitr
+- days_to_eid_adha
+- in_ramadan
+- holiday_next7
+- days_since_prev_report
+- weather_1
+- weather_2
+- weather_3
+- own_export_measure
+- fx_lvl
+- fx_ch30
+horizons:
+- 1
+- 7
+- 14
+- 30
+limitation_to_state: The 2025-26 period was already scored by the earlier model, so this is not a first look. If the model
+  does not beat tomorrow=today, that is reported.
+metrics:
+  also:
+  - mae_tk
+  - rmse_tk
+  - mape
+  - mase
+  - relative error to tomorrow=today (geometric mean over items)
+  - bias
+  - direction accuracy on days the price moved
+  - error on change days vs unchanged days
+  - r2 on price changes
+  primary: mae_log (mean absolute error of the log price change, about the percentage error)
+model:
+  decision: LightGBM kept as the main model by user decision 2026-11-16 although validation winner was ets (naive reference
+    0.0231; LightGBM 0.0241)
+  kind: one LightGBM for all items and horizons (horizon stacking)
+  n_estimators: 400
+  objective: l1
+  params:
+    bagging_fraction: 0.845548895319934
+    feature_fraction: 0.6654879551936704
+    lambda_l1: 7.439818380354269
+    lambda_l2: 1.99214511619966
+    learning_rate: 0.01961119784898728
+    min_data_in_leaf: 76
+    num_leaves: 6
+    objective: l1
+  selected_by: lowest mean log-change MAE over horizons [1, 7, 14, 30] on the 2024 rolling origins; a simpler model within
+    1% wins; naive is the reference
+  tuning_rule: 'tuned setting kept: it is better than the default on the Oct-Dec 2024 confirm period'
+  validation_scores:
+    ets: 0.023512353838470293
+    lgbm: 0.024096996773518068
+    lstm: 0.02450232448214328
+    naive: 0.023110697792701092
+    rf: 0.027249539872610494
+    ridge: 0.0292292054627527
+  winner: ets
+purpose: Fixed before the 2025-26 test period is scored. The test is unsealed once; nothing below changes after seeing a test
+  number.
+schemes:
+  main: rolling origin, expanding window, 2025-01..2026-10 (87 origins)
+  random_or_stratified_kfold: never
+  sliding_window_reports: 500
+  walk_forward_years:
+  - 2023
+  - '2024 (labelled: tuning year)'
+  - 2025-26
+stage: S27
+test:
+  first_cutoff: 808
+  last_cutoff: 1410
+  origins: 87
+  period:
+  - '2025-01-01'
+  - '2026-10-24'
+  refit_every_n_cutoffs: 8
+  step: 7
+  window: expanding
