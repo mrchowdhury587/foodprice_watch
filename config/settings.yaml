@@ -85,8 +85,12 @@ alerts:
   match: {before_reports: 14, after_reports: 7}   # a run counts for an episode if it starts from 14 report days before onset to 7 after the end
   placebo_draws: 300
 
-# Filled from the output of 05a and committed BEFORE 05b scores anything. Empty until then.
-alert_choice: {}
+# Filled from the output of 05a and committed BEFORE 05b scores anything.
+# Chosen 2026-11-17 by notebook 05a (local run on the work PC, code 2549097), 2024 only. Not to be changed after 05b runs.
+alert_choice:
+  A: {setting: 0.95, target_met: true}    # ML range (LightGBM): upper bound = 95th percentile of the last 120 known errors
+  B: {setting: 0.95, target_met: true}    # simple range ("tomorrow = today"): same on the 7-report change
+  C: {setting: 0.07, target_met: true}    # fixed threshold: 7-report rise of at least 7 %
 
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day

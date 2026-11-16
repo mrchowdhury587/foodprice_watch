@@ -255,3 +255,36 @@ Sugar                1.023  1.047    1.0
 
 files: processed/forecasts_test.csv sha256 d536b5039e841ea6 | processed/forecasts_h7.csv sha256 6449ec4dbf7b5a5c | rows 16976
 ```
+
+## 05a_alert_choice (2026-11-17, LOCAL run on the work PC, code 2549097) — not a Colab run
+
+Run locally against `E:\msc_project\FoodPriceWatch_v2_local` (Drive does not mount in Colab). Only 2024 was used. The settings below were written into `config/settings.yaml` (`alert_choice`) and committed before notebook 05b was written or run. Table: `reports/tables/A1_alert_choice.csv`.
+
+```
+=== 05a alert settings chosen on 2024 (validation year only) ===
+code commit: 2549097 (local run, work PC) | forecasts_h7.csv sha256 6449ec4dbf7b5a5c
+checks: PASS {'rows_lgbm': 8488, 'rows_naive': 8488, 'one_row_per_report_day': True, 'naive_error_is_change': True, 'episodes_same_as_03': True, 'episodes_2024': 11, 'first_target_date': '2023-06-13', 'first_bound_date': '2023-09-07'}
+2024: episodes 11 | item-years 10.53 | target: runs matching no rise <= 2.0 per item-year
+
+A1 every candidate on 2024 (setting = range level for A and B, threshold for C)
+rule  setting  episodes  detected  recall  alert_runs  matched_runs  precision  unmatched_per_item_year  median_delay_reports  chosen
+   A    0.900        11         9  0.8182          39             9     0.2308                   2.8495                   0.0   False
+   A    0.950        11         6  0.5455          17             6     0.3529                   1.0448                   1.5    True
+   A    0.975        11         5  0.4545          13             5     0.3846                   0.7599                   2.0   False
+   A    0.990        11         4  0.3636          10             4     0.4000                   0.5699                   2.0   False
+   B    0.900        11         9  0.8182          36             9     0.2500                   2.5646                   2.0   False
+   B    0.950        11         8  0.7273          20             8     0.4000                   1.1398                   2.0    True
+   B    0.975        11         5  0.4545          14             5     0.3571                   0.8549                   2.0   False
+   B    0.990        11         4  0.3636          11             4     0.3636                   0.6649                   2.0   False
+   C    0.030        11        10  0.9091          58            10     0.1724                   4.5593                  -4.0   False
+   C    0.050        11        10  0.9091          39            10     0.2564                   2.7546                  -1.5   False
+   C    0.070        11        10  0.9091          27            10     0.3704                   1.6147                   0.5    True
+   C    0.100        11         9  0.8182          15             9     0.6000                   0.5699                   2.0   False
+
+CHOICE (to be committed before 05b):
+alert_choice:
+  A: {setting: 0.95, target_met: true}   # ML range (LightGBM)
+  B: {setting: 0.95, target_met: true}   # simple range ("tomorrow = today")
+  C: {setting: 0.07, target_met: true}   # fixed 7-report rise
+  chosen_by: notebook 05a, code 2549097 (local run, work PC), 2024 only
+```
