@@ -37,8 +37,21 @@ drivers:
   weather_lag_days: 5        # weather of day d is usable from d + 5
   carry_cap_days: 7          # a driver value older than this on a report day is left empty
 
+# Sustained-rise reference: what alerts are scored against (notebook 05). Same rule as the earlier run (S34), not re-chosen.
+rises:
+  window_reports: 14         # R = P_t / P_(t-14 report days) - 1
+  threshold: 0.10            # a rise day has R >= 10 %
+  persist_reports: 5         # an episode is at least 5 consecutive rise days
+  merge_gap_reports: 14      # episodes of one item closer than this are merged
+  sensitivity: [0.07, 0.15]  # reported next to the main rule, never used to choose anything
+
+behaviour:
+  ramadan_window_days: 30    # "before Ramadan" = 1 to 30 days before its first day
+
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
+  rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)
   checks: processed/checks.json
+  figures: reports/figures
   manifest: raw/MANIFEST.csv
   tables: reports/tables
