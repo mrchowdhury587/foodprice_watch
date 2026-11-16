@@ -24,4 +24,6 @@ print(f"""Next steps:
 1. Copy {new.name} into data/raw/ on Drive (MyDrive/FoodPriceWatch/data/raw/) and set price_file: {new.name} in config/project.yaml; log it in DEVIATIONS.md; commit and push.
 2. Colab notebook 01: STAGES = ['S22','S23'] (new panel and features).
 3. Colab notebook 05: STAGES = ['S30'] (production fit, new forecasts, ranges, alerts).
-4. Dashboard: streamlit run app/dashboard.py -- path-to-outputs/export""")
+4. Dashboard: streamlit run app/dashboard.py -- path-to-outputs/export
+Note: these steps refresh the forecasts and ranges only. The alert list (alerts.csv, alert_drivers.csv) and the TCB-rise scores (S34) are NOT refreshed for the new days:
+S28, S29 and S34 are finished stages with sealed results, so a later alert run needs a new pre-registration and a DEVIATIONS.md entry first.""")

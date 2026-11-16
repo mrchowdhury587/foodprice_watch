@@ -28,4 +28,4 @@ streamlit run app/dashboard.py -- "G:\My Drive\FoodPriceWatch\outputs\export"
 (use the path of the synced Drive folder, or download the three files into `outputs/export/`). The files hold TCB prices: do not commit or publish them.
 
 ## Updating with new prices
-`python tools/update.py COMBINED.csv` checks the longer file and prints the steps (notebook 01 with S22 and S23, then notebook 05 with S30).
+`python tools/update.py COMBINED.csv` checks the longer file and prints the steps (notebook 01 with S22 and S23, then notebook 05 with S30). This refreshes forecasts and ranges only; alerts and their drivers (S28, S29) and the TCB-rise scores (S34) stay as at 2026-10-24 until a new pre-registration is made.
