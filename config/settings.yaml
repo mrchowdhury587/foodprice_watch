@@ -48,6 +48,26 @@ rises:
 behaviour:
   ramadan_window_days: 30    # "before Ramadan" = 1 to 30 days before its first day
 
+# Forecast benchmark (notebooks 04a, 04b). A benchmark, not the product; every figure sits beside "tomorrow = today".
+forecast:
+  horizons: [1, 7, 14, 30]   # report days
+  lags: [1, 7, 14, 30]       # log change over the last k reports
+  rolling: [30]              # deviation from the 30-report mean, 30-report volatility
+  rolling_min_periods: 10
+  origin_step: 7             # one forecast origin every 7 report days
+  refit_every: 8             # LightGBM is refitted every 8 origins
+  rounds: 300
+  grid:                      # chosen on 2024 only (04a); 2 x 2 x 2 x 2 = 16 configurations, simplest first
+    feature_sets: [price_only, price_plus_drivers]
+    num_leaves: [7, 31]
+    learning_rate: [0.03, 0.05]
+    objective: [l1, huber]
+  tie_margin: 0.01           # a simpler configuration within 1 % of the best wins
+  daily_h7: {start: "2023-06-01", refit_every: 30}   # 7-day forecasts from every report day, for the alert ranges (notebook 05)
+
+# Filled from the pasted output of 04a and committed BEFORE 04b scores 2025-26. Empty until then.
+forecast_choice: {}
+
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
   rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)
