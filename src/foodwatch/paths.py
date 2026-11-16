@@ -29,9 +29,10 @@ def sha256(path):
 
 
 def write_csv(df, path):
-    """Atomic write: a half-written file never replaces a good one."""
+    """Atomic write: a half-written file never replaces a good one.
+    LF line ends and 10 significant digits so the same data gives the same sha256 on Windows and in Colab."""
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    df.to_csv(tmp, index=False)
+    df.to_csv(tmp, index=False, lineterminator="\n", float_format="%.10g")
     tmp.replace(path)
     return sha256(path)
