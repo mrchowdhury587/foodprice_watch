@@ -45,6 +45,10 @@ STAGES = {
         run=[f"{PY} src/stages/s29_explain.py"],
         outputs=["outputs/export/alert_drivers.csv"] + [f"reports/project/tables/P9_{n}.csv" for n in ["driver_overall", "driver_by_horizon", "driver_by_item_group", "driver_by_item", "sign_checks", "driver_stability"]],
         tests=["tests/test_exports.py", "tests/test_wording.py"]),
+    "S34": dict(
+        run=[f"{PY} src/stages/s34_tcb_rises.py"], note="TCB price-rise reference, prereg_S34.yaml committed first, 2025-26 is retrospective",
+        outputs=["state/prereg_S34.yaml"] + [f"reports/project/tables/P10_{n}.csv" for n in ["rise_counts_2024", "rise_episodes", "alerts_vs_rises", "alerts_vs_rises_by_group"]],
+        tests=["tests/test_s34_rises.py", "tests/test_wording.py"]),
     "S30": dict(
         run=[f"{PY} src/stages/s30_export.py"], note="exports and model hold TCB prices: Drive only",
         outputs=["outputs/export/forecasts.parquet", "outputs/export/alerts.csv", "models/lgbm_production.txt"],

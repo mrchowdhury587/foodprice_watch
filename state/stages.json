@@ -602,6 +602,33 @@
       "git_commit": null,
       "finished_at": null,
       "notes": ""
+    },
+    {
+      "id": "S34",
+      "title": "Alerts judged against an independent TCB price-rise reference (PROJECT_DESIGN_DRAFT section 12)",
+      "depends_on": [
+        "S28"
+      ],
+      "outputs": [
+        "state/prereg_S34.yaml",
+        "reports/project/tables/P10_rise_counts_2024.csv",
+        "reports/project/tables/P10_rise_episodes.csv",
+        "reports/project/tables/P10_alerts_vs_rises.csv",
+        "reports/project/tables/P10_alerts_vs_rises_by_group.csv"
+      ],
+      "checks": [
+        "rule fixed in prereg_S34.yaml and committed before scoring",
+        "2024 has at least the configured number of rise episodes",
+        "2025-26 results are labelled retrospective"
+      ],
+      "status": "pending",
+      "started_at": null,
+      "last_unit": null,
+      "units_done": 0,
+      "output_sha256": {},
+      "git_commit": null,
+      "finished_at": null,
+      "notes": ""
     }
   ]
 }

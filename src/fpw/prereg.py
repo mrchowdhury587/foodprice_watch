@@ -47,6 +47,24 @@ def s28(threshold):
     return _dump(doc)
 
 
+def s34(alert_level):
+    """TCB price-rise reference fixed before any alert is scored against it (S34). The rule uses reported TCB prices only; no news, no forecast bound."""
+    r = PCFG["rises"]
+    doc = dict(stage="S34", purpose="Fixed before alerts are scored against TCB price rises. Nothing below changes after seeing a result.",
+               rise_rule=dict(formula="R = P_t / P_(t-w) - 1 on reported prices of one item", window_reports=int(r["window_reports"]), threshold=float(r["threshold"]),
+                              persist_reports=int(r["persist_reports"]), merge_gap_reports=int(r["merge_gap_reports"]),
+                              excluded="windows touching the sparse 2022 period; days without a reported price"),
+               matching=dict(before_reports=int(r["match"]["before_reports"]), after_reports=int(r["match"]["after_reports"]),
+                             unit="one alert run (first day of an uninterrupted alert) against one rise episode, one-to-one, same item"),
+               alerts=dict(source="state/prereg_S28.yaml (unchanged)", chosen_level=float(alert_level)),
+               sensitivity_thresholds=[float(x) for x in r["sensitivity"]], sensitivity_use="reported only, never used to choose the rule",
+               validation_period=list(r["validation"]), retrospective_period=list(r["retrospective"]),
+               retrospective_note="2025-26 was already scored by the earlier model, so results there are retrospective, not a first look",
+               placebo=dict(draws=int(r["placebo_draws"]), seed=42, method="alert-run dates of each item shifted by a random whole number of report days"),
+               tuned_on_shock_episodes=False, news_used=False, model_retrained=False)
+    return _dump(doc)
+
+
 def verify_s27(repo_path, drive_path, selection, tuning):
     """The committed pre-registration, the copy S26 wrote to Drive and a fresh rebuild from the tuning record must be byte-identical."""
     a, b = repo_path.read_text(encoding="utf-8"), drive_path.read_text(encoding="utf-8")

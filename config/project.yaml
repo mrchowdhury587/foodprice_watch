@@ -62,6 +62,20 @@ alerts:
   persistence: {k: 3, m: 5}
   event_window_days: {before_onset: 14, after_peak: 30}
 
+# ---- TCB price-rise reference for judging alerts (S34). Fixed here, before any alert is scored against it.
+# Independent of the forecast bounds: it uses only reported TCB prices. News is not used.
+rises:
+  window_reports: 14                                  # R = P_t / P_(t-14 report days) - 1
+  threshold: 0.10                                     # a rise day has R >= 10 %
+  persist_reports: 5                                  # and stays on at least 5 consecutive report days to count as an episode
+  merge_gap_reports: 14                               # episodes of one item closer than this are merged
+  match: {before_reports: 14, after_reports: 7}       # an alert run counts for an episode if it starts from 14 report days before the onset to 7 after the end
+  sensitivity: [0.07, 0.15]                           # reported next to the main rule, never used to choose it
+  validation: ["2024-01-01", "2024-12-31"]
+  retrospective: ["2025-01-01", "2026-10-24"]         # already scored by the earlier model, so labelled retrospective
+  min_validation_episodes: 5                          # the stage stops and asks if 2024 has fewer episodes than this
+  placebo_draws: 300
+
 # ---- outputs
 paths:
   tables: reports/project/tables

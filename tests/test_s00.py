@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest, yaml
 from fpw.paths import ROOT as R, CODE_ROOT
 OLD = ["S00", "S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13", "S14", "S99"]
-NEW = [f"S{n}" for n in range(22, 34)]          # prediction-system track, appended 2026-11-15
+NEW = [f"S{n}" for n in range(22, 35)]          # prediction-system track, appended 2026-11-15 (S34 added 2026-11-16)
 @pytest.mark.skipif(not (R/"data/raw/MANIFEST.csv").exists(), reason="S00 not run here (data lives on Drive; finalize.py refuses a missing MANIFEST)")
 def test_manifest_present():
     rows = list(csv.DictReader((R/"data/raw/MANIFEST.csv").open()))
