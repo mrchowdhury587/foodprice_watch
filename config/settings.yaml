@@ -73,6 +73,21 @@ forecast_choice:
   params: {num_leaves: 7, learning_rate: 0.03, objective: l1}
   validation_rel_mae: 1.0472        # geometric mean over items and horizons of MAE / MAE of "tomorrow = today" (2024); above 1 = worse than naive
 
+# Alert rules (notebooks 05a, 05b). Abnormal-rise detection, not early warning.
+alerts:
+  horizon: 7                 # the actual price is compared with the forecast made 7 report days earlier
+  window: 120                # last known forecast errors per item for the range
+  min_obs: 30
+  persistence: {k: 3, m: 5}  # alert when above the bound on 3 of the last 5 report days
+  levels: [0.9, 0.95, 0.975, 0.99]          # candidates for rule A (ML range) and rule B (simple range)
+  thresholds: [0.03, 0.05, 0.07, 0.10]      # candidates for rule C (fixed 7-report rise)
+  fa_target_per_item_year: 2.0              # most sensitive setting whose 2024 alert runs matching no rise stay <= this (user, 2026-11-17)
+  match: {before_reports: 14, after_reports: 7}   # a run counts for an episode if it starts from 14 report days before onset to 7 after the end
+  placebo_draws: 300
+
+# Filled from the output of 05a and committed BEFORE 05b scores anything. Empty until then.
+alert_choice: {}
+
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
   rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)

@@ -1,4 +1,4 @@
-"""Writes notebooks/01-04b as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
+"""Writes notebooks/01-05a as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
 import json, sys
 from pathlib import Path
 
@@ -455,8 +455,89 @@ print('\\nfiles:', SETTINGS['files']['forecasts_test'], 'sha256', h_test[:16], '
 """),
 ]
 
+alert_choice_nb = [
+    ("markdown", """
+# Food Price Watch 05a: alert settings chosen on 2024
+Three ways to raise an abnormal-rise alert, all with the same persistence (above the bound on 3 of the last 5 report days, 7-report horizon):
+A. ML range (LightGBM forecast errors), B. simple range ("tomorrow = today", so the 7-report change), C. fixed 7-report rise threshold.
+For each rule the most sensitive candidate whose 2024 alert runs that match no sustained 10 % rise stay at or below 2 per item-year is chosen. Only 2024 is used.
+The choice goes into `config/settings.yaml` (`alert_choice`) and is committed **before** notebook 05b scores anything.
+Needs notebooks 03 and 04b. Writes `reports/tables/A1_alert_choice.csv` (counts and rates only). Run top to bottom and paste the last cell's output back.
+"""),
+    *SETUP,
+    ("code", """
+import numpy as np
+import pandas as pd
+from foodwatch import alerts as al, behaviour as bh
+a, r = SETTINGS['alerts'], SETTINGS['rises']
+k, m, hz = a['persistence']['k'], a['persistence']['m'], a['horizon']
+before, after = a['match']['before_reports'], a['match']['after_reports']
+VAL = SETTINGS['periods']['validation']
+D = pd.read_csv(data('data'), parse_dates=['Date'])
+F7 = pd.read_csv(data('forecasts_h7'))
+h_f7 = sha256(data('forecasts_h7'))
+EP = bh.episodes(bh.rise_days(D, r['window_reports']), r['threshold'], r['persist_reports'], r['merge_gap_reports'])
+P = {'A': al.bounds(al.table(F7, 'lgbm', hz), hz, a['levels'], a['window'], a['min_obs']),
+     'B': al.bounds(al.table(F7, 'naive', hz), hz, a['levels'], a['window'], a['min_obs'])}
+P['C'] = P['B']
+eps24 = al.in_period(EP, 'onset_date', VAL)
+"""),
+    ("code", """
+# Checks: one row per item and report day (so shifting by 7 rows = errors whose target is <= the origin); naive error = the change;
+# the rise episodes equal notebook 03's file; enough 2024 episodes; nothing in the 2022 gap.
+old = pd.read_csv(data('rise_episodes'))
+chk = dict(
+    rows_lgbm=len(P['A']), rows_naive=len(P['B']),
+    one_row_per_report_day=al.consecutive(P['A']) and al.consecutive(P['B']),
+    naive_error_is_change=bool(np.allclose(P['B'].resid.dropna(), P['B'].y.dropna())),
+    episodes_same_as_03=bool(len(old) == len(EP) and (old[['item_id', 'onset_idx', 'end_idx']].values == EP[['item_id', 'onset_idx', 'end_idx']].values).all()),
+    episodes_2024=len(eps24),
+    first_target_date=str(P['A'].tdate.min().date()),
+    first_bound_date=str(P['A'].loc[P['A'][f"hi{a['levels'][0]}"].notna(), 'tdate'].min().date()),
+)
+chk['ok'] = chk['one_row_per_report_day'] and chk['naive_error_is_change'] and chk['episodes_same_as_03'] and chk['episodes_2024'] >= 5
+assert chk['ok'], chk
+"""),
+    ("code", """
+# Every candidate on 2024: alert runs, runs matching no rise per item-year, recall
+iy = al.item_years(P['B'], VAL)
+rows = []
+for rule, cands in [('A', a['levels']), ('B', a['levels']), ('C', a['thresholds'])]:
+    for s in sorted(cands):
+        _, on = al.range_alerts(P[rule], s, k, m) if rule != 'C' else al.threshold_alerts(P[rule], s, k, m)
+        rn = al.in_period(al.runs(P[rule], on), 'start_date', VAL)
+        e, rn = al.match(rn, eps24, before, after)
+        rows.append(dict(rule=rule, setting=s, **al.prf(e, rn, iy)))
+A1 = pd.DataFrame(rows)
+choice = {}
+for rule in 'ABC':
+    t = A1[A1.rule == rule].set_index('setting')
+    s, met = al.choose(t.unmatched_per_item_year.to_dict(), sorted(t.index), a['fa_target_per_item_year'])
+    choice[rule] = dict(setting=float(s), target_met=met)
+A1['chosen'] = [choice[r_]['setting'] == s for r_, s in zip(A1.rule, A1.setting)]
+A1 = A1.round(4)
+write_csv(A1, DATA_ROOT / SETTINGS['files']['tables'] / 'A1_alert_choice.csv')
+"""),
+    ("code", """
+pd.set_option('display.width', 250); pd.set_option('display.max_columns', 30)
+names = {'A': 'ML range (LightGBM)', 'B': 'simple range ("tomorrow = today")', 'C': 'fixed 7-report rise'}
+print('=== 05a alert settings chosen on 2024 (validation year only) ===')
+print('code commit:', CODE_COMMIT, '| forecasts_h7.csv sha256', h_f7[:16])
+print('checks:', 'PASS' if chk['ok'] else 'FAIL', {k_: v for k_, v in chk.items() if k_ != 'ok'})
+print('2024: episodes', len(eps24), '| item-years', round(iy, 2), '| target: runs matching no rise <=', a['fa_target_per_item_year'], 'per item-year')
+print('\\nA1 every candidate on 2024 (setting = range level for A and B, threshold for C)')
+print(A1[['rule', 'setting', 'episodes', 'detected', 'recall', 'alert_runs', 'matched_runs', 'precision', 'unmatched_per_item_year',
+          'median_delay_reports', 'chosen']].to_string(index=False))
+print('\\nCHOICE (to be committed before 05b):')
+print('alert_choice:')
+for rule in 'ABC':
+    print(f"  {rule}: {{setting: {choice[rule]['setting']}, target_met: {str(choice[rule]['target_met']).lower()}}}   # {names[rule]}")
+print(f"  chosen_by: notebook 05a, code {CODE_COMMIT}, 2024 only")
+"""),
+]
+
 OUT.mkdir(parents=True, exist_ok=True)
 for name, cells in [("01_data_intake.ipynb", intake), ("02_data_processing.ipynb", processing), ("03_price_behaviour.ipynb", behaviour_nb),
-                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb)]:
+                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb)]:
     (OUT / name).write_text(json.dumps(nb(cells), indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print("wrote", OUT / name)
