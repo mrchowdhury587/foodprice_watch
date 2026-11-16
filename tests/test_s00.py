@@ -9,7 +9,8 @@ def test_manifest_present():
     rows = list(csv.DictReader((R/"data/raw/MANIFEST.csv").open()))
     assert sum(r["status"]=="present" and r["path"].startswith("data/raw/project/") for r in rows) >= 32   # 32 original files + optional extra_raw_files
 def test_ledger_valid():
-    ids = [s["id"] for s in json.loads((R/"state/stages.json").read_text())["stages"]]
+    from fpw import state                                   # Drive's ledger is a copy made once; state.load() adds stages that exist only in the repo ledger
+    ids = [s["id"] for s in state.load()["stages"]]
     assert ids[:16] == OLD, "old entries deleted or reordered"
     assert ids[16:] == NEW, "new stages must be appended in order"
 def test_project_settings_match_frozen_config():
