@@ -209,3 +209,49 @@ forecast_choice:
   validation_rel_mae: 1.0472
   chosen_by: notebook 04a, code ae0b96c (local run, work PC), 2024 origins only
 ```
+
+## 04b_forecast_test (2026-11-17, LOCAL run on the work PC, code c4b683f) — RETROSPECTIVE, not a Colab run
+
+Google Drive still would not mount in Colab, so the notebook ran locally on the same `data_8.csv` (sha256 `381ef71d10092bde…`), with the user's approval. The LightGBM configuration was fixed on 2024 and committed in 8d7c145 before this notebook was written or run. 2025-26 was already scored by the earlier run, so these results are retrospective. Tables: `reports/tables/M3_test_accuracy.csv`, `M4_test_by_item.csv`. Forecast files (contain prices) are on the work PC only until a Colab rerun: `processed/forecasts_test.csv`, `processed/forecasts_h7.csv`.
+
+Result: neither ETS nor LightGBM is below "tomorrow = today" at any horizon (relative MAE 1.01 to 1.21); where the difference is significant (DM, Holm p < 0.05) it favours naive.
+
+```
+chosen on 2024: price_only|leaves7|lr0.03|l1 | choice first committed in 8d7c145 2026-11-17
+test origins: 82 | 2025-01-01 to 2026-09-16
+=== 04b forecast test, 2025-01-01 to 2026-10-24: RETROSPECTIVE ===
+code commit: c4b683f (local run, work PC) | data_8.csv sha256 381ef71d10092bde
+model choice (2024 only): price_only|leaves7|lr0.03|l1 | choice first committed in 8d7c145 2026-11-17
+checks: PASS {'test_forecasts': 7872, 'test_scored': 7872, 'first_target_date': '2025-01-02', 'last_target_date': '2026-10-16', 'target_before_test': 0, 'fit_after_origin': 0, 'rows_touching_gap': 0, 'naive_rel_mae': 1.0, 'h7_rows_per_model': 8488, 'h7_rows_expected': 8488, 'h7_first_origin': '2023-06-02', 'h7_last_origin': '2026-10-24'}
+
+M3 accuracy by model and horizon; rel = MAE / MAE of "tomorrow = today"; dm_stat > 0 = worse than naive; NaN = not computable
+model  horizon     n  mae_log  mae_log_naive  gmean_rel_mae  mae_tk  mae_tk_naive  accuracy  accuracy_naive  direction_acc  dm_stat  p_holm
+  ets        1 656.0  0.00603        0.00541        1.12695 0.52839       0.49924   0.99401         0.99463        0.39175  5.72277 0.00000
+  ets        7 656.0  0.02610        0.02536        1.02813 2.48265       2.44588   0.97382         0.97454        0.40176  2.60809 0.04158
+  ets       14 656.0  0.04168        0.04067        1.01854 3.79460       3.75991   0.95814         0.95906        0.42308  2.09069 0.07938
+  ets       30 656.0  0.06505        0.06342        1.02010 5.84904       5.78887   0.93313         0.93446        0.39216  3.90938 0.00096
+ lgbm        1 656.0  0.00626        0.00541        1.21301 0.56801       0.49924   0.99377         0.99463        0.46392  7.59564 0.00000
+ lgbm        7 656.0  0.02640        0.02536        1.03344 2.49918       2.44588   0.97348         0.97454        0.54545  4.85789 0.00003
+ lgbm       14 656.0  0.04161        0.04067        1.01427 3.77381       3.75991   0.95804         0.95906        0.50452  2.62358 0.04158
+ lgbm       30 656.0  0.06515        0.06342        1.02208 5.79800       5.78887   0.93200         0.93446        0.56863  1.09859 0.27520
+naive        1 656.0  0.00541        0.00541        1.00000 0.49924       0.49924   0.99463         0.99463        0.00000      NaN     NaN
+naive        7 656.0  0.02536        0.02536        1.00000 2.44588       2.44588   0.97454         0.97454        0.00000      NaN     NaN
+naive       14 656.0  0.04067        0.04067        1.00000 3.75991       3.75991   0.95906         0.95906        0.00000      NaN     NaN
+naive       30 656.0  0.06342        0.06342        1.00000 5.78887       5.78887   0.93446         0.93446        0.00000      NaN     NaN
+ets: below naive at horizons none; significantly better (DM, Holm p < 0.05) at none
+lgbm: below naive at horizons none; significantly better (DM, Holm p < 0.05) at none
+
+M4 relative MAE by item at horizon 7 (below 1 = better than naive)
+model                  ets   lgbm  naive
+item_id                                 
+Chicken - Broiler    1.000  1.003    1.0
+Egg - Farm           1.001  1.030    1.0
+Garlic - Imported    1.004  1.015    1.0
+Onion - Local        1.006  1.020    1.0
+Palm Oil - Loose     1.007  1.045    1.0
+Potato               1.096  1.116    1.0
+Soybean Oil - Loose  1.094  0.996    1.0
+Sugar                1.023  1.047    1.0
+
+files: processed/forecasts_test.csv sha256 d536b5039e841ea6 | processed/forecasts_h7.csv sha256 6449ec4dbf7b5a5c | rows 16976
+```
