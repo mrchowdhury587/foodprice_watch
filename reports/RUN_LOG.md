@@ -151,3 +151,61 @@ Soybean Oil - Loose                  110         5                              
 rise episodes file: processed/rise_episodes_8.csv | rows 70 | sha256 48d529fceedeae9b
 figures: ['F1_change_frequency.png', 'F2_prices_with_rises.png']
 ```
+
+## 04a_forecast_choice (2026-11-17, LOCAL run on the work PC, code ae0b96c) — not a Colab run
+
+Google Drive still would not mount in Colab, so with the user's approval the notebook ran locally on the same `data_8.csv` (sha256 `381ef71d10092bde…`). Only 2024 targets were scored. The choice below was written into `config/settings.yaml` (`forecast_choice`) and committed before notebook 04b was written or run. Tables: `reports/tables/M1_validation_grid.csv`, `M2_validation_models.csv`.
+
+Result: on 2024 neither ETS nor LightGBM is below "tomorrow = today" at any horizon (relative MAE 1.00 to 1.11); the drivers make LightGBM worse; the simplest configuration wins.
+
+```
+validation origins: 43 | 2024-01-01 to 2024-11-24
+=== 04a forecast choice on 2024 (validation year only) ===
+code commit: ae0b96c (local run, work PC) | data_8.csv sha256 381ef71d10092bde
+checks: PASS {'forecasts': 24768, 'scored': 24768, 'last_target_date': '2024-12-27', 'target_after_validation_year': 0, 'fit_after_origin': 0, 'rows_touching_gap': 0, 'naive_rel_mae': 1.0}
+origins: 43 | horizons [1, 7, 14, 30] | rel = MAE of the model / MAE of "tomorrow = today" (below 1 = better than naive)
+
+M1 LightGBM grid, geometric mean relative MAE over items (simplest first)
+                                  config  rel_h1  rel_h7  rel_h14  rel_h30  rel_all  chosen
+            price_only|leaves7|lr0.03|l1  1.1135  1.0294   1.0352   1.0137   1.0472    True
+         price_only|leaves7|lr0.03|huber  2.0980  1.1342   1.0723   1.0009   1.2641   False
+            price_only|leaves7|lr0.05|l1  1.2186  1.0334   1.0620   1.0404   1.0861   False
+         price_only|leaves7|lr0.05|huber  2.1506  1.1506   1.0801   1.0366   1.2902   False
+           price_only|leaves31|lr0.03|l1  1.3157  1.0932   1.0935   1.0554   1.1351   False
+        price_only|leaves31|lr0.03|huber  2.2093  1.2096   1.1475   1.1247   1.3628   False
+           price_only|leaves31|lr0.05|l1  1.4376  1.1388   1.1177   1.0763   1.1847   False
+        price_only|leaves31|lr0.05|huber  2.3354  1.2329   1.1768   1.1576   1.4073   False
+    price_plus_drivers|leaves7|lr0.03|l1  1.3575  1.0828   1.0594   1.0050   1.1185   False
+ price_plus_drivers|leaves7|lr0.03|huber  2.5955  1.1863   1.0960   1.0147   1.3603   False
+    price_plus_drivers|leaves7|lr0.05|l1  1.4557  1.0885   1.0654   1.0217   1.1460   False
+ price_plus_drivers|leaves7|lr0.05|huber  2.5939  1.2155   1.1369   1.0467   1.3918   False
+   price_plus_drivers|leaves31|lr0.03|l1  1.6171  1.1651   1.1450   1.0803   1.2356   False
+price_plus_drivers|leaves31|lr0.03|huber  2.6731  1.2821   1.1781   1.0941   1.4498   False
+   price_plus_drivers|leaves31|lr0.05|l1  1.8044  1.2124   1.1887   1.1238   1.3075   False
+price_plus_drivers|leaves31|lr0.05|huber  2.9850  1.3246   1.2348   1.1396   1.5358   False
+
+M2 naive, ETS and the chosen LightGBM by horizon (2024); dm_stat > 0 = worse than naive, < 0 = better; p_holm = Holm-corrected p; NaN = not computable
+model  horizon     n  mae_log  mae_log_naive  gmean_rel_mae  mae_tk  mae_tk_naive  accuracy  accuracy_naive  direction_acc  dm_stat  p_holm
+  ets        1 344.0  0.00891        0.00858        1.05958 0.95480       0.92442   0.99103         0.99135        0.44776  3.76370 0.00308
+  ets        7 344.0  0.03184        0.03158        1.01046 3.53377       3.50872   0.96784         0.96808        0.36538  2.92939 0.02735
+  ets       14 344.0  0.05085        0.05069        1.00407 5.40724       5.39244   0.94835         0.94851        0.35385  2.16121 0.14571
+  ets       30 344.0  0.08274        0.08261        1.00228 8.53395       8.52471   0.91401         0.91410        0.33221  1.71487 0.28122
+ lgbm        1 344.0  0.00929        0.00858        1.11355 1.00857       0.92442   0.99065         0.99135        0.71642  3.95709 0.00201
+ lgbm        7 344.0  0.03222        0.03158        1.02937 3.64664       3.50872   0.96746         0.96808        0.53846  1.28633 0.41075
+ lgbm       14 344.0  0.05193        0.05069        1.03522 5.57885       5.39244   0.94705         0.94851        0.52308  0.78991 0.43402
+ lgbm       30 344.0  0.08231        0.08261        1.01365 8.46509       8.52471   0.91337         0.91410        0.54362      NaN     NaN
+naive        1 344.0  0.00858        0.00858        1.00000 0.92442       0.92442   0.99135         0.99135        0.00000      NaN     NaN
+naive        7 344.0  0.03158        0.03158        1.00000 3.50872       3.50872   0.96808         0.96808        0.00000      NaN     NaN
+naive       14 344.0  0.05069        0.05069        1.00000 5.39244       5.39244   0.94851         0.94851        0.00000      NaN     NaN
+naive       30 344.0  0.08261        0.08261        1.00000 8.52471       8.52471   0.91410         0.91410        0.00000      NaN     NaN
+ets: below naive at horizons none
+lgbm: below naive at horizons none
+
+CHOICE (to be committed before 04b):
+forecast_choice:
+  config: price_only|leaves7|lr0.03|l1
+  feature_set: price_only
+  params: {'num_leaves': 7, 'learning_rate': 0.03, 'objective': 'l1'}
+  validation_rel_mae: 1.0472
+  chosen_by: notebook 04a, code ae0b96c (local run, work PC), 2024 origins only
+```

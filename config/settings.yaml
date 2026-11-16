@@ -65,8 +65,13 @@ forecast:
   tie_margin: 0.01           # a simpler configuration within 1 % of the best wins
   daily_h7: {start: "2023-06-01", refit_every: 30}   # 7-day forecasts from every report day, for the alert ranges (notebook 05)
 
-# Filled from the pasted output of 04a and committed BEFORE 04b scores 2025-26. Empty until then.
-forecast_choice: {}
+# Filled from the output of 04a and committed BEFORE 04b scores 2025-26.
+# Chosen 2026-11-17 by notebook 04a (local run on the work PC, code ae0b96c), 2024 origins only. Not to be changed after 04b runs.
+forecast_choice:
+  config: price_only|leaves7|lr0.03|l1
+  feature_set: price_only
+  params: {num_leaves: 7, learning_rate: 0.03, objective: l1}
+  validation_rel_mae: 1.0472        # geometric mean over items and horizons of MAE / MAE of "tomorrow = today" (2024); above 1 = worse than naive
 
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day

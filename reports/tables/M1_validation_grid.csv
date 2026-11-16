@@ -1,0 +1,17 @@
+config,rel_h1,rel_h7,rel_h14,rel_h30,rel_all,chosen
+price_only|leaves7|lr0.03|l1,1.1135,1.0294,1.0352,1.0137,1.0472,True
+price_only|leaves7|lr0.03|huber,2.098,1.1342,1.0723,1.0009,1.2641,False
+price_only|leaves7|lr0.05|l1,1.2186,1.0334,1.062,1.0404,1.0861,False
+price_only|leaves7|lr0.05|huber,2.1506,1.1506,1.0801,1.0366,1.2902,False
+price_only|leaves31|lr0.03|l1,1.3157,1.0932,1.0935,1.0554,1.1351,False
+price_only|leaves31|lr0.03|huber,2.2093,1.2096,1.1475,1.1247,1.3628,False
+price_only|leaves31|lr0.05|l1,1.4376,1.1388,1.1177,1.0763,1.1847,False
+price_only|leaves31|lr0.05|huber,2.3354,1.2329,1.1768,1.1576,1.4073,False
+price_plus_drivers|leaves7|lr0.03|l1,1.3575,1.0828,1.0594,1.005,1.1185,False
+price_plus_drivers|leaves7|lr0.03|huber,2.5955,1.1863,1.096,1.0147,1.3603,False
+price_plus_drivers|leaves7|lr0.05|l1,1.4557,1.0885,1.0654,1.0217,1.146,False
+price_plus_drivers|leaves7|lr0.05|huber,2.5939,1.2155,1.1369,1.0467,1.3918,False
+price_plus_drivers|leaves31|lr0.03|l1,1.6171,1.1651,1.145,1.0803,1.2356,False
+price_plus_drivers|leaves31|lr0.03|huber,2.6731,1.2821,1.1781,1.0941,1.4498,False
+price_plus_drivers|leaves31|lr0.05|l1,1.8044,1.2124,1.1887,1.1238,1.3075,False
+price_plus_drivers|leaves31|lr0.05|huber,2.985,1.3246,1.2348,1.1396,1.5358,False
