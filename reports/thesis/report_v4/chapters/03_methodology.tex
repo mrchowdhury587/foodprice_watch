@@ -1,0 +1,85 @@
+\chapter{Methodology}
+
+\section{Dataset Description}
+
+\subsection{Dataset Sources and Collection}
+The prices come from the TCB daily retail price reports for Dhaka, downloaded as Excel sheets and converted to one table. Weather comes from Open-Meteo for 13 locations. The exchange rate is the Bangladeshi taka per US dollar, built from two market series spliced at 2 March 2024. The onion export measure comes from a table of Indian export duties, minimum export prices and bans, whose India onion ban dates were checked against the Indian trade notification and press reports. The 12 price episodes used only to score the alerts come from a list of news-documented shocks collected for the earlier study. No driver value is used before the date it became available: weather is lagged five days, and the exchange rate is the last value on or before the report day.
+
+\subsection{Dataset Description}
+The price file holds 76,440 rows: 63 items observed over 1,412 report days from 17 May 2021 to 24 October 2026. Each item has a minimum and a maximum price and a unit. The items fall into six groups used for evaluation, plus nine items with short history (Table~\ref{tab:strata}). Nine items started to be reported only in May 2024 and are not forecast, so the model covers 54 items.
+
+\begin{table}[H]\centering\small
+\caption[Items by evaluation group]{Items by evaluation group.}\label{tab:strata}
+\input{tables/item_groups}
+\par\smallskip{\footnotesize Source: \path{reports/project/tables/P2_panel_summary.csv}.}
+\end{table}
+
+\subsection{Unique Contribution of the Dataset}
+No open, machine-readable daily record of the TCB reports existed that I could find. The panel built here has one row per item and report day, keeps blank and zero prices as not reported, and keeps the 2022 gap visible instead of filling it. It was audited against the original sheets. Because TCB states no reuse terms, the panel and everything derived from it are kept out of the public code repository.
+
+\subsection{Data Preprocessing}
+A price of zero or a blank cell means the item was not reported that day, and such cells are never filled in a forecast target. Reporting was irregular in 2022: only 24 reports exist between 12 March and 31 December 2022. That period is never filled, never used as a target and never scored, and any input window that touches it is dropped from training.
+
+I checked the file against the original Excel sheets with a machine re-read of a random 2\% sample: 1,530 item-day rows on 28 report days and 3,060 price cells. No row or cell differed, which puts the transcription error rate below 0.25\% (Wilson 95\% upper limit, Table~\ref{tab:audit}). The audit only checks copying. It cannot show that TCB itself typed a value correctly.
+
+\begin{table}[H]\centering\small
+\caption[Audit of the price file against the TCB sheets]{Audit of the price file against the original TCB sheets.}\label{tab:audit}
+\input{tables/audit}
+\par\smallskip{\footnotesize Source: \path{reports/project/tables/P2_audit_summary.csv}.}
+\end{table}
+
+For each item and report day $t$, the target at horizon $h \in \{1,7,14,30\}$ is the change in log price between $t$ and $t+h$ report days, defined only if the price at $t+h$ was actually reported. The input price is the last reported price, carried forward, because an item can be skipped on a report day. A driver that is missing stays missing, with a flag, and is never set to zero. A daily driver older than seven days is dropped rather than carried further. The table of exporter events ends on 27 March 2025, so the onion flag is empty for every report day after that, which covers most of the test period.
+
+\section{Model Architecture}
+
+\subsection{LightGBM}
+The main model is a LightGBM gradient-boosted tree regressor \cite{lightgbm}. One model is fitted for all items and all four horizons, using rows of the four horizons stacked together with the horizon as an input. A forecast is the last price times the exponential of the predicted change, so the model works in log changes and its errors do not depend on the price level of the item.
+
+\subsection{Model Inputs}
+The model uses 25 inputs in five groups (Table~\ref{tab:features}). The price-history inputs are the log price, log changes over 1, 7, 14 and 30 report days, the deviation of the price from its 30-report mean, the 30-report volatility of one-day changes, and the number of reports since the price last changed, together with item and group codes and the horizon. The calendar inputs are the month, the day of the week, the days to Ramadan and to the two Eids, a Ramadan flag, holidays in the coming week and the days since the previous report. The weather inputs are the 7-day maximum temperature, the 30-day mean temperature and the 7-day rainfall for seven items. The onion export flag covers the two onion items. The exchange rate, as a level and a 30-day change, covers 34 items (imported staples, administered items and spices).
+
+\begin{table}[H]\centering\small
+\caption[Model inputs by driver group]{Model inputs by driver group.}\label{tab:features}
+\input{tables/model_inputs}
+\par\smallskip{\footnotesize Source: \path{reports/project/tables/P3_driver_inventory.csv} and \path{config/project.yaml}.}
+\end{table}
+
+\subsection{Candidate Models}
+Six models were compared on the validation year. The naive model forecasts no change and is the yardstick. Automatic ETS is fitted to each item's own log price; for an item with fewer than 30 observations at an origin it falls back to no change. Ridge regression and a random forest use the same inputs as LightGBM. The LSTM reads the last 30 log prices together with calendar and price-history inputs and an item embedding, and it was trained for a small number of epochs on the CPU.
+
+\subsection{Expected Range and Alert Rule}
+The expected range at horizon 7 comes from each item's own forecast errors. At a forecast origin, the item's last 120 errors whose target date had already passed are taken, and the 5th and 95th percentiles of those errors give the lower and upper bounds. An alert starts when the price is above the upper bound on at least 3 of the last 5 report days, and a run of consecutive alert days counts as one alert. The percentile used for the upper bound (the alert level) is chosen from 0.90, 0.95, 0.975 and 0.99 as the lowest one that gives at most 2 false alarms per item-year on 2024 days outside the event windows.
+
+\subsection{Driver Breakdown}
+The per-feature contributions of the model to a forecast are added up within each driver group (price history, calendar, weather, onion export measure, exchange rate). The same sums are made for all items, for each item group, and for each alert day. As a stability check, three models fitted with data up to different report days (1011, 1211 and 1411) were compared on the same rows. The part of a rise above the upper bound is reported as \unexpl; this describes the model's inputs only and says nothing about who or what caused the rise.
+
+\section{Model Training and Optimization}
+
+\subsection{Training Strategy}
+At a forecast origin the model sees only rows whose target date lies on or before the origin, so nothing from the future enters training. The window is expanding. The model is refitted every 8 forecast origins, where origins are 7 report days apart, and it is reused between refits. Rows that touch the 2022 gap are removed from training.
+
+\subsection{Loss Function}
+The objective was part of the search: L1 (absolute error), Huber or L2. L1 was chosen, which matches the main metric, the mean absolute error of the log price change.
+
+\subsection{Hyperparameter Search}
+Optuna \cite{optuna} with a tree-structured sampler (seed 42) ran 50 trials. Each trial was scored on 31 origins from January to August 2024. The best setting was then compared with the default on 9 origins from October to November 2024 and kept only if it was better there. The 2025--26 test period was not touched in either step.
+
+\subsection{Training Configuration}
+Table~\ref{tab:params} lists the chosen setting. The test uses exactly this setting and the 25 inputs above.
+
+\begin{table}[H]\centering\small
+\caption[Chosen LightGBM setting]{Chosen LightGBM setting.}\label{tab:params}
+\input{tables/lightgbm_setting}
+\par\smallskip{\footnotesize Source: \path{state/tuning_S26.json} and \path{reports/project/tables/P6_tuning_trials.csv}.}
+\end{table}
+
+\section{Model Evaluation}
+
+\subsection{Validation and Test Design}
+Calendar 2024 is the validation year. Six candidates were compared on 43 forecast origins in 2024, spaced 7 report days apart. The naive forecast is the yardstick and cannot be chosen, and a simpler model is preferred if it is within 1\% of the best. Before the test was scored, the chosen settings, the 25 inputs, the list of metrics and the list of checks were written to a file and committed to the repository (state/prereg\_S27.yaml), and the code refuses to score the test unless that file is committed. The test has 87 forecast origins, again 7 report days apart, from January 2025 to October 2026, with the model refitted every 8 origins. Two further schemes check the main result: walk-forward on 2023 and 2024, and a sliding window of the latest 500 report days. The test was scored once. The 2025--26 period had already been scored by an earlier version of this study, so it is not a first look at that data.
+
+\subsection{Forecast Metrics}
+The primary metric is the mean absolute error of the log price change, which is about the percentage error. For each item I divide the model's error by the naive error and summarise the ratio over items with a geometric mean, where 1 means a tie with ``tomorrow equals today'' and values above 1 mean the model is worse. I also report the absolute error in taka, the error on days where the price changed against days where it did not, the direction accuracy on days the price moved, the coefficient of determination on the price changes, and the Diebold--Mariano test of the model against the naive forecast.
+
+\subsection{Range and Alert Evaluation}
+For the ranges I report how often the price was below the upper bound and inside the central interval, the average width, and the Kupiec test of the exceedance rate \cite{kupiec}. For the alerts I use the 12 documented episodes. An episode window runs from 14 days before the recorded onset to 30 days after the news peak, and an episode counts as detected if an alert starts inside the window for at least one affected item. I report recall, precision (the share of alert runs that start inside a window), false alarms per item-year in 2024 outside the windows, and a random-date control in which each episode window is moved to a random start in the evaluation period, 300 times. The alert level is fixed and committed (state/prereg\_S28.yaml) before any episode is scored. The model is never trained on events and the level is never tuned on them.

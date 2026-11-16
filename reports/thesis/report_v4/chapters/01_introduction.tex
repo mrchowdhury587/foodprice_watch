@@ -1,0 +1,41 @@
+\chapter{Introduction}
+
+\section{Introduction}
+Rice, edible oil, sugar, onion, eggs and lentils take a large share of what a Bangladeshi household spends on food, so a sudden rise in any of them is noticed quickly and often becomes a policy question. The Trading Corporation of Bangladesh (TCB) publishes a retail price report for Dhaka on most working days. The reports are Excel sheets with a minimum and maximum price per item, and they are not available as one clean, machine-readable series.
+
+The TCB prices have a shape that makes forecasting harder than it first looks. A price stays exactly the same on most days and then moves in a step. For administered items such as sugar and edible oil the step follows an announcement. For perishables such as onion and eggs the steps are smaller and more frequent. The median item had an unchanged price on 85 to 93 percent of report days, depending on its group (Table~\ref{tab:strata}). A forecast of ``no change'' is therefore right most of the time, and any model has to beat that to be worth running.
+
+\section{Motivation}
+Two kinds of users could use a daily price watch. A person who follows prices wants to know what a staple is likely to cost in a week or a month and how far from that figure a price could reasonably land. A person who follows market behaviour wants to know when a price has risen further than its own recent history makes likely, and whether the cost drivers that can be measured account for that rise. Published forecasting work on Bangladeshi retail prices is thin and mostly uses price history alone \cite{agripricebd}, and I did not find a system that returns the forecast, the range, the alert and the breakdown together for the TCB daily reports.
+
+\section{Problem Statement}
+Given the TCB daily retail prices of an item up to a report day, the problem is to forecast its price 1, 7, 14 and 30 report days ahead, to state an expected range around the forecast, to decide whether a price that has risen is outside that range in a way that persists, and to say how much of the model's forecast comes from each measurable driver. The difficulty is that most prices do not move on most days, so a model has to beat the forecast ``tomorrow equals today'' and a good-looking error number alone proves little.
+
+\section{Objectives of the Study}
+The objectives are:
+\begin{itemize}
+    \item to build a clean, audited daily price panel from the TCB reports and join to it the drivers that could be measured, each dated by the day it became known;
+    \item to forecast every long-history item at four horizons with one model and to compare that model with five alternatives on a validation year;
+    \item to give each forecast an expected range and to raise an alert when the price stays above it, with the alert level fixed from false alarms on non-event days;
+    \item to attach a breakdown by driver group to each alert, and to word any residual rise as \unexpl;
+    \item to test the settings once on a period that was not used for any choice, and to report the result whether or not it is favourable.
+\end{itemize}
+
+\section{Scope of the Study}
+The study covers the TCB Dhaka retail reports from 17 May 2021 to 24 October 2026. Of the 63 items, 54 have enough history to forecast; the other nine started in May 2024. Time is counted in report days, because TCB does not publish every day. The 2022 reports are too sparse and are never filled or scored. Forecasting is for the Dhaka retail price only. The study does not claim to find the cause of any price rise, it does not use market-level prices from other sources, and it does not test pretrained forecasting models. The alerts detect an abnormal rise after it has started; they are not an early warning.
+
+\section{Functionality of the Proposed System}
+The system takes the price file and produces, for each of the 54 items: a forecast at 1, 7, 14 and 30 report days with a lower and an upper bound; a list of alerts, where an alert starts when the price is above the upper bound on at least 3 of the last 5 report days; and, for each alert day, the contribution of each driver group to the model's forecast and the part of the rise above the range, labelled \unexpl. The results are written to three files (forecasts, alerts and alert drivers) that a Gradio app in a Colab notebook and a local Streamlit dashboard read. A longer price file can be added later and the same steps run again.
+
+\section{Organization of the Report}
+This report consists of five chapters.
+
+\textbf{Chapter 1: Introduction} describes the background, problem, objectives, scope and the functions of the system.
+
+\textbf{Chapter 2: Literature Review} reviews related work, states the research gap and lists the contributions.
+
+\textbf{Chapter 3: Methodology} describes the data, the model, its training and the evaluation design.
+
+\textbf{Chapter 4: Experiments and Results} gives the setup and the results for selection, tuning, the sealed test, ranges, alerts and drivers.
+
+\textbf{Chapter 5: Conclusion and Future Work} gives the conclusion, the limitations and the future work.

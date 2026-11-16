@@ -1,0 +1,15 @@
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Tool} & \textbf{Use} \\
+\midrule
+Python 3.13 (Colab) & all stages \\
+pandas, pyarrow & price panel and feature tables \\
+LightGBM & main model \\
+Optuna & tuning, 50 trials \\
+statsforecast (AutoETS) & ETS candidate \\
+scikit-learn & ridge and random forest candidates \\
+PyTorch (CPU) & LSTM candidate \\
+Gradio, Streamlit & dashboard in Colab and on the work computer \\
+pytest & unit tests and stage acceptance checks \\
+\bottomrule
+\end{tabular}
