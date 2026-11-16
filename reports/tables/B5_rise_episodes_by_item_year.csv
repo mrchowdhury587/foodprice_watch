@@ -1,0 +1,49 @@
+item_id,year,share_rise_days,episodes_7pct,episodes_10pct,episodes_15pct,median_length_reports,median_peak_rise
+Chicken - Broiler | per kg,2021,0.3169,3,2,2,27.5,0.26385
+Chicken - Broiler | per kg,2022,0.1,0,0,0,,
+Chicken - Broiler | per kg,2023,0.2317,2,2,2,26,0.3299
+Chicken - Broiler | per kg,2024,0.0699,6,1,0,10,0.1429
+Chicken - Broiler | per kg,2025,0.0299,1,1,0,5,0.1351
+Chicken - Broiler | per kg,2026,0.0669,2,2,1,9,0.1785
+Egg - Farm | per hali (4 pcs),2021,0.1277,2,2,1,5.5,0.19215
+Egg - Farm | per hali (4 pcs),2022,0.175,1,1,0,7,0.1538
+Egg - Farm | per hali (4 pcs),2023,0.0854,4,1,0,7,0.137
+Egg - Farm | per hali (4 pcs),2024,0.0426,1,1,1,14,0.1951
+Egg - Farm | per hali (4 pcs),2025,0.021,1,1,0,7,0.1807
+Egg - Farm | per hali (4 pcs),2026,0.0892,4,2,0,11,0.16255
+Garlic - Imported | per kg,2021,0.227,3,2,1,10.5,0.29565
+Garlic - Imported | per kg,2022,0.075,0,0,0,,
+Garlic - Imported | per kg,2023,0.248,4,4,3,10,0.25875
+Garlic - Imported | per kg,2024,0.0638,1,2,0,9,0.16675
+Garlic - Imported | per kg,2025,0.015,1,1,1,5,0.1515
+Garlic - Imported | per kg,2026,0.145,4,3,2,10,0.1818
+Onion - Local | per kg,2021,0.1915,2,2,1,11.5,0.5031
+Onion - Local | per kg,2022,0.425,1,1,1,17,1
+Onion - Local | per kg,2023,0.378,5,5,5,10,0.4444
+Onion - Local | per kg,2024,0.2948,4,4,4,24.5,0.31505
+Onion - Local | per kg,2025,0.1677,4,4,3,15,0.3854
+Onion - Local | per kg,2026,0.1636,3,3,3,13,0.2
+Palm Oil - Loose | per litre,2021,0,0,0,0,,
+Palm Oil - Loose | per litre,2022,0.175,1,1,0,7,0.1561
+Palm Oil - Loose | per litre,2023,0.0081,0,0,0,,
+Palm Oil - Loose | per litre,2024,0,1,0,0,,
+Palm Oil - Loose | per litre,2025,0,0,0,0,,
+Palm Oil - Loose | per litre,2026,0,0,0,0,,
+Potato | per kg,2021,0.2766,3,3,1,12,0.3333
+Potato | per kg,2022,0.15,1,1,0,6,0.1667
+Potato | per kg,2023,0.4431,5,5,4,14,0.3218
+Potato | per kg,2024,0.2158,3,3,3,24,0.2174
+Potato | per kg,2025,0.1257,3,3,2,14,0.2222
+Potato | per kg,2026,0.1784,3,3,3,14,0.3
+Soybean Oil - Loose | per litre,2021,0.0071,1,0,0,,
+Soybean Oil - Loose | per litre,2022,0.2162,1,1,0,7,0.1695
+Soybean Oil - Loose | per litre,2023,0,1,0,0,,
+Soybean Oil - Loose | per litre,2024,0,1,0,0,,
+Soybean Oil - Loose | per litre,2025,0,0,0,0,,
+Soybean Oil - Loose | per litre,2026,0,0,0,0,,
+Sugar | per kg,2021,0.0423,1,1,0,5,0.1286
+Sugar | per kg,2022,0,0,0,0,,
+Sugar | per kg,2023,0.0854,2,2,1,8,0.1566
+Sugar | per kg,2024,0,0,0,0,,
+Sugar | per kg,2025,0,0,0,0,,
+Sugar | per kg,2026,0.0112,0,0,0,,

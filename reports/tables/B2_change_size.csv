@@ -1,0 +1,9 @@
+item_id,changes,share_up,median_abs_tk,p95_abs_tk,median_abs_pct,p95_abs_pct,largest_up_pct,largest_down_pct
+Chicken - Broiler | per kg,520,0.5192,5,12.5,2.7,7.58,16.22,-14.29
+Egg - Farm | per hali (4 pcs),317,0.5237,1,3.5,2.35,6.9,12.2,-10.53
+Garlic - Imported | per kg,326,0.4939,5,20,4,12.91,20,-19.35
+Onion - Local | per kg,440,0.4977,2.5,12.5,5,16.72,42.31,-25
+Palm Oil - Loose | per litre,261,0.5709,1.5,5,1.02,3.74,8.36,-5.56
+Potato | per kg,302,0.4901,2.5,5,6.25,18.18,36.36,-23.08
+Soybean Oil - Loose | per litre,268,0.5896,1.5,5,0.88,3.01,4.23,-8.38
+Sugar | per kg,174,0.5,2,5,1.85,4.76,7.41,-7.32

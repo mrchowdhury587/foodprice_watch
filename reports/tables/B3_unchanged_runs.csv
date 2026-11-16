@@ -1,0 +1,9 @@
+item_id,runs,mean_days,median_days,p90_days,longest_days,longest_from,longest_to
+Chicken - Broiler | per kg,304,2.85,2,6,40,2026-08-14,2026-09-24
+Egg - Farm | per hali (4 pcs),198,5.39,3,12,44,2025-12-02,2026-01-18
+Garlic - Imported | per kg,219,4.83,3,11.2,40,2025-12-15,2026-01-27
+Onion - Local | per kg,267,3.54,2,8,32,2025-08-07,2025-09-09
+Palm Oil - Loose | per litre,171,6.58,3,13,102,2026-05-18,2026-09-07
+Potato | per kg,201,5.38,3,12,75,2026-08-06,2026-10-24
+Soybean Oil - Loose | per litre,183,6.08,3,13.8,50,2025-10-30,2025-12-19
+Sugar | per kg,133,9.11,4,23.8,104,2026-04-27,2026-08-18
