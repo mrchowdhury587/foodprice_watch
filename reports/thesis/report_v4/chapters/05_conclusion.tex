@@ -1,26 +1,26 @@
 \chapter{Conclusion and Future Work}
 
 \section{Conclusion}
-This project delivered a price watch for TCB Dhaka retail prices that runs from the raw price file to forecasts, expected ranges, alerts and a driver breakdown, and the evidence says it is not yet useful for forecasting: on the 2025--26 test one LightGBM model was no better than ``tomorrow equals today'' at 1, 7, 14 or 30 report days, and slightly worse at the shortest two, because most TCB prices do not change on most days and the inputs I could measure did not predict the days when they do. The ranges came close to their nominal coverage and the alert rule, fixed on 2024 data, flagged 7 of 12 documented price episodes, but random dates did almost as well and about 94\% of alert runs were not tied to any documented episode. Against rises defined from the TCB prices alone the alerts did better than random dates (recall 0.65 in 2024 and 0.75 in 2025--26) but only about one alert run in five matched such a rise, so the alerts should be read as a way to review unusual rises and not as a warning. The driver shares changed too much between refits to support claims about causes, and the fair summary is that the measured drivers were not shown to explain these prices.
+This project built a price watch for TCB Dhaka retail prices that goes from the raw price file to forecasts, expected ranges, alerts and a driver breakdown. As a forecaster it is not yet useful. On the 2025--26 test, one LightGBM model was no better than ``tomorrow equals today'' at 1, 7, 14 or 30 report days, and it was slightly worse at the two shortest horizons. The main reason is that most TCB prices do not change on most days, and the inputs I could measure did not predict the days when they do. The ranges came close to their nominal coverage. The alert rule, fixed on 2024 data, flagged 7 of 12 documented price episodes, but random dates did almost as well, and about 94\% of alert runs were not tied to any documented episode. Against rises defined from the TCB prices alone the alerts did better than random dates (recall 0.65 in 2024 and 0.75 in 2025--26), but only about one alert run in five matched such a rise. The alerts are therefore best used to point a person to unusual rises that are worth checking, rather than as a warning. The driver shares changed too much between refits to support any claim about causes; all that can be said is that the measured drivers were not shown to explain these prices.
 
 \section{Limitations}
-This research has several limitations that should be acknowledged:
+The main limitations are listed below.
 \begin{itemize}
-    \item \textbf{Forecast value}: on these data the forecasts add nothing over persistence at any horizon, so the value of the system rests on its ranges, alerts and bookkeeping, and the alerts are weak.
+    \item \textbf{Forecast value}: on these data the forecasts add nothing over persistence at any horizon, so whatever value the system has lies in its ranges, its alerts and its record keeping, and the alerts are weak.
     \item \textbf{Model choice}: LightGBM was kept for the driver breakdown although it did not win the 2024 comparison, so a different choice might have done somewhat better, although the ETS result suggests not by much.
     \item \textbf{Test period}: the 2025--26 period was not a first look, because an earlier version of this study had scored it. The settings were fixed before this run, but that earlier exposure cannot be undone.
     \item \textbf{Number of episodes}: twelve episodes is a small number, and five of them fall in 2024, the year used to set the level (the level was set from non-event days only, so the episodes did not influence it). A recall of 7 of 12 has a wide uncertainty band and the random-date comparison has little power. The episode windows are long, which flatters detection, and the list may be missing real rises that would turn some of the 94\% of unmatched alert runs into correct ones.
     \item \textbf{TCB rise reference}: the 10\% over 14 report days rule is my own fixed choice, and the 7\% and 15\% results show that precision depends on it. 2024 is also the year in which the alert level was set from false alarms, so it is a validation year for the rise rule but not an unseen year for the alerts. The 2025--26 scores are retrospective.
     \item \textbf{Data gaps}: the 2022 reports are too sparse and are not used. The table of Indian onion export measures ends in March 2025, so the onion input is empty after that date. Weather and exchange-rate files end a few days before the end of the price file, which will matter when new reports are added.
-    \item \textbf{Audit}: the audit covers copying only, and it was run on the extended price file whereas the model uses the file to 24 October 2026.
+    \item \textbf{Audit}: the audit covers copying only. It was run on the extended price file, while the model uses the file that ends on 24 October 2026. I compared the two files, and the 76,440 rows they share are identical.
     \item \textbf{Data terms}: TCB does not state terms for reusing its reports, so the price data and everything derived from it are kept out of the public repository, and the Gradio link of the dashboard is public while it runs.
     \item \textbf{Driver breakdown}: it has no independent check beyond two sign tests, one of which returned no value, and its shares change a great deal between refits.
 \end{itemize}
 
 \section{Future Work}
-Several directions follow from this work:
+The results suggest the following next steps.
 \begin{itemize}
-    \item \textbf{Change versus no change}: model separately whether a price will change and by how much, which the step-like prices suggest.
+    \item \textbf{Change versus no change}: model separately whether a price will change and, if it does, by how much, since the prices move in steps.
     \item \textbf{Episodes}: build a larger and independently checked list of price episodes, with shorter windows, so that alert detection can be tested with more power.
     \item \textbf{Onion export table}: extend the table of Indian export measures beyond March 2025.
     \item \textbf{Market-level prices}: use WFP market prices to test whether a rise is national, regional or local.

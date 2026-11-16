@@ -6,7 +6,7 @@
 The prices come from the TCB daily retail price reports for Dhaka, downloaded as Excel sheets and converted to one table. Weather comes from Open-Meteo for 13 locations. The exchange rate is the Bangladeshi taka per US dollar, built from two market series spliced at 2 March 2024. The onion export measure comes from a table of Indian export duties, minimum export prices and bans, whose India onion ban dates were checked against the Indian trade notification and press reports. The 12 price episodes used only to score the alerts come from a list of news-documented shocks collected for the earlier study. No driver value is used before the date it became available: weather is lagged five days, and the exchange rate is the last value on or before the report day.
 
 \subsection{Dataset Description}
-The price file holds 76,440 rows: 63 items observed over 1,412 report days from 17 May 2021 to 24 October 2026. Each item has a minimum and a maximum price and a unit. The items fall into six groups used for evaluation, plus nine items with short history (Table~\ref{tab:strata}). Nine items started to be reported only in May 2024 and are not forecast, so the model covers 54 items.
+The price file holds 76,440 rows for 63 items on 1,412 report days, from 17 May 2021 to 24 October 2026. An item here is a product together with its unit, so loose and packet atta, or a 2-litre and a 5-litre bottle of oil, count as separate items. Each row gives a minimum price, a maximum price and the unit. For evaluation the items are put into six groups (Table~\ref{tab:strata}). Nine items have too short a history to forecast: rice bran oil in 1-litre bottles (May 2024 to April 2025), bottled palm olein in 2 and 5 litres (a few days in April 2025), brinjal, cucumber, green chilli and lemon (from February 2026), and two kinds of aromatic rice (from August 2026). The model therefore covers 54 items.
 
 \begin{table}[H]\centering\small
 \caption[Items by evaluation group]{Items by evaluation group.}\label{tab:strata}
@@ -15,7 +15,7 @@ The price file holds 76,440 rows: 63 items observed over 1,412 report days from 
 \end{table}
 
 \subsection{Unique Contribution of the Dataset}
-No open, machine-readable daily record of the TCB reports existed that I could find. The panel built here has one row per item and report day, keeps blank and zero prices as not reported, and keeps the 2022 gap visible instead of filling it. It was audited against the original sheets. Because TCB states no reuse terms, the panel and everything derived from it are kept out of the public code repository.
+I could not find an open, machine-readable daily record of the TCB reports. The panel built here has one row per item and report day, keeps blank and zero prices as not reported, and keeps the 2022 gap visible instead of filling it. It was audited against the original sheets. Because TCB states no reuse terms, the panel and everything derived from it are kept out of the public code repository.
 
 \subsection{Data Preprocessing}
 A price of zero or a blank cell means the item was not reported that day, and such cells are never filled in a forecast target. Reporting was irregular in 2022: only 24 reports exist between 12 March and 31 December 2022. That period is never filled, never used as a target and never scored, and any input window that touches it is dropped from training.
