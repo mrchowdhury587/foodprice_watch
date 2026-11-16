@@ -288,3 +288,62 @@ alert_choice:
   C: {setting: 0.07, target_met: true}   # fixed 7-report rise
   chosen_by: notebook 05a, code 2549097 (local run, work PC), 2024 only
 ```
+
+## 05b_alert_scoring (2026-11-17, LOCAL run on the work PC, code aa8c8aa) — 2025-26 RETROSPECTIVE, not a Colab run
+
+Run locally against `E:\msc_project\FoodPriceWatch_v2_local` (Drive does not mount in Colab). Settings fixed on 2024 and committed in e0cfa06 before this notebook was written or run. Tables: `reports/tables/A2_rule_comparison.csv`, `A3_rule_overlap.csv`, `A4_range_coverage.csv`, `A5_alerts_by_item.csv`. Alert flags (`processed/alerts_8.csv`) are in the local data folder only.
+
+Result: every rule catches far more sustained rises than random dates (p = 0.003, the smallest possible with 300 draws). The ML range and the simple range catch nearly the same rises (2024: 6 vs 8; 2025-26: 17 vs 15; their errors correlate at 0.99), so the alerts do not depend on the ML model. The fixed 7 % rule catches the most (10/11, 22/23), but it is close to the rise definition it is scored against. Range coverage is 0.93-0.95 against 0.95 nominal; in 2025-26 it is significantly below nominal (Kupiec p < 0.001).
+
+```
+settings (chosen on 2024): {'A': 0.95, 'B': 0.95, 'C': 0.07} | first committed in e0cfa06 2026-11-17
+=== 05b alert rules vs sustained 10 % rises: 2024 validation and 2025-26 RETROSPECTIVE ===
+code commit: aa8c8aa (local run, work PC) | forecasts_h7.csv sha256 6449ec4dbf7b5a5c
+settings fixed on 2024: {'A': 0.95, 'B': 0.95, 'C': 0.07} | first committed in e0cfa06 2026-11-17
+checks: PASS {'placebo_p_valid': True, 'same_as_05a': True, 'first_alert_date': '2023-06-25', 'episodes_per_period': {'2024 validation': 11, '2025-26 retrospective': 23}, 'corr_errors_A_B': 0.9907}
+
+A2 rule comparison (recall = rises caught; precision = alert runs that match a rise; delay in report days after onset)
+               period rule  setting  episodes  detected  recall  placebo_recall  placebo_p  alert_runs  precision     f1  median_delay_reports  runs_per_item_year  unmatched_per_item_year
+      2024 validation    A     0.95        11         6  0.5455          0.1970     0.0033          17     0.3529 0.4286                   1.5              1.6147                   1.0448
+      2024 validation    B     0.95        11         8  0.7273          0.2961     0.0033          20     0.4000 0.5161                   2.0              1.8997                   1.1398
+      2024 validation    C     0.07        11        10  0.9091          0.4909     0.0033          27     0.3704 0.5263                   0.5              2.5646                   1.6147
+2025-26 retrospective    A     0.95        23        17  0.7391          0.2849     0.0033          42     0.4048 0.5231                   2.0              2.1766                   1.2956
+2025-26 retrospective    B     0.95        23        15  0.6522          0.2506     0.0033          39     0.3846 0.4839                   2.0              2.0211                   1.2438
+2025-26 retrospective    C     0.07        23        22  0.9565          0.3123     0.0033          30     0.7333 0.8302                   2.0              1.5547                   0.4146
+
+A3 rises caught by the ML range (A) and the simple range (B)
+               period  episodes  both  A_only  B_only  neither
+      2024 validation        11     6       0       2        3
+2025-26 retrospective        23    15       2       0        6
+
+A4 range coverage (share of days at or below the upper bound; nominal = level)
+               period rule    n  nominal  coverage  kupiec_p
+      2024 validation    A 2632     0.95    0.9445    0.2053
+      2024 validation    B 2632     0.95    0.9460    0.3582
+2025-26 retrospective    A 4824     0.95    0.9345    0.0000
+2025-26 retrospective    B 4824     0.95    0.9391    0.0007
+
+A5 per item: rises caught / episodes (alert runs)
+period              2024 validation                    2025-26 retrospective                  
+rule                              A        B         C                     A        B        C
+item_id                                                                                       
+Chicken - Broiler           1/1 (3)  1/1 (4)   1/1 (5)               1/3 (4)  1/3 (4)  2/3 (3)
+Egg - Farm                  1/1 (1)  1/1 (1)   1/1 (3)               3/3 (7)  3/3 (6)  3/3 (4)
+Garlic - Imported           1/2 (1)  1/2 (1)   1/2 (1)               4/4 (7)  4/4 (8)  4/4 (7)
+Onion - Local               2/4 (2)  3/4 (3)  4/4 (10)               5/7 (6)  5/7 (6)  7/7 (9)
+Palm Oil - Loose            0/0 (3)  0/0 (3)   0/0 (0)               0/0 (4)  0/0 (4)  0/0 (0)
+Potato                      1/3 (2)  2/3 (3)   3/3 (8)               4/6 (5)  2/6 (3)  6/6 (6)
+Soybean Oil - Loose         0/0 (3)  0/0 (3)   0/0 (0)               0/0 (4)  0/0 (3)  0/0 (0)
+Sugar                       0/0 (2)  0/0 (2)   0/0 (0)               0/0 (5)  0/0 (5)  0/0 (1)
+
+2024 validation | A ML range: caught 6/11 = 0.55 vs random dates 0.20 (p = 0.003); 17 alert runs
+2024 validation | B simple range: caught 8/11 = 0.73 vs random dates 0.30 (p = 0.003); 20 alert runs
+2024 validation | C fixed 7-report rise: caught 10/11 = 0.91 vs random dates 0.49 (p = 0.003); 27 alert runs
+2024 validation: the simple range catches more rises than the ML range (8 vs 6)
+2025-26 retrospective | A ML range: caught 17/23 = 0.74 vs random dates 0.28 (p = 0.003); 42 alert runs
+2025-26 retrospective | B simple range: caught 15/23 = 0.65 vs random dates 0.25 (p = 0.003); 39 alert runs
+2025-26 retrospective | C fixed 7-report rise: caught 22/23 = 0.96 vs random dates 0.31 (p = 0.003); 30 alert runs
+2025-26 retrospective: the simple range catches fewer rises than the ML range (15 vs 17)
+
+alerts file: processed/alerts_8.csv | rows 25464 | sha256 613b3c4595a68cf5
+```
