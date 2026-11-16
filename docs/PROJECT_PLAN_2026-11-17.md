@@ -2,6 +2,8 @@
 
 **Title:** Food Price Watch: A Monitoring and Abnormal-Rise Alert System for Daily Retail Food Prices in Dhaka
 
+> **Update 2026-11-17 (later the same day):** the user chose a fresh restart instead of adding stages S36-S39 to the old pipeline. The old pipeline is archived in `archive/old_pipeline/`. The work now runs as one Colab notebook per task on 8 items (`notebooks/`, `src/foodwatch/`, `config/settings.yaml`); see `DEVIATIONS.md`. The analyses below (alert-rule comparison, price behaviour, focus items, report) and the claims lists still apply; the stage numbers, `stages.json` and `config/project.yaml` references do not.
+
 This plan replaces `docs/PROJECT_PLAN_2026-11-15.md` where they differ. It was approved by the user on 2026-11-17. Every difference must be logged in `DEVIATIONS.md` before code is written (step 0).
 
 ## 1. What changes and what does not

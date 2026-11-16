@@ -1,0 +1,43 @@
+# Settings for Food Price Watch: A Monitoring and Abnormal-Rise Alert System for Daily Retail Food Prices in Dhaka.
+# Plan: docs/PROJECT_PLAN_2026-11-17.md. Changes to items, dates, drivers or rules go into DEVIATIONS.md first.
+
+drive:
+  data_root: /content/drive/MyDrive/FoodPriceWatch_v2          # this project's data and outputs (Colab)
+  old_raw: /content/drive/MyDrive/FoodPriceWatch/data/raw/project   # where notebook 01 copies the raw files from
+  old_processed: /content/drive/MyDrive/FoodPriceWatch/data/processed   # old panel and features, for the regression check only
+
+raw_files:
+  prices: tcb_dhaka_daily_prices_2021_2026.csv                  # TCB Dhaka daily retail prices, 2021-05-17 to 2026-10-24
+  ramadan_eid: bd_ramadan_eid.csv
+  fx: yahoo_bdt_per_usd.csv                                     # taka per US dollar; stale from about Sep 2026 (DEVIATIONS.md)
+  weather: weather_open_meteo_13_locations_2019_2026.csv
+
+# The 8 focus items (chosen 2026-11-16 for how often their prices move and for being everyday purchases; chosen after
+# earlier results were seen). group = the item group of the earlier run. weather / fx = whether the driver is a model input.
+items:
+  - {id: "Chicken - Broiler | per kg",      group: volatile_perishable, weather: false, fx: false}
+  - {id: "Onion - Local | per kg",          group: volatile_perishable, weather: true,  fx: false}
+  - {id: "Egg - Farm | per hali (4 pcs)",   group: volatile_perishable, weather: false, fx: false}
+  - {id: "Potato | per kg",                 group: domestic_staple,     weather: true,  fx: false}
+  - {id: "Soybean Oil - Loose | per litre", group: administered,        weather: false, fx: true}
+  - {id: "Palm Oil - Loose | per litre",    group: administered,        weather: false, fx: true}
+  - {id: "Garlic - Imported | per kg",      group: imported_staple,     weather: false, fx: true}
+  - {id: "Sugar | per kg",                  group: administered,        weather: false, fx: true}
+
+gap_2022: ["2022-03-12", "2022-12-31"]    # TCB reported only sporadically; never filled across, never scored
+
+periods:
+  validation: ["2024-01-01", "2024-12-31"]   # every choice (model, level, threshold) is made here
+  test: ["2025-01-01", "2026-10-24"]         # already looked at by the earlier run, so results are labelled retrospective
+
+drivers:
+  weather_cols: [wx_bd_tmax_7d, wx_bd_tmean_30d, wx_bd_rain_7d]   # Bangladesh mean of locations 0-10; chosen on 2024 by the earlier run
+  weather_lag_days: 5        # weather of day d is usable from d + 5
+  carry_cap_days: 7          # a driver value older than this on a report day is left empty
+
+files:
+  panel: processed/panel_8.csv
+  features: processed/features_8.csv
+  checks: processed/checks.json
+  manifest: raw/MANIFEST.csv
+  tables: reports/tables

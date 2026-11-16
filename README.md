@@ -1,35 +1,37 @@
-# Bangladesh Food Price Watch
+# Food Price Watch
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/01_data_features.ipynb)
+**A Monitoring and Abnormal-Rise Alert System for Daily Retail Food Prices in Dhaka.** MSc project.
 
-Master's project (not a thesis): a price-prediction system for TCB daily retail prices in Dhaka (63 items, May 2021 onward).
-For each item it forecasts the price 1, 7, 14 and 30 report days ahead with an expected range, raises an alert when the
-price stays above the range, and attaches a driver breakdown to each alert. One LightGBM model serves all items and horizons.
-Scope and "done": `SPEC.md`. Plan: `docs/PROJECT_PLAN_2026-11-15.md`. Stage status: `state/stages.json`, `PROGRESS.md`.
+The system takes the Trading Corporation of Bangladesh (TCB) daily retail price sheets for Dhaka and works on 8 everyday items: chicken, local onion, eggs, potato, loose soybean oil, loose palm oil, imported garlic and sugar. For each item it builds an expected price range, flags prices that stay above that range, and compares three ways of setting the range.
 
-## Run it in Colab
+Plan: [docs/PROJECT_PLAN_2026-11-17.md](docs/PROJECT_PLAN_2026-11-17.md). Settings: [config/settings.yaml](config/settings.yaml). Rules for working on the repo: [AGENTS.md](AGENTS.md).
 
-- **GitHub holds code only.** Every session the notebook clones `main` into `/content/foodprice_watch`.
-- **Google Drive holds data and outputs only**, in `MyDrive/FoodPriceWatch/` (`inbox/`, `data/`, `outputs/`, `models/`, `state/`). Data is not in this public repo (TCB reuse terms are unconfirmed).
+## Notebooks (Colab)
 
-1. Put the project data files in `MyDrive/FoodPriceWatch/inbox/project/`.
-2. Click **Open in Colab**, run the cells top to bottom, set `STAGE`, run the stage cell, paste the summary back.
+| Notebook | Task | Status |
+|---|---|---|
+| [01_data_intake](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/01_data_intake.ipynb) | Copy the 4 raw files into `MyDrive/FoodPriceWatch_v2/raw/`, write `MANIFEST.csv` | ready |
+| [02_data_processing](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/02_data_processing.ipynb) | 8-item panel and driver features, checks, comparison with the earlier run | ready |
+| 03_price_behaviour | How often and how much prices move; rise episodes | planned |
+| 04_forecast_benchmark | "Tomorrow = today", ETS, LightGBM; choices on 2024 | planned |
+| 05_alert_rules | ML range, simple range, fixed threshold, scored against sustained rises | planned |
+| 06_report_tables | Final tables and figures | planned |
 
-After a disconnect, reconnect and run the same cells again; long jobs skip units already saved on Drive.
+Code comes from GitHub `main` each session; Google Drive holds data and outputs only.
 
-## Layout
+## Data
 
-- `src/fpw/` library: paths, loaders, panel, features, checkpoints, stage registry and runner
-- `src/stages/` one script per stage (S00 intake, S22 panel, S23 features); `finalize.py` runs a stage's tests and marks it done
-- `tests/` acceptance tests; `config/project.yaml` settings of the prediction system
-- `tools/` data collection helpers run on the work PC (convert, download, append, audit)
-- `state/` ledger, pre-registrations, seals; `reports/` tables, figures, results register
-- `archive/` frozen earlier comparison study (S00-S11) and retired instructions; not run
-- `AGENTS.md`, `SPEC.md`, `DECISIONS.md`, `DEVIATIONS.md`, `PROGRESS.md`, `docs/`: rules, scope, choices, log
+The code reads 4 raw files from `raw/`; none of them is in git:
 
-Author: to be confirmed (`config.yaml` author).
+| File | Content |
+|---|---|
+| `tcb_dhaka_daily_prices_2021_2026.csv` | TCB Dhaka daily retail prices, 2021-05-17 to 2026-10-24 |
+| `bd_ramadan_eid.csv` | Ramadan and Eid dates |
+| `yahoo_bdt_per_usd.csv` | Taka per US dollar, daily |
+| `weather_open_meteo_13_locations_2019_2026.csv` | Daily weather at 13 locations (Open-Meteo) |
 
+TCB publishes no reuse terms, so prices and anything derived from them stay out of this public repository.
 
-## Run guide and design
-- How to run the notebooks, the dashboard and updates: `docs/HOW_TO_RUN.md`
-- How the system works: `docs/HOW_IT_WORKS.md`
+## Earlier work
+
+The earlier pipeline (stages S00-S35, 54 items, report drafts) is kept unchanged in [archive/old_pipeline/](archive/old_pipeline/).
