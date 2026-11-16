@@ -34,7 +34,7 @@ STAGES = {
     "S27": dict(
         run=[f"{PY} src/stages/s27_test.py"], note="sealed test scored once, prereg_S27.yaml committed first",
         outputs=["state/prereg_S27.yaml"] + [f"reports/project/tables/P7_{n}.csv" for n in ["accuracy_by_horizon", "accuracy_by_group", "accuracy_by_item", "walk_forward", "error_analysis", "worst20", "dm_vs_naive", "learning_curve", "bias_over_time"]]
-                + ["reports/project/figures/F10_relative_error_by_horizon.png", "reports/project/RESULTS_REGISTER.md"],
+                + ["reports/project/figures/F10_relative_error_by_horizon.png"],
         tests=["tests/test_s26_prereg.py", "tests/test_s27_eval.py", "tests/test_wording.py"]),
     "S28": dict(
         run=[f"{PY} src/stages/s28_alerts.py"], note="alert level fixed from 2024 non-event periods, prereg_S28.yaml committed first, 12 shock episodes scored once",
