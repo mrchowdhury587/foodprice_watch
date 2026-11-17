@@ -497,3 +497,7 @@ Identical to the LOCAL run (c4b683f): `forecasts_test.csv` sha256 `d536b5039e841
 
 Identical to the LOCAL run (2549097): input `forecasts_h7.csv` sha256 `6449ec4dbf7b5a5c`; checks PASS (8,488 rows per model, one row per report day, naive error equals the 7-report change, episodes the same as 03, 11 episodes in 2024). All 12 rows of A1 equal the committed table. Choice unchanged: ML range 0.95, simple range 0.95, fixed threshold 7 %. `alert_choice` in `config/settings.yaml` stays as committed in e0cfa06 (before 05b); nothing changed.
 
+## 05b_alert_scoring, Colab rerun (2026-11-17, code 7a9b268, account mhpcoder) — 2025-26 RETROSPECTIVE; replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (aa8c8aa): `alerts_8.csv` 25,464 rows, sha256 `613b3c4595a68cf5` (same bytes as the local file); checks PASS (placebo p valid, 2024 equals 05a, error correlation A vs B 0.9907). A2-A5 equal the committed tables: rises caught 6 / 8 / 10 of 11 in 2024 and 17 / 15 / 22 of 23 in 2025-26 (ML range / simple range / fixed 7 %), every rule above random dates (p = 0.003); coverage 0.934-0.946. The alert file is now on Drive.
+
