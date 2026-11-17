@@ -493,3 +493,7 @@ Identical to the LOCAL run (ae0b96c): checks PASS (24,768 forecasts scored, no t
 
 Identical to the LOCAL run (c4b683f): `forecasts_test.csv` sha256 `d536b5039e841ea6` and `forecasts_h7.csv` sha256 `6449ec4dbf7b5a5c` (16,976 rows), the same bytes as the local files. Checks PASS (7,872 test forecasts scored, first target 2025-01-02, last 2026-10-16, none before the test period, no fit after its origin, no row touching the gap; 8,488 h7 rows per model, origins 2023-06-02 to 2026-10-24). M3 and M4 equal the committed tables: relative MAE 1.01-1.21, no model below "tomorrow = today" at any horizon, no significant improvement. The forecast files are now on Drive.
 
+## 05a_alert_choice, Colab rerun (2026-11-17, code b1dd8c8, account mhpcoder) — replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (2549097): input `forecasts_h7.csv` sha256 `6449ec4dbf7b5a5c`; checks PASS (8,488 rows per model, one row per report day, naive error equals the 7-report change, episodes the same as 03, 11 episodes in 2024). All 12 rows of A1 equal the committed table. Choice unchanged: ML range 0.95, simple range 0.95, fixed threshold 7 %. `alert_choice` in `config/settings.yaml` stays as committed in e0cfa06 (before 05b); nothing changed.
+
