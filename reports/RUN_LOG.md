@@ -489,3 +489,7 @@ Identical to the LOCAL run (e8853d5): input `data_8.csv` sha256 `381ef71d10092bd
 
 Identical to the LOCAL run (ae0b96c): checks PASS (24,768 forecasts scored, no target after 2024, no fit after its origin, no row touching the gap); all 16 grid rows (M1) and every M2 value (relative MAE, Holm p) equal the committed tables. Chosen configuration unchanged: `price_only|leaves7|lr0.03|l1`, validation relative MAE 1.0472. `forecast_choice` in `config/settings.yaml` stays as committed in 8d7c145 (before 04b); nothing changed.
 
+## 04b_forecast_test, Colab rerun (2026-11-17, code e2ec5ba, account mhpcoder) — RETROSPECTIVE; replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (c4b683f): `forecasts_test.csv` sha256 `d536b5039e841ea6` and `forecasts_h7.csv` sha256 `6449ec4dbf7b5a5c` (16,976 rows), the same bytes as the local files. Checks PASS (7,872 test forecasts scored, first target 2025-01-02, last 2026-10-16, none before the test period, no fit after its origin, no row touching the gap; 8,488 h7 rows per model, origins 2023-06-02 to 2026-10-24). M3 and M4 equal the committed tables: relative MAE 1.01-1.21, no model below "tomorrow = today" at any horizon, no significant improvement. The forecast files are now on Drive.
+
