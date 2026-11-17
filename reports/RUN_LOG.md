@@ -485,3 +485,7 @@ Same result as the earlier Colab run (2a93d78): `data_8.csv` 11,296 rows, 20 col
 
 Identical to the LOCAL run (e8853d5): input `data_8.csv` sha256 `381ef71d10092bde`; `rise_episodes_8.csv` 70 rows, sha256 `48d529fceedeae9b` (same as local); checks PASS (11,074 changes counted, none inside or across the gap, no rise window touching the gap, no episode onset in the gap). Tables B1-B6 print the same values as the committed tables. Validation 2024: 17 / 11 / 8 episodes at 7 / 10 / 15 %; retrospective 2025-26: 26 / 23 / 15. F1 and F2 are now on Drive.
 
+## 04a_forecast_choice, Colab rerun (2026-11-17, code e2ec5ba, account mhpcoder) — replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (ae0b96c): checks PASS (24,768 forecasts scored, no target after 2024, no fit after its origin, no row touching the gap); all 16 grid rows (M1) and every M2 value (relative MAE, Holm p) equal the committed tables. Chosen configuration unchanged: `price_only|leaves7|lr0.03|l1`, validation relative MAE 1.0472. `forecast_choice` in `config/settings.yaml` stays as committed in 8d7c145 (before 04b); nothing changed.
+
