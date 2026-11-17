@@ -1,0 +1,13 @@
+# Figures that show TCB prices and app screenshots: upload to Overleaf from Drive, never commit (public repo)
+figures/F2_prices_with_rises.png
+figures/F5_prices_with_alerts.png
+figures/monitor_*.png
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.pdf

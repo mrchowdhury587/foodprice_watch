@@ -1,0 +1,51 @@
+\chapter{Introduction}\label{ch:intro}
+
+\section{Background}
+Food takes a large share of household spending in Bangladesh, and food prices in Dhaka can rise sharply within weeks: onion, potato, eggs and broiler chicken have all had episodes in which their retail price rose by a tenth or more and stayed high. Food has a weight of about 59\,\% in the consumer price index, and food inflation was close to 14\,\% at its recent peak \cite{cpd2026}\todo{check both figures in the CPD report}.
+
+The Trading Corporation of Bangladesh (TCB), a state agency, publishes a daily sheet of retail prices in Dhaka markets for common food items \cite{tcb}. The sheet gives, for each item, the lowest and highest price seen that day. It is public, but it is published as one document per day, so it is hard to see from it whether today's price is unusual for an item, or whether a rise is continuing.
+
+International agencies already watch food prices for unusual movements. FAO's indicator of price anomalies compares compound growth rates of a price with their history \cite{baquedano2015}, and the World Food Programme's Alert for Price Spikes compares a price with its seasonal trend \cite{wfpalps2014}. Both are designed for monthly market prices. This project asks whether a similar kind of monitoring can be built for the daily TCB data, and whether machine learning makes it better.
+
+\section{Motivation}
+A monitor of this kind has to answer one question every day for every item: is this price unusually high for this item? A natural way to answer it is to forecast the price, draw an expected range around the forecast, and raise an alert when the price stays above the range. That raises two further questions that the literature on food price forecasting rarely asks. First, is the machine-learning forecast actually better than the simplest possible forecast, ``the price tomorrow will be the price today''? Many published studies compare complex models with each other or with ARIMA, but not with this baseline \cite{manogna2025}. Second, even if the forecast is not better, does a range built from it still make useful alerts, and are they better than alerts from a range that uses no model at all?
+
+\section{Problem Statement}
+Given the TCB daily retail prices of eight everyday food items in Dhaka from May 2021 to October 2026, build and evaluate a system that gives each item an expected price range for each report day and raises an alert when the price stays above it. The system must be evaluated honestly: every setting must be chosen on one period and scored on another, every forecast figure must be compared with \naive{}, and the alerts must be compared with what the same number of alerts on random dates would achieve.
+
+\section{Objectives}
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item Build a clean, audited daily data table of TCB prices for eight items, with weather, exchange rate and calendar columns joined on the date they became available.
+\item Describe how these prices behave and define sustained rises from the prices alone.
+\item Benchmark ETS and LightGBM forecasts against \naive{} at horizons of 1 to 30 report days.
+\item Build three alert rules (a range from LightGBM, a range from \naive{}, and a fixed threshold), choose their settings on 2024, and score them on 2025-26 against sustained rises and a random-date control.
+\item Provide a working monitoring app that shows, for any report day, which items are in alert.
+\end{enumerate}
+
+\section{Research Questions}
+\begin{table}[H]\centering\small
+\caption[Research questions]{Research questions.}\label{tab:rq}
+\input{tables/rq}
+\end{table}
+
+\section{Scope}
+The study covers eight items (broiler chicken, farm eggs, local onion, potato, imported garlic, loose palm oil, loose soybean oil and sugar), Dhaka only, from 17 May 2021 to 24 October 2026. The items were chosen after the results of an earlier, wider run of this project had been seen. The monitor replays this period; it does not collect new prices. Alerts look for abnormal \emph{rises} only. The system says that a rise is unusual; it does not say why the price rose, and a rise above the range is described only as \unexpl{}.
+
+\section{Functionality of the System}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item Reads the TCB daily prices and the driver data, checks them and joins them into one table.
+\item Computes, for each item and report day, an upper bound under each of the three rules from information available one week earlier.
+\item Flags an item as in alert when its price is above the bound on 3 of the last 5 report days.
+\item Shows, in a web app, the status of all items on a chosen day, a chart of each item, and a log of every alert.
+\end{itemize}
+
+\section{Contributions}
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item An audited daily data table for eight items from the TCB reports, with drivers joined on their availability dates and the sparse 2022 period kept as a gap.
+\item A forecast benchmark in which every figure is shown next to \naive{} and every setting was committed before scoring; it finds that neither ETS nor LightGBM beats \naive{}.
+\item A comparison of three alert rules against a model-free definition of a sustained rise, with a random-date control; all three beat random dates, and the range from \naive{} catches the same rises as the range from LightGBM.
+\item A working monitoring app built on these rules.
+\end{enumerate}
+
+\section{Organization of the Report}
+Chapter~\ref{ch:lit} reviews related work. Chapter~\ref{ch:method} describes the data, the cleaning, the forecast benchmark, the alert rules and how they are evaluated. Chapter~\ref{ch:results} gives the results and discusses them. Chapter~\ref{ch:concl} answers the research questions and lists limitations and future work. The appendices give the reproducibility record, the results register and the changes made to the original plan.

@@ -1,0 +1,15 @@
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{5.2cm}X}
+\toprule
+\textbf{Column(s)} & \textbf{Meaning} \\
+\midrule
+\texttt{Date}, \texttt{item\_id} & report day; item as ``product $|$ unit'' (the key) \\
+\texttt{Price\_Min}, \texttt{Price\_Max}, \texttt{Price\_Avg} & lowest and highest Dhaka retail price in the TCB sheet and their midpoint (Tk); blank = not reported \\
+\texttt{report\_idx} & report-day number, 0 = 17 May 2021; the time axis for lags and horizons \\
+\texttt{gap\_2022} & the day lies in the sparse 2022 period \\
+\texttt{days\_since\_prev\_report} & calendar days since the previous TCB sheet \\
+\texttt{reports\_since\_change} & report days the price has stayed the same \\
+\texttt{month}, \texttt{dow}, \texttt{days\_to\_ramadan}, \texttt{days\_to\_eid\_fitr}, \texttt{days\_to\_eid\_adha}, \texttt{in\_ramadan} & calendar, known in advance \\
+\texttt{wx\_tmax\_7d}, \texttt{wx\_tmean\_30d}, \texttt{wx\_rain\_7d} & 7-day maximum temperature, 30-day mean temperature, 7-day rainfall (Bangladesh mean); onion and potato only \\
+\texttt{fx\_lvl}, \texttt{fx\_ch30} & log taka per US dollar and its 30-day change; garlic, both oils and sugar only \\
+\bottomrule
+\end{tabularx}

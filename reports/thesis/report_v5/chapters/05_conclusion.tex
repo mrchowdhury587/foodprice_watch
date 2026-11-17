@@ -1,0 +1,32 @@
+\chapter{Conclusion, Limitations and Future Work}\label{ch:concl}
+
+\section{Conclusion}
+This project built Food Price Watch, a monitoring and abnormal-rise alert system for the TCB daily retail prices of eight food items in Dhaka, and evaluated it with every setting chosen on 2024 and committed before 2025-26 was scored. The answers to the research questions are:
+
+\begin{description}[leftmargin=1.2cm,style=nextline]
+\item[RQ1] The prices are sticky. An item's price is unchanged on 62 to 87\,\% of report days and moves in steps of at least Tk 0.5. Sustained 10\,\% rises do happen (70 in 2021-26), mostly in onion, potato and imported garlic; the two oils and sugar had none in 2024-26.
+\item[RQ2] No. Neither ETS nor LightGBM beats \naive{} at any horizon, in 2024 (relative MAE 1.00 to 1.11) or in 2025-26 \retro{} (1.01 to 1.21). Every significant difference favours \naive{}. Adding weather, exchange-rate and calendar drivers made LightGBM worse.
+\item[RQ3] Yes. The ML range caught 6 of 11 sustained rises in 2024 and 17 of 23 in 2025-26 \retro{}, and the simple range 8 of 11 and 15 of 23, about 2.5 to 2.8 times the recall of the same alerts on random dates ($p = 0.003$ in every case). Alerts start a median of 1.5 to 2 report days after a rise begins.
+\item[RQ4] No. The range from LightGBM and the range from \naive{} catch nearly the same rises; each caught two that the other missed. The fixed 7\,\% rise catches the most, but its score is partly built into the definition of a sustained rise.
+\end{description}
+
+The practical conclusion is that a daily monitor for these prices does not need machine learning: a range drawn from each item's own past price changes catches the same sustained rises. The honest negative result on forecasting is not a failure of the system; it is what the stickiness of the prices predicts, and the alerts work without it.
+
+\section{Limitations}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item The 2025-26 results are retrospective: that period had been looked at in an earlier run of the project.
+\item The eight items were chosen after the earlier results had been seen.
+\item There are few sustained rises (11 in 2024, 23 in 2025-26), and none for three of the items.
+\item Rule C is close to the definition of a sustained rise, so its score is partly circular.
+\item The range was slightly too narrow in 2025-26 (coverage 93.4 to 93.9\,\% against 95\,\%).
+\item Only rises are monitored; only Dhaka is covered; and the monitor replays past data rather than receiving new sheets.
+\item The price is the midpoint of TCB's lowest and highest price, and its accuracy depends on TCB's own recording.
+\end{itemize}
+
+\section{Future Work}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item Connect the monitor to new TCB sheets as they are published, with TCB's permission, and run it forward on genuinely unseen days.
+\item Extend it to more items, to falls as well as rises, and to other cities.
+\item Make the range adapt faster when an item becomes more volatile, to bring coverage back to its nominal level.
+\item Compare the alerts with FAO's and WFP's indicators on the same items, and test whether weekly or monthly drivers help at longer horizons.
+\end{itemize}

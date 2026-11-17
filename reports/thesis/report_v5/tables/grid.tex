@@ -1,0 +1,16 @@
+\begin{tabular}{llrrrrr}
+\toprule
+ & & \multicolumn{4}{c}{\textbf{Relative MAE by horizon}} & \\
+\cmidrule(lr){3-6}
+\textbf{Feature set} & \textbf{Leaves, rate, loss} & 1 & 7 & 14 & 30 & \textbf{All} \\
+\midrule
+price only & 7, 0.03, l1 (chosen) & 1.114 & 1.029 & 1.035 & 1.014 & \textbf{1.047} \\
+price only & 7, 0.05, l1 & 1.219 & 1.033 & 1.062 & 1.040 & 1.086 \\
+price only & 31, 0.03, l1 & 1.316 & 1.093 & 1.094 & 1.055 & 1.135 \\
+price only & 7, 0.03, huber & 2.098 & 1.134 & 1.072 & 1.001 & 1.264 \\
+price + drivers & 7, 0.03, l1 & 1.358 & 1.083 & 1.059 & 1.005 & 1.119 \\
+price + drivers & 7, 0.05, l1 & 1.456 & 1.089 & 1.065 & 1.022 & 1.146 \\
+price + drivers & 31, 0.03, l1 & 1.617 & 1.165 & 1.145 & 1.080 & 1.236 \\
+price + drivers & 7, 0.03, huber & 2.596 & 1.186 & 1.096 & 1.015 & 1.360 \\
+\bottomrule
+\end{tabular}

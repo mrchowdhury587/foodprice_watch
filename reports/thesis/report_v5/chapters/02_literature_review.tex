@@ -1,0 +1,44 @@
+\chapter{Literature Review}\label{ch:lit}
+% Written from the abstracts of the papers. The student reads each paper before submission (reports/thesis/READING_LIST.md).
+
+\section{Related Works}
+
+\subsection{Food price monitoring and alert indicators}
+Two indicators are used internationally to flag unusual food prices. Baquedano \cite{baquedano2015} developed, for FAO's Global Information and Early Warning System, an indicator of price anomalies based on a weighted combination of quarterly and annual compound growth rates, each compared with its own historical mean and spread; it became the basis of the SDG indicator 2.c.1. The World Food Programme's Alert for Price Spikes (ALPS) compares a market price with its estimated seasonal trend and grades the difference into alert levels \cite{wfpalps2014}. Both work on monthly prices across many markets. Neither forecasts with machine learning; both define ``unusual'' from the series' own history. This project does the same on daily data and tests whether a forecast-based range improves on that.
+
+\subsection{How retail prices change}
+Studies of individual retail prices find that prices change infrequently and stay fixed for weeks or months between changes \cite{klenow2010,nakamura2008}. Cavallo \cite{cavallo2018} showed with daily prices collected online that price spells are long and that very small changes are rare, and that some earlier findings came from how prices had been sampled. These findings explain the stickiness found in the TCB data and why ``no change'' is a strong forecast for it.
+
+\subsection{Forecasting food and agricultural prices}
+Machine learning is widely used to forecast food prices. Ogol et al.\ \cite{ogol2025} forecast Kenyan food prices from WFP data with a hybrid of gradient-boosting models and deployed it as a web application. Manogna et al.\ \cite{manogna2025} compared ARIMA, support vector regression, XGBoost and several neural networks on daily wholesale prices of 23 Indian commodities and found recurrent networks most accurate; the comparison does not include a no-change forecast. For Bangladesh, Jubayer et al.\ \cite{jubayer2024} studied the growth and instability of onion production and forecast onion prices with time-series models, and Mila et al.\ \cite{onionnardl} studied how onion prices are transmitted between markets\todo{check method details in both papers}. Closest to this project, Muhammad et al.\ \cite{agripricebd} built a daily dataset of Bangladeshi retail prices from government reports and compared classical and deep-learning models; naive persistence was best on commodities that behave like a random walk.
+
+\subsection{Benchmarks and forecast evaluation}
+A forecast is only useful if it beats a simple benchmark. Meese and Rogoff \cite{meese1983} found that structural exchange-rate models did not beat a random walk out of sample, a result that has made the random walk a standard benchmark. The M5 competition \cite{makridakis2022} evaluated many methods on retail sales with common error measures. Hyndman and Koehler \cite{hk2006} recommend scale-free measures relative to a naive forecast. Differences in accuracy are tested with the Diebold--Mariano test \cite{dm1995} and its small-sample correction \cite{hln1997}, and many tests at once are corrected with the Holm procedure \cite{holm1979}. The ETS candidate follows the state-space framework of Hyndman et al.\ \cite{hyndman2002}, and the machine-learning candidate is LightGBM \cite{lightgbm}.
+
+\subsection{Ranges from forecast errors}
+An expected range can be built from a model's own past out-of-sample errors instead of from its assumptions; Lee and Scholtes \cite{lee2014} studied such empirical prediction intervals. Whether a range holds the stated share of observations can be tested with Kupiec's coverage test \cite{kupiec}, developed for value-at-risk models.
+
+\section{Summary of Related Works}
+\begin{table}[H]\centering\small
+\caption[Summary of related works]{Summary of related works.}\label{tab:litsum}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.0cm}X}
+\toprule
+\textbf{Work} & \textbf{Data} & \textbf{Method} & \textbf{Relevance / gap} \\
+\midrule
+Baquedano \cite{baquedano2015} & monthly food prices, many countries & compound growth rate anomaly & monthly; no forecast \\
+WFP ALPS \cite{wfpalps2014} & monthly market prices & deviation from seasonal trend & monthly; no forecast \\
+Ogol et al.\ \cite{ogol2025} & Kenyan food prices (WFP) & gradient-boosting hybrid, web app & no alert rules \\
+Manogna et al.\ \cite{manogna2025} & daily wholesale, 23 Indian commodities & ARIMA, ML, deep learning & no naive benchmark \\
+Jubayer et al.\ \cite{jubayer2024} & Bangladesh onion & time-series forecast & one item; no alerts \\
+Muhammad et al.\ \cite{agripricebd} & daily Bangladeshi retail prices & classical and deep models & naive wins on random-walk items; no alerts \\
+Klenow and Malin \cite{klenow2010}, Cavallo \cite{cavallo2018} & retail micro prices & descriptive & prices are sticky \\
+This work & TCB daily Dhaka prices, 8 items & naive, ETS, LightGBM; three alert rules & alerts scored against model-free rises and random dates \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Research Gap}
+The works above leave three gaps that this project addresses. First, the established price-anomaly indicators work on monthly prices; there is no tested daily monitor for Dhaka retail prices. Second, many machine-learning studies of food prices do not report a no-change benchmark, so it is not known whether their models would beat it on sticky retail prices. Third, studies that forecast prices rarely ask whether a forecast-based alert is better than an alert that needs no model, or test their alerts against chance.
+
+\section{Contributions}
+This project builds a daily monitor for eight TCB items, benchmarks two forecasting methods against \naive{} with settings committed before scoring, and compares three alert rules against a model-free definition of a sustained rise and a random-date control (Section~1.8).

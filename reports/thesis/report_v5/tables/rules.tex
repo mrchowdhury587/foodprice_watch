@@ -1,0 +1,9 @@
+\begin{tabularx}{\linewidth}{lXl}
+\toprule
+\textbf{Rule} & \textbf{Upper bound on report day $t$} & \textbf{Candidates} \\
+\midrule
+A. ML range & LightGBM forecast of the 7-report change made at $t-7$, plus the $q$-quantile of the item's last 120 known LightGBM errors & $q \in \{0.90, 0.95, 0.975, 0.99\}$ \\
+B. Simple range & ``no change'' made at $t-7$, plus the $q$-quantile of the item's last 120 known 7-report changes & $q \in \{0.90, 0.95, 0.975, 0.99\}$ \\
+C. Fixed rise & price at $t-7$ times $(1+c)$, the same $c$ for every item & $c \in \{3, 5, 7, 10\}\,\%$ \\
+\bottomrule
+\end{tabularx}

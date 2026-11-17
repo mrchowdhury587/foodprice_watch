@@ -1,0 +1,34 @@
+\chapter{Reproducibility Record}\label{app:repro}
+The code is in the public repository \url{https://github.com/mrchowdhury587/foodprice_watch}. Each notebook clones the code, runs on the data folder, and prints its code commit and the sha256 hashes of its inputs and outputs. Notebooks 02 to 06 were run on the work computer and again in Google Colab; every output was byte-identical (Table~\ref{tab:repro}).
+
+\begin{table}[H]\centering\small
+\caption[Output files and their hashes]{Main output files and the first eight characters of their sha256 hash, identical in the local and the Colab runs.}\label{tab:repro}
+\input{tables/repro}
+\source{\path{reports/RUN_LOG.md}.}
+\end{table}
+
+\begin{table}[H]\centering\small
+\caption[Commits that fixed the settings]{Commits that fixed the settings before scoring.}\label{tab:commits}
+\begin{tabular}{lll}
+\toprule
+\textbf{Commit} & \textbf{What was fixed} & \textbf{Before} \\
+\midrule
+\texttt{8d7c145} & LightGBM: price only, 7 leaves, rate 0.03, absolute-error loss & notebook 04b (forecast test) \\
+\texttt{e0cfa06} & alert settings: ML range 0.95, simple range 0.95, fixed rise 7\,\% & notebook 05b (alert scoring) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Results Register}\label{app:register}
+Every headline number of this report is listed in \path{reports/RESULTS_REGISTER.md} with the committed table it comes from, the notebook that wrote the table, and the commit. Results for 2025-26 carry the label ``retrospective''.
+
+\chapter{Changes to the Original Plan}\label{app:deviations}
+Every change to items, dates, drivers, method, thresholds or sources was written into \path{DEVIATIONS.md} before work continued. The main changes are:
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item Three forecast models (\naive{}, ETS, LightGBM) instead of the six of the earlier run.
+\item The 30-day exchange-rate change takes the last quote on or before the day 30 days earlier (at most 7 days older) instead of that exact day, which had left 28\,\% of values empty.
+\item Notebooks were run locally while Google Drive could not be mounted in Colab, and rerun in Colab afterwards with identical results.
+\item The monitoring app can be shared through a temporary Gradio link, approved by the project owner.
+\item This report replaces the earlier report: the title and the scope changed, and the driver-breakdown and news-event chapters of the earlier run were dropped.
+\end{itemize}
+\todo{check this list against DEVIATIONS.md before submission}

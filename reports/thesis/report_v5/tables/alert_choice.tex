@@ -1,0 +1,20 @@
+\begin{tabular}{llrrrrl}
+\toprule
+\textbf{Rule} & \textbf{Setting} & \textbf{Caught} & \textbf{Runs} & \textbf{Precision} & \textbf{Unmatched / item-year} & \textbf{Chosen} \\
+\midrule
+A. ML range & 0.90 & 9/11 & 39 & 0.23 & 2.85 & \\
+ & 0.95 & 6/11 & 17 & 0.35 & 1.04 & yes \\
+ & 0.975 & 5/11 & 13 & 0.38 & 0.76 & \\
+ & 0.99 & 4/11 & 10 & 0.40 & 0.57 & \\
+\midrule
+B. Simple range & 0.90 & 9/11 & 36 & 0.25 & 2.56 & \\
+ & 0.95 & 8/11 & 20 & 0.40 & 1.14 & yes \\
+ & 0.975 & 5/11 & 14 & 0.36 & 0.85 & \\
+ & 0.99 & 4/11 & 11 & 0.36 & 0.66 & \\
+\midrule
+C. Fixed rise & 3\,\% & 10/11 & 58 & 0.17 & 4.56 & \\
+ & 5\,\% & 10/11 & 39 & 0.26 & 2.75 & \\
+ & 7\,\% & 10/11 & 27 & 0.37 & 1.61 & yes \\
+ & 10\,\% & 9/11 & 15 & 0.60 & 0.57 & \\
+\bottomrule
+\end{tabular}

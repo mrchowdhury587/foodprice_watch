@@ -1,0 +1,162 @@
+% Compiles with pdfLaTeX + BibTeX (Overleaf default).
+% Figures that show TCB prices (F2, F5) and the monitor screenshots are not in git: upload them to figures/ in Overleaf.
+% Until they are there, a framed placeholder is shown instead (see \optfig below).
+\documentclass[12pt]{report}
+
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tgtermes}
+\else
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\fi
+
+\usepackage{graphicx}
+\graphicspath{{figures/}{./}}
+\usepackage{float}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{textcomp}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{ragged2e}
+\usepackage{array,multirow}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\usepackage[parfill]{parskip}
+\usepackage{geometry}
+\usepackage{sectsty}
+\chapterfont{\centering}
+
+\geometry{
+paper=a4paper,
+top=1in,
+bottom=1in,
+left=1.2in,
+right=0.8in,
+headheight=0.75cm,
+footskip=1.5cm,
+headsep=0.75cm,
+}
+\linespread{1.5}
+
+% ---------------------------------------------------------------------------
+% Visible reminder for anything still to be filled in. Search the project for TODO before submitting.
+\newcommand{\todo}[1]{\textbf{\textcolor{red}{[TODO: #1]}}}
+\newcommand{\unexpl}{\emph{not explained by measured cost drivers}}
+\newcommand{\naive}{``tomorrow = today''}
+\newcommand{\retro}{\emph{(retrospective)}}
+% A figure that is uploaded separately (prices or screenshots): placeholder until the file exists.
+\newcommand{\optfig}[2]{\IfFileExists{figures/#1}{\includegraphics[width=#2]{#1}}{\fbox{\parbox[c][4cm][c]{#2}{\centering\textcolor{red}{Upload \texttt{figures/\detokenize{#1}} from Drive}}}}}
+% Source line under a table or figure.
+\newcommand{\source}[1]{\par\smallskip{\footnotesize Source: #1}}
+% ---------------------------------------------------------------------------
+
+\begin{document}
+
+% ============================ TITLE PAGE ============================
+\begin{titlepage}
+\centering
+\includegraphics[height=4cm,width=4cm]{unilogo.png}\par
+\vspace{0.3cm}
+{\huge\bfseries Comilla University \par}
+\vspace{0.5cm}
+{\Large\bfseries Food Price Watch: A Monitoring and Abnormal-Rise Alert System for Daily Retail Food Prices in Dhaka\par}
+\vspace{0.45cm}
+{\scshape\Large\bfseries A RESEARCH PROJECT REPORT \par}
+{\scshape\Large\bfseries \textit{Submitted By}\par}
+{\Large\textbf{MD. ROMJAN CHOWDHURY}}\par
+{\Large{ID: 22408024}}\par
+\vspace{0.35cm}
+{\large\textbf{\textit{In Partial Fulfillment for the course Research Project of}}}\par
+{\Large\textbf{MASTER OF SCIENCE (ENGINEERING)\\}}
+\vspace{0.1cm}
+{\large\textbf{IN }}
+{\large\textbf{DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING}\par}
+\vspace{0.45cm}
+{\Large\textbf{COMILLA UNIVERSITY, CUMILLA-3506}}\par
+\vspace{0.35cm}
+{\Large\bfseries November 2026\par}
+\end{titlepage}
+
+% ============================ CERTIFICATE ============================
+\newpage
+\pagenumbering{gobble}
+\begin{center}
+\large\textbf{BONAFIDE CERTIFICATE}\\
+\end{center}
+\section*{}
+This is to certify that this research project entitled
+\textbf{``Food Price Watch: A Monitoring and Abnormal-Rise Alert System for Daily Retail Food Prices in Dhaka''}
+is submitted by \textbf{Md. Romjan Chowdhury}, who carried out the project work under my supervision. This is the bonafide work.
+\\
+\\
+
+\begin{table}[h]
+\begin{tabular}{l@{\hspace{3cm}}l}
+{Signature} & {Signature} \\
+\\
+\ldots\ldots\ldots\ldots\ldots\ldots\ldots\ldots & \ldots\ldots\ldots\ldots\ldots\ldots\ldots\ldots \\
+Dr. Mahmudul Hasan & Dr. Mahmudul Hasan \\
+\textbf{Chairman of the Exam Committee} & \textbf{Supervisor} \\
+Associate Professor & Associate Professor \\
+Department of CSE & Department of CSE \\
+Comilla University, Cumilla. & Comilla University, Cumilla. \\
+\end{tabular}
+\end{table}
+
+\pagenumbering{Roman}
+
+% ============================ ABSTRACT ============================
+\input{chapters/00_abstract}
+
+% ============================ ACKNOWLEDGEMENT ============================
+\chapter*{Acknowledgement}
+\addcontentsline{toc}{chapter}{\numberline{}Acknowledgement}
+First of all, I thank Almighty Allah for the health and patience that let me finish this project.
+
+\noindent I am grateful to my supervisor, \textbf{Dr. Mahmudul Hasan}, Associate Professor, Department of Computer Science and Engineering, Comilla University, for his guidance and for the time he gave to this work. His questions about what the results did and did not show shaped how this report is written.
+
+\noindent I also thank the Trading Corporation of Bangladesh, whose published daily price reports are the source of the price data, and the providers of the open data used as cost drivers: Open-Meteo for weather and the market data services behind the exchange-rate series.
+
+\noindent Finally, I thank my family and friends for their support during this work.
+
+% ============================ CONTENTS ============================
+\newpage
+\renewcommand*\contentsname{Table of Contents}
+\tableofcontents
+\listoffigures
+\listoftables
+\input{chapters/00_abbreviations}
+\pagenumbering{arabic}
+
+\justifying
+
+% ============================ CHAPTERS ============================
+\input{chapters/01_introduction}
+\input{chapters/02_literature_review}
+\input{chapters/03_methodology}
+\input{chapters/04_results}
+\input{chapters/05_conclusion}
+
+% ============================ REFERENCES ============================
+\clearpage
+\addcontentsline{toc}{chapter}{\numberline{}References}
+\renewcommand{\bibname}{References}
+\bibliographystyle{unsrt}
+\bibliography{ref}
+
+% ============================ APPENDICES ============================
+\appendix
+\input{chapters/06_appendix}
+
+\end{document}

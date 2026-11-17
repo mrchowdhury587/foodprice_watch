@@ -22,6 +22,10 @@ Plan: [docs/PROJECT_PLAN_2026-11-17.md](docs/PROJECT_PLAN_2026-11-17.md). Settin
 
 Code comes from GitHub `main` each session; Google Drive holds data and outputs only.
 
+## Report
+
+The thesis is in `reports/thesis/report_v5/` (LaTeX, pdfLaTeX + BibTeX; upload the folder to Overleaf). Figures that show prices (F2, F5) and the app screenshots are not in git: upload them to `figures/` in Overleaf. The papers cited are listed in `reports/thesis/READING_LIST.md`.
+
 ## Data
 
 The code reads 4 raw files from `raw/`; none of them is in git:

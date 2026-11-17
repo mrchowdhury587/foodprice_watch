@@ -1,0 +1,218 @@
+\chapter{Experiments and Results}\label{ch:results}
+
+The results are given in the order of the research questions: how the prices behave (RQ1), whether any forecast beats \naive{} (RQ2), and whether the alerts catch sustained rises, and which rule does so best (RQ3, RQ4). Results for 2024 are validation results, on which every setting was chosen. Results for 2025-26 are \emph{retrospective}: no setting was chosen on them, but that period had been looked at in an earlier run of this project.
+
+\section{Experimental Setup}
+
+\subsection{Hardware and software}
+\begin{table}[H]\centering\small
+\caption[Hardware]{Hardware used.}\label{tab:hardware}
+\input{tables/hardware}
+\end{table}
+
+\begin{table}[H]\centering\small
+\caption[Software]{Software used.}\label{tab:software}
+\input{tables/software}
+\end{table}
+
+\subsection{Runs}
+Notebooks 01 to 06 were first run on the work computer, while Google Drive could not be mounted in Colab, and then again in Google Colab once it could. Every output file of the Colab runs was byte-identical to the local run (Table~\ref{tab:repro} in Appendix~\ref{app:repro}); the Colab runs are the runs of record. Each run, its code commit and its file hashes are logged in \path{reports/RUN_LOG.md}.
+
+\section{Dataset}
+The data table has 11,296 rows: 8 items on 1,412 report days from 17 May 2021 to 24 October 2026. Prices are missing on 0 to 0.28\,\% of report days per item (Table~\ref{tab:items}). The 2022 gap holds 24 report days. The audit of the converted TCB sheets found no mismatch in 3,060 price cells.
+
+\section{Price Behaviour (RQ1)}\label{sec:res-behaviour}
+
+\subsection{Prices rarely change}
+On most report days an item's price is the same as on the previous report day: from 62\,\% of days for broiler chicken to 87\,\% for sugar. Over the whole period the price changed on 12.6\,\% (sugar) to 37.5\,\% (chicken) of report days, and less often in 2024-26 than before (Table~\ref{tab:behaviour}, Figure~\ref{fig:f1}). When a price does change, the typical change is small for the administered items (about 1\,\% for the two oils) and larger for perishables (5\,\% for onion, 6.25\,\% for potato). A price can stay unchanged for long stretches: up to 104 report days for sugar and 102 for palm oil.
+
+\begin{table}[H]\centering\small
+\caption[How often and how much prices change]{How often and how much prices change. Change sizes are on days the price changed; unchanged runs are in report days; the last column counts sustained 10\,\% rises in 2021-26.}\label{tab:behaviour}
+\input{tables/behaviour}
+\source{\path{reports/tables/report/R2_behaviour.csv} (notebook 03).}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{F1_change_frequency.png}
+\caption[Share of report days on which the price changed]{Share of report days on which the price changed, by item and year (2022 covers January to March only, before the gap).}
+\label{fig:f1}
+\source{\path{reports/figures/F1_change_frequency.png} (notebook 03).}
+\end{figure}
+
+This stickiness matters for everything that follows. If the price is unchanged on two days out of three, then ``no change'' is the exact answer on two days out of three, and any model that predicts small movements adds error on those days. The same pattern of infrequent price changes is well documented in studies of retail prices \cite{klenow2010,nakamura2008,cavallo2018}.
+
+\begin{figure}[H]
+\centering
+\optfig{F2_prices_with_rises.png}{0.95\linewidth}
+\caption[Prices of the eight items with sustained rises]{Prices of the eight items with the sustained 10\,\% rises shaded. (This figure shows TCB prices and is kept out of the public repository.)}
+\label{fig:f2}
+\source{notebook 03, Drive \path{reports/figures/}.}
+\end{figure}
+
+\subsection{Sustained rises}
+Using the rule of Section~\ref{sec:rise}, the eight items had 70 sustained 10\,\% rises in 2021-26: 11 with onset in 2024 and 23 in 2025-26 (Table~\ref{tab:episodes}). Most of them are in onion (19), potato (18) and imported garlic (12). Palm oil, soybean oil and sugar had no sustained rise in 2024-26, so alerts on these three items cannot be judged as caught or missed; their alerts can only count as unmatched.
+
+\begin{table}[H]\centering\small
+\caption[Sustained rise episodes]{Sustained rise episodes by period (onset date), with the 7\,\% and 15\,\% thresholds as a sensitivity check.}\label{tab:episodes}
+\input{tables/episodes}
+\source{\path{reports/tables/B5_rise_episodes_by_item_year.csv} (notebook 03).}
+\end{table}
+
+\subsection{Before Ramadan}
+Table~\ref{tab:ramadan} compares the 30 days before each of the five Ramadans in the data with all other days. Broiler chicken had a positive median change before Ramadan (2.94\,\%) and more rise days (16.1\,\% against 11.1\,\%). Onion and potato had fewer rise days before Ramadan than on other days. The comparison is descriptive: a seasonal pattern is associated with the period and says nothing about why.
+
+\begin{table}[H]\centering\small
+\caption[Changes before Ramadan]{Price changes in the 30 days before Ramadan against other days (five Ramadans, about 112 report days per item).}\label{tab:ramadan}
+\input{tables/ramadan}
+\source{\path{reports/tables/report/R3_ramadan.csv} (notebook 03).}
+\end{table}
+
+\section{Forecast Benchmark (RQ2)}\label{sec:res-forecast}
+
+\subsection{Choice on 2024}
+All 16 LightGBM configurations were worse than \naive{} on 2024 (relative MAE 1.047 to 1.536). The simplest one, price history only with 7 leaves, learning rate 0.03 and absolute-error loss, scored best at 1.047 (Table~\ref{tab:grid}). Adding the calendar, weather and exchange-rate drivers made the model worse: the best configuration with drivers scored 1.119. On daily data, these drivers carried no usable signal beyond the recent price path.
+
+\begin{table}[H]\centering\small
+\caption[LightGBM configurations on 2024]{LightGBM configurations on 2024 (eight of the sixteen shown, including the best of each feature set; the full grid is in \texttt{M1\_validation\_grid.csv}). Relative MAE is the geometric mean over items of MAE / MAE of \naive{}; above 1 is worse than \naive{}.}\label{tab:grid}
+\input{tables/grid}
+\source{\path{reports/tables/M1_validation_grid.csv} (notebook 04a, setting committed in \texttt{8d7c145}).}
+\end{table}
+
+\subsection{No model beats \naive{}}
+Table~\ref{tab:forecast} and Figure~\ref{fig:f3} give the result. Neither ETS nor LightGBM has a relative MAE below 1 at any horizon, in 2024 (1.00 to 1.11) or in 2025-26 (1.01 to 1.21). The gap is largest one day ahead, where \naive{} is right on most days. Where the Diebold--Mariano test finds a significant difference after the Holm correction (3 of 8 comparisons in 2024 and 6 of 8 in 2025-26), the difference is in favour of \naive{}.
+
+The accuracy column shows why accuracy alone would mislead. LightGBM is 99.4\,\% accurate one day ahead in 2025-26, which sounds good, but \naive{} is 99.5\,\% accurate on the same days.
+
+\begin{table}[H]\centering\small
+\caption[Forecast benchmark]{Forecast benchmark: MAE of the log change at horizon $h$ (report days), next to \naive{}; relative MAE is the geometric mean over items; Holm $p$ is the corrected Diebold--Mariano $p$-value (``--'': the loss difference has no variance to test).}\label{tab:forecast}
+\input{tables/forecast}
+\source{\path{reports/tables/report/R4_forecast.csv} (notebooks 04a, 04b).}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{F3_forecast_vs_naive.png}
+\caption[Forecast error relative to \naive{}]{Relative MAE of ETS and LightGBM by horizon; the line at 1 is \naive{}. Every point lies at or above it.}
+\label{fig:f3}
+\source{\path{reports/figures/F3_forecast_vs_naive.png} (notebook 06).}
+\end{figure}
+
+\section{Alert Rules (RQ3, RQ4)}\label{sec:res-alerts}
+
+\subsection{Settings chosen on 2024}
+Table~\ref{tab:alertchoice} lists every candidate on 2024. For the ML range (A) and the simple range (B), the 0.90 level gave more than 2 unmatched alert runs per item-year, so the 0.95 level was chosen. For the fixed rise (C), 7\,\% was the most sensitive threshold within the target. These three settings were committed in \texttt{e0cfa06} before any rule was scored on 2025-26.
+
+\begin{table}[H]\centering\small
+\caption[Alert settings on 2024]{Alert settings on 2024 (11 sustained rises, 10.53 item-years). The chosen setting is the most sensitive one with at most 2 unmatched alert runs per item-year.}\label{tab:alertchoice}
+\input{tables/alert_choice}
+\source{\path{reports/tables/A1_alert_choice.csv} (notebook 05a, committed in \texttt{e0cfa06}).}
+\end{table}
+
+\subsection{All three rules beat random dates}
+Table~\ref{tab:alertrules} and Figure~\ref{fig:f4} give the scores. In 2024 the ML range caught 6 of 11 sustained rises, the simple range 8 and the fixed rise 10. In 2025-26 \retro{} the ML range caught 17 of 23, the simple range 15 and the fixed rise 22. The same number of alert runs placed on random dates caught far fewer: for the two ranges, the real recall was 2.5 to 2.8 times the random-date recall. In none of the 300 random draws did the random recall reach the real one, for any rule in either period ($p = 0.003$, the smallest value the test can give).
+
+Alerts start a median of 1.5 to 2 report days after a rise begins for the two ranges. This is detection of a rise that is under way, not early warning.
+
+About 6 of every 10 alert runs of the two ranges do not match a sustained 10\,\% rise (precision 0.35 to 0.40). That is roughly 1.0 to 1.3 unmatched runs per item per year. An alert means that the price is unusually high for that item; not every unusual rise goes on to last long enough to count as a sustained 10\,\% rise.
+
+\begin{table}[H]\centering\small
+\caption[Alert rules scored against sustained rises]{Alert rules scored against sustained 10\,\% rises. Random = mean recall of the same alert runs on random dates (300 draws); $p$ = random-date $p$-value; Runs = alert runs; Delay = median report days from onset to the matched alert.}\label{tab:alertrules}
+\input{tables/alert_rules}
+\source{\path{reports/tables/report/R5_alert_rules.csv} (notebook 05b).}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{F4_alert_recall.png}
+\caption[Sustained rises caught, against random dates]{Share of sustained rises caught by each rule, against the same alert runs on random dates.}
+\label{fig:f4}
+\source{\path{reports/figures/F4_alert_recall.png} (notebook 06).}
+\end{figure}
+
+\subsection{The ML range adds nothing over the simple range}
+The ML range and the simple range catch almost the same rises (Table~\ref{tab:overlap}). In 2024 the simple range caught two rises that the ML range missed and the reverse never happened; in 2025-26 the ML range caught two that the simple range missed and the reverse never happened. Over the two periods each range caught two rises the other missed. This is what Section~\ref{sec:res-forecast} leads one to expect: since the LightGBM forecast is close to \naive{}, the two ranges are close too. For a monitor, the simple range is enough: it catches the same rises and needs no model to be trained or maintained.
+
+\begin{table}[H]\centering\small
+\caption[Rises caught by the ML range and the simple range]{Sustained rises caught by the ML range and the simple range.}\label{tab:overlap}
+\input{tables/overlap}
+\source{\path{reports/tables/report/R5b_rule_overlap.csv} (notebook 05b).}
+\end{table}
+
+\subsection{The fixed rise is a reference, not the winner}
+Rule C catches the most rises (10 of 11 and 22 of 23), and in 2025-26 it also has the highest precision. This should not be read as a win. A rise of 7\,\% over 7 report days is very close to the definition of the thing being scored, a rise of 10\,\% over 14 report days lasting 5 days, so its score is partly built in. It also uses one threshold for every item, so it cannot tell an ordinary move of a volatile item such as onion from an unusual move of a stable one. It is reported as a reference point for the two ranges.
+
+\subsection{Results by item}
+Table~\ref{tab:byitem} shows each item. Onion, potato and garlic hold most of the rises. On the three items without any sustained rise, the ranges still raised 2 to 5 alert runs per period; these are the unmatched alerts of a sticky price that moved by more than usual.
+
+\begin{table}[H]\centering\small
+\caption[Alerts by item]{Rises caught / rises (alert runs) by item and rule. ``--'': no sustained rise in the period, so the alerts cannot be judged.}\label{tab:byitem}
+\input{tables/by_item}
+\source{\path{reports/tables/report/R6_focus_items.csv} (notebook 05b).}
+\end{table}
+
+\subsection{Range coverage}
+A 95\,\% upper bound should hold the price on about 95\,\% of days. In 2024 it did: 94.5\,\% for the ML range and 94.6\,\% for the simple range, consistent with 95\,\% by Kupiec's test (Table~\ref{tab:coverage}). In 2025-26 coverage was 93.4\,\% and 93.9\,\%, slightly but significantly below 95\,\%. A range built from the last 120 errors adapts slowly when prices become more volatile.
+
+\begin{table}[H]\centering\small
+\caption[Coverage of the expected range]{Share of days at or below the upper bound, against the nominal 95\,\%, with Kupiec's test.}\label{tab:coverage}
+\input{tables/coverage}
+\source{\path{reports/tables/report/R7_range_coverage.csv} (notebook 05b).}
+\end{table}
+
+\section{The Monitoring System: Sample Input and Output}\label{sec:res-monitor}
+The input of the monitor is the TCB sheet of a report day, already joined into the data table, together with the 7-day forecasts made one week earlier and the settings committed in \texttt{e0cfa06}. Its output, for each item, is one of three states: ``normal''; ``above range on $n$ of the last 5 days''; or ``ALERT: abnormal rise'' with the date the alert run started. Figures~\ref{fig:app-status} to \ref{fig:app-log} show the app; Figure~\ref{fig:f5} shows the alerts on three items over 2024-26.
+
+\begin{figure}[H]
+\centering
+\optfig{monitor_status.png}{0.95\linewidth}
+\caption[Monitor: status on a day]{Monitor, ``Status on a day'' view: the eight items on a chosen report day under the ML range, with price, upper bound and status.}
+\label{fig:app-status}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\optfig{monitor_item.png}{0.95\linewidth}
+\caption[Monitor: item view]{Monitor, ``Item'' view: price, upper bound of each chosen rule, sustained rises shaded (known only in hindsight) and the start of each alert run.}
+\label{fig:app-item}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\optfig{monitor_log.png}{0.95\linewidth}
+\caption[Monitor: alert log]{Monitor, ``Alert log'' view: every alert run with its start, end, change over 7 report days and whether it matched a sustained rise.}
+\label{fig:app-log}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\optfig{F5_prices_with_alerts.png}{0.95\linewidth}
+\caption[Prices with alerts for onion, potato and egg]{Onion, potato and egg prices, 2024 to October 2026, with sustained rises shaded and the start of each alert run of the three rules.}
+\label{fig:f5}
+\source{notebook 06, Drive \path{reports/figures/}.}
+\end{figure}
+
+\todo{After running notebook 07 in Colab: describe one onion rise in the item view (onset, alert start, delay) from the screenshot, using dates only.}
+
+\section{Discussion}
+
+\subsection{Why \naive{} wins}
+The forecast result follows from the price behaviour. TCB records a price that is unchanged on 62 to 87\,\% of report days and that moves in steps of at least Tk 0.5. On such a series, the last price is the best guess most of the time. A model that learns average movements from history spreads small predicted changes over many days on which nothing happens, and loses more on those days than it gains on the few days with a large move. This is the same lesson as the long line of studies in which the random walk is hard to beat out of sample \cite{meese1983}, and it matches the Bangladeshi benchmark in which naive persistence won on commodities that behave like a random walk \cite{agripricebd}. The drivers did not help because, on a daily scale, weather and the exchange rate change slowly and are already reflected in the recent price path.
+
+\subsection{What the alerts can and cannot say}
+The alerts work: all three rules catch far more sustained rises than the same number of alerts on random dates, and the ranges do so a median of 1.5 to 2 report days after a rise begins. An alert says that the price of an item has stayed above what its own recent behaviour would lead one to expect. Such a rise is \unexpl{} in this system. The alert does not say why the price rose; finding that out needs other evidence.
+
+\subsection{Which rule to use}
+The ML range and the simple range catch nearly the same rises, so the machine-learning model adds nothing to the alerts. For a monitor that someone has to keep running, the simple range is the better choice: same rises, no model to train, and a rule that is easy to explain. The app shows the ML range first so that the comparison stays visible, and it states this finding beside it.
+
+\section{Threats to Validity}\label{sec:threats}
+\begin{itemize}[leftmargin=*,itemsep=2pt]
+\item \textbf{Retrospective test period.} 2025-26 had been looked at by an earlier run of the project. No setting in this run was chosen on it, and the commits show the order, but the design of the comparison was made after those earlier results were known.
+\item \textbf{Item choice.} The eight items were chosen after the earlier 54-item results had been seen.
+\item \textbf{Few rises.} 2024 has 11 sustained rises and 2025-26 has 23. Rates are always shown with their counts. The random-date test does not need large samples, and both periods point the same way.
+\item \textbf{Three items without rises.} For palm oil, soybean oil and sugar, recall cannot be measured.
+\item \textbf{Rule C is partly circular}, as discussed above.
+\item \textbf{The reference is a definition.} A sustained 10\,\% rise over 14 report days is one reasonable definition among several; the 7\,\% and 15\,\% counts show how much it matters.
+\item \textbf{Data.} The audit confirms the copying of the TCB sheets, not the accuracy of what TCB recorded. TCB reports a range for Dhaka markets, and the midpoint is used as the price.
+\item \textbf{Coverage} in 2025-26 is slightly below its nominal level.
+\end{itemize}
