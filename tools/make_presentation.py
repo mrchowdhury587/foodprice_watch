@@ -7,7 +7,7 @@ Figures F1, F3, F4 come from reports/figures (in git). F2 and F5 show TCB prices
 the local data folder and the output .pptx is written there too (never into git).
 
 Usage:
-    python tools/make_presentation.py [--data-root E:/msc_project/FoodPriceWatch_v2_local]
+    python tools/make_presentation.py [--short] [--data-root E:/msc_project/FoodPriceWatch_v2_local]
 """
 from __future__ import annotations
 
@@ -174,15 +174,23 @@ def arrow(slide, x1, y1, x2, y2, dashed=False):
 
 
 class Deck:
-    def __init__(self):
-        self.prs = Presentation()
-        self.prs.slide_width = Inches(W)
-        self.prs.slide_height = Inches(H)
-        self.blank = self.prs.slide_layouts[6]
-        self.n = 0
+    """keep: 1-based positions (in the full deck) of the slides to keep; None keeps all.
+    A skipped slide is drawn into a scratch presentation that is never saved."""
+
+    def __init__(self, keep=None):
+        self.prs, self.scratch = Presentation(), Presentation()
+        for p in (self.prs, self.scratch):
+            p.slide_width = Inches(W)
+            p.slide_height = Inches(H)
+        self.keep = keep
+        self.i = 0  # position in the full deck
+        self.n = 0  # number shown on the slide
 
     def slide(self, title=None, notes=""):
-        s = self.prs.slides.add_slide(self.blank)
+        self.i += 1
+        if self.keep is not None and self.i not in self.keep:
+            return self.scratch.slides.add_slide(self.scratch.slide_layouts[6])
+        s = self.prs.slides.add_slide(self.prs.slide_layouts[6])
         self.n += 1
         if title:
             text_box(s, 0.6, 0.35, W - 1.2, 0.9, title, 32, bold=True, color=DARK,
@@ -196,10 +204,14 @@ class Deck:
 
 
 # ----------------------------------------------------------------------------- slides
-def build(data_root: Path, out: Path):
+# Short version: title, background, RQs, data, alert method, results, app, conclusion, limits, thanks.
+SHORT = {1, 3, 5, 7, 11, 13, 15, 16, 17, 18, 19, 20, 21}
+
+
+def build(data_root: Path, out: Path, keep=None):
     figs = REPO / "reports" / "figures"
     local_figs = data_root / "reports" / "figures"
-    d = Deck()
+    d = Deck(keep)
 
     # 1 Title
     s = d.slide(notes="Introduce the project: a daily monitor that tells, for eight everyday food items in "
@@ -625,7 +637,9 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", default=os.environ.get("FW_DATA_ROOT", "E:/msc_project/FoodPriceWatch_v2_local"))
     ap.add_argument("--out", default=None)
+    ap.add_argument("--short", action="store_true", help="13-slide version for a shorter talk")
     a = ap.parse_args()
     root = Path(a.data_root)
-    out = Path(a.out) if a.out else root / "reports" / "presentation" / "FoodPriceWatch_presentation.pptx"
-    build(root, out)
+    name = "FoodPriceWatch_presentation_short.pptx" if a.short else "FoodPriceWatch_presentation.pptx"
+    out = Path(a.out) if a.out else root / "reports" / "presentation" / name
+    build(root, out, SHORT if a.short else None)
