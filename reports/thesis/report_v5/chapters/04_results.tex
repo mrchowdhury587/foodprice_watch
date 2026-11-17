@@ -38,7 +38,7 @@ notebooks 01--07 & intake, processing, price behaviour, forecast choice and test
 \end{table}
 
 \subsection{Runs}
-Notebooks 01 to 06 were first run on the work computer, while Google Drive could not be mounted in Colab, and then again in Google Colab once it could. Every output file of the Colab runs was byte-identical to the local run (Table~\ref{tab:repro} in Appendix~\ref{app:repro}); the Colab runs are the runs of record. Each run, its code commit and its file hashes are logged in \path{reports/RUN_LOG.md}.
+Notebooks 01 to 06 were first run on the work computer, while Google Drive could not be mounted in Colab, and then again in Google Colab once it could. Every output file of the Colab runs was byte-identical to the local run (same sha256 hashes); the Colab runs are the runs of record. Each run, its code commit and its file hashes are logged in \path{reports/RUN_LOG.md}.
 
 \section{Dataset}
 The data table has 11,296 rows: 8 items on 1,412 report days from 17 May 2021 to 24 October 2026. Prices are missing on 0 to 0.28\,\% of report days per item (Table~\ref{tab:items}). The 2022 gap holds 24 report days. The audit of the converted TCB sheets found no mismatch in 3,060 price cells. Table~\ref{tab:periods} shows how the data is divided in time.
