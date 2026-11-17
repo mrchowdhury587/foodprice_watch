@@ -41,6 +41,15 @@ This chapter describes the data, how it was cleaned and joined, the reference th
 \subsection{Sources}
 The prices come from the daily retail price reports of the Trading Corporation of Bangladesh (TCB) for Dhaka \cite{tcb}. On most working days TCB publishes a sheet that gives, for each item, the lowest and highest retail price seen in Dhaka markets that day, in taka. The sheets from 17 May 2021 to 24 October 2026 had been converted into one long table during an earlier phase of this work and checked against the original files: a machine re-read of 1,530 sampled rows on 28 report days compared 3,060 price cells and found no mismatch. The audit checks the copying only; it cannot show that TCB itself recorded a value correctly.
 
+Figure~\ref{fig:dataraw} shows the first rows of the converted TCB price file.
+
+\begin{figure}[H]
+\centering
+\optfig{dataset_raw.png}{0.95\linewidth}
+\caption[The converted TCB price file]{The converted TCB price file: one row per item, unit and report day with TCB's lowest and highest Dhaka price.}
+\label{fig:dataraw}
+\end{figure}
+
 Three other files are used: Ramadan and Eid dates; the taka per US dollar exchange rate (daily market quotes); and daily weather at 13 locations in Bangladesh from Open-Meteo \cite{openmeteo}. The four raw files are copied once into a \texttt{raw/} folder, never edited, and listed with their sha256 hashes in a manifest.
 
 \subsection{The eight items}
@@ -59,6 +68,15 @@ Everything is joined into one table, \texttt{data\_8.csv}, in long format: one r
 \caption[Columns of the data table]{Columns of \texttt{data\_8.csv}.}\label{tab:columns}
 \input{tables/columns}
 \end{table}
+
+Figure~\ref{fig:datatable} shows the table as it is loaded in a notebook.
+
+\begin{figure}[H]
+\centering
+\optfig{dataset_sample.png}{0.95\linewidth}
+\caption[The data table in the notebook]{The data table \texttt{data\_8.csv} loaded in Colab (first rows; 11,296 rows $\times$ 20 columns).}
+\label{fig:datatable}
+\end{figure}
 
 Table~\ref{tab:datasample} shows the eight rows of the first report day of the test period, 1 January 2025, with a selection of columns. The exchange-rate column is empty for items that do not use it, and the weather column for items other than onion and potato.
 
@@ -288,45 +306,15 @@ Figure~\ref{fig:arch} shows the system as it runs, in four layers. The data laye
 \label{fig:arch}
 \end{figure}
 
-\section{The Monitoring App and User Interface}\label{sec:method-monitor}
-Notebook 07 builds one row per item and report day from 13 June 2023 to 24 October 2026 (8,432 rows): the price, the upper bound of each rule in taka, and the exceedance, alert and run-start flags. A check confirms that its alert flags are identical to those scored in notebook 05b. A Gradio app \cite{gradio} then serves four tabs (Table~\ref{tab:tabs}, Figure~\ref{fig:wireframe}). Everything shown for a day uses only information known on that day. The app replays the data to 24 October 2026; it does not fetch new prices. In Colab it can be opened through a temporary share link; because the app shows TCB prices, a login can be set in the notebook.
-
-\begin{table}[H]\centering\small
-\caption[Tabs of the monitoring app]{Tabs of the monitoring app: what the user chooses and what the app shows.}\label{tab:tabs}
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.2cm}X}
-\toprule
-\textbf{Tab} & \textbf{User input} & \textbf{Output} \\
-\midrule
-Status on a day & report day; alert rule (ML range shown first) & one row per item: price, change over 7 report days, upper bound, status (normal / above range on $n$ of the last 5 days / ALERT) and the date the alert started \\
-Item & item; rules to show; from and to dates & chart of price and bounds with sustained rises shaded and alert starts marked; table of alert runs in the period \\
-Alert log & rules; item; period & every alert run with start, end, price and change at the start, and whether it matched a sustained rise (in hindsight) \\
-How it works & -- & the three rules, the scores of Table~\ref{tab:alertrules}, the main finding and the limits \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[font=\scriptsize]
-\draw[rounded corners=3pt, thick] (0,0) rectangle (14,8.2);
-\node[anchor=west, font=\normalsize\bfseries] at (0.3,7.7) {Food Price Watch};
-\node[anchor=west, text width=13cm] at (0.3,7.1) {Replay of TCB Dhaka daily retail prices to 24 Oct 2026. Abnormal-rise detection, not early warning.};
-\foreach \x/\t/\w in {0.3/Status on a day/2.6, 3.0/Item/1.4, 4.5/Alert log/1.8, 6.4/How it works/2.2}
-  \draw (\x,6.2) rectangle ++(\w,0.5) node[midway] {\t};
-\draw[very thick] (0.3,6.2) -- (2.9,6.2);
-\draw (0.3,5.1) rectangle (4.3,5.8) node[midway] {Report day \quad $\blacktriangledown$};
-\draw (4.6,5.1) rectangle (13.7,5.8);
-\node[anchor=west] at (4.7,5.45) {Alert rule: \quad $\odot$ ML range \quad $\circ$ simple range \quad $\circ$ fixed 7-report rise};
-\draw (0.3,0.4) rectangle (13.7,4.7);
-\foreach \x/\t in {0.4/Item, 2.3/Unit, 3.9/Report day, 5.6/Price (Tk), 7.1/Change 7 (\%), 8.9/Upper bound (Tk), 10.7/Status, 12.4/Alert since}
-  \node[anchor=west, font=\scriptsize\bfseries] at (\x,4.35) {\t};
-\draw (0.3,4.05) -- (13.7,4.05);
-\foreach \y/\s in {3.7/ALERT: abnormal rise, 3.2/above range on 2 of the last 5 days, 2.7/normal, 2.2/normal, 1.7/normal, 1.2/normal, 0.7/normal}
-  {\node[anchor=west] at (0.4,\y) {item}; \node[anchor=west] at (10.7,\y) {\s};}
-\end{tikzpicture}
-\caption[Layout of the ``Status on a day'' tab]{Layout of the ``Status on a day'' tab (wireframe; items in alert are listed first). Screenshots of the running app are in Section~\ref{sec:res-monitor}.}
-\label{fig:wireframe}
-\end{figure}
+\section{The Monitoring App}\label{sec:method-monitor}
+Notebook 07 builds one row per item and report day from 13 June 2023 to 24 October 2026 (8,432 rows): the price, the upper bound of each rule in taka, and the exceedance, alert and run-start flags. A check confirms that its alert flags are identical to those scored in notebook 05b. A Gradio app \cite{gradio} then serves four tabs:
+\begin{itemize}[leftmargin=*,itemsep=1pt]
+\item \textbf{Status on a day:} the user picks a report day and a rule; the app lists the eight items with price, upper bound and status.
+\item \textbf{Item:} the user picks an item, rules and dates; the app draws the price, the bounds and the alerts.
+\item \textbf{Alert log:} every alert run, filtered by rule, item and period.
+\item \textbf{How it works:} the three rules and their scores.
+\end{itemize}
+Everything shown for a day uses only information known on that day. The app replays the data to 24 October 2026; it does not fetch new prices. Screenshots are in Section~\ref{sec:res-monitor}.
 
 \section{Reproducibility}
 Each notebook starts by cloning the code from GitHub and prints the code commit and the sha256 hashes of its inputs and outputs. Tables in the repository contain only rates and counts; files that contain prices stay on Drive because TCB states no reuse terms. Every headline number in this report is listed with its table, notebook and commit in a results register (Appendix~\ref{app:register}).

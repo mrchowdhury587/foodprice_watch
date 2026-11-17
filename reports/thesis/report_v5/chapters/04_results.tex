@@ -15,11 +15,49 @@ The results are given in the order of the research questions: how the prices beh
 \input{tables/software}
 \end{table}
 
+\subsection{Implementation details}
+The system is written in Python as a small package, \texttt{foodwatch}, that the notebooks call; each notebook does one task (Table~\ref{tab:modules}). The notebooks are generated from one script so that their setup cells are identical: they mount Google Drive, clone the code from the \texttt{main} branch of GitHub, and set the data folder. Settings are read from \path{config/settings.yaml}, and each notebook ends by printing a summary with its checks, so that a run can be confirmed from its last cell.
+
+\begin{table}[H]\centering\small
+\caption[Code modules and notebooks]{Code modules and notebooks.}\label{tab:modules}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{4.3cm}X}
+\toprule
+\textbf{File} & \textbf{Role} \
+\midrule
+\texttt{paths.py}, \texttt{load.py} & data folder, settings, readers for the four raw files, hashing \
+\texttt{panel.py}, \texttt{features.py}, \texttt{checks.py} & item $\times$ report-day rows, drivers joined on availability date, data checks \
+\texttt{behaviour.py} & price-change measures and sustained rise episodes \
+\texttt{forecast.py}, \texttt{metrics.py} & naive, ETS and LightGBM on an expanding window; MAE, relative MAE, Diebold--Mariano with Holm \
+\texttt{alerts.py} & ranges from known errors, the three rules, persistence, matching, random-date control, Kupiec test \
+\texttt{monitor.py}, \texttt{app/monitor\_app.py} & day-by-day monitor table and the Gradio app \
+\texttt{report.py} & report tables, figures and the results register \
+notebooks 01--07 & intake, processing, price behaviour, forecast choice and test, alert choice and scoring, report tables, monitor \
+\texttt{tools/} & notebook generator; TCB conversion and audit scripts; thesis files with prices for Overleaf \
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Runs}
 Notebooks 01 to 06 were first run on the work computer, while Google Drive could not be mounted in Colab, and then again in Google Colab once it could. Every output file of the Colab runs was byte-identical to the local run (Table~\ref{tab:repro} in Appendix~\ref{app:repro}); the Colab runs are the runs of record. Each run, its code commit and its file hashes are logged in \path{reports/RUN_LOG.md}.
 
 \section{Dataset}
-The data table has 11,296 rows: 8 items on 1,412 report days from 17 May 2021 to 24 October 2026. Prices are missing on 0 to 0.28\,\% of report days per item (Table~\ref{tab:items}). The 2022 gap holds 24 report days. The audit of the converted TCB sheets found no mismatch in 3,060 price cells.
+The data table has 11,296 rows: 8 items on 1,412 report days from 17 May 2021 to 24 October 2026. Prices are missing on 0 to 0.28\,\% of report days per item (Table~\ref{tab:items}). The 2022 gap holds 24 report days. The audit of the converted TCB sheets found no mismatch in 3,060 price cells. Table~\ref{tab:periods} shows how the data is divided in time.
+
+\begin{table}[H]\centering\small
+\caption[Distribution of the data over the periods]{Distribution of the data over the periods. Forecasts are per model and horizon; rises are sustained 10\,\% rises by onset date.}\label{tab:periods}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Period} & \textbf{Report days} & \textbf{Item-days} & \textbf{Origins} & \textbf{Forecasts} & \textbf{Rises} \
+\midrule
+History (May 2021 -- 2023), training only & 480 & 3,840 & -- & -- & 36 \
+2024 validation & 329 & 2,632 & 43 & 344 & 11 \
+2025 -- Oct 2026 test \retro & 603 & 4,824 & 82 & 656 & 23 \
+\midrule
+All & 1,412 & 11,296 & 125 & 1,000 & 70 \
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \section{Price Behaviour (RQ1)}\label{sec:res-behaviour}
 
@@ -160,29 +198,57 @@ A 95\,\% upper bound should hold the price on about 95\,\% of days. In 2024 it d
 \source{\path{reports/tables/report/R7_range_coverage.csv} (notebook 05b).}
 \end{table}
 
-\section{The Monitoring System: Sample Input and Output}\label{sec:res-monitor}
-The input of the monitor is the TCB sheet of a report day, already joined into the data table, together with the 7-day forecasts made one week earlier and the settings committed in \texttt{e0cfa06}. Its output, for each item, is one of three states: ``normal''; ``above range on $n$ of the last 5 days''; or ``ALERT: abnormal rise'' with the date the alert run started. Figures~\ref{fig:app-status} to \ref{fig:app-log} show the app; Figure~\ref{fig:f5} shows the alerts on three items over 2024-26.
+\section{Sample Input and Output}\label{sec:res-monitor}
+This section follows one real case through the system, in the order in which the system processes it: the sustained rise of local onion that began on 2 November 2025 (2025-26, retrospective). The rise lasted 16 report days, to 17 November 2025, with a peak rise of 57\,\% over 14 report days.
+
+\subsection{Input}
+The input on each report day is the TCB row of the item, joined with its drivers (Table~\ref{tab:datasample}), and the 7-day forecast made one week earlier. For onion, the drivers are the weather columns; the chosen LightGBM uses price history only.
+
+\subsection{Expected range}
+On each day $t$, the upper bound of the ML range is the LightGBM forecast made at $t-7$ plus the 95th percentile of onion's last 120 forecast errors known at $t-7$. The bound is fixed before day $t$ is seen.
+
+\subsection{Alert decision}
+Table~\ref{tab:worked} follows the days around the onset. Onion was above the bound on the onset day and the next day, which is not yet an alert. On 4 November 2025, the third day above the bound in the last five, the alert run started: 2 report days after the onset.
+
+\begin{table}[H]\centering\footnotesize
+\caption[Worked example: onion, November 2025]{Worked example: local onion around the onset of the rise of 2 November 2025, under the ML range (prices in Tk; change over 7 report days).}\label{tab:worked}
+\opttab{worked_example}
+\source{\texttt{processed/monitor\_8.csv} on Drive (contains prices; not in the public repository).}
+\end{table}
+
+\subsection{Output in the app}
+Figures~\ref{fig:app-status} to \ref{fig:app-how} show the four tabs of the app for this case.
 
 \begin{figure}[H]
 \centering
 \optfig{monitor_status.png}{0.95\linewidth}
-\caption[Monitor: status on a day]{Monitor, ``Status on a day'' view: the eight items on a chosen report day under the ML range, with price, upper bound and status.}
+\caption[App: status on a day]{App, ``Status on a day'': all eight items on 4 November 2025 under the ML range; onion is in alert.}
 \label{fig:app-status}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \optfig{monitor_item.png}{0.95\linewidth}
-\caption[Monitor: item view]{Monitor, ``Item'' view: price, upper bound of each chosen rule, sustained rises shaded (known only in hindsight) and the start of each alert run.}
+\caption[App: item chart]{App, ``Item'': onion from October to November 2025 with the upper bound, the sustained rise shaded and the start of the alert run.}
 \label{fig:app-item}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \optfig{monitor_log.png}{0.95\linewidth}
-\caption[Monitor: alert log]{Monitor, ``Alert log'' view: every alert run with its start, end, change over 7 report days and whether it matched a sustained rise.}
+\caption[App: alert log]{App, ``Alert log'': alert runs of the ML range in 2025-26 with the hindsight match.}
 \label{fig:app-log}
 \end{figure}
+
+\begin{figure}[H]
+\centering
+\optfig{monitor_how.png}{0.95\linewidth}
+\caption[App: how it works]{App, ``How it works'': the three rules and their scores.}
+\label{fig:app-how}
+\end{figure}
+
+\subsection{Validation}
+In hindsight, the alert run that started on 4 November 2025 lies inside the match window of the rise (14 report days before the onset to 7 after its end), so it counts as a caught rise in Table~\ref{tab:alertrules}. For the whole period, the app's alert flags were checked to be identical to those scored in notebook 05b, and its counts of alert runs equal Table~\ref{tab:alertrules}. Figure~\ref{fig:f5} shows the alerts of the three rules on onion, potato and egg over 2024-26.
 
 \begin{figure}[H]
 \centering
@@ -192,7 +258,6 @@ The input of the monitor is the TCB sheet of a report day, already joined into t
 \source{notebook 06, Drive \path{reports/figures/}.}
 \end{figure}
 
-\todo{After running notebook 07 in Colab: describe one onion rise in the item view (onset, alert start, delay) from the screenshot, using dates only.}
 
 \section{Discussion}
 
