@@ -501,3 +501,7 @@ Identical to the LOCAL run (2549097): input `forecasts_h7.csv` sha256 `6449ec4db
 
 Identical to the LOCAL run (aa8c8aa): `alerts_8.csv` 25,464 rows, sha256 `613b3c4595a68cf5` (same bytes as the local file); checks PASS (placebo p valid, 2024 equals 05a, error correlation A vs B 0.9907). A2-A5 equal the committed tables: rises caught 6 / 8 / 10 of 11 in 2024 and 17 / 15 / 22 of 23 in 2025-26 (ML range / simple range / fixed 7 %), every rule above random dates (p = 0.003); coverage 0.934-0.946. The alert file is now on Drive.
 
+## 06_report_tables, Colab run (2026-11-17, code 475bf85, account mhpcoder) — 2025-26 rows RETROSPECTIVE; replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (4b65a2f): checks PASS (every number traces to its source table, 2025-26 labelled retrospective, no price column, no forbidden word); the sha256 of R1-R7 equal the local files (R1 63cafc132f52, R2 0173d0cbf9c4, R3 a546f2a0fce4, R4 06e1da492e2a, R5 a43f64a65f06, R5b 0815c5e2510e, R6 9ef3ef6cec3e, R7 81fb52ace0ec). Register and plan-claim verdicts unchanged. F3-F5 are now on Drive (F5 shows prices: Drive only).
+
