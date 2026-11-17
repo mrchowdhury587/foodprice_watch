@@ -4,7 +4,7 @@ This chapter describes the data, how it was cleaned and joined, the reference th
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
+\begin{adjustbox}{max width=\linewidth}\begin{tikzpicture}[
   box/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, minimum height=1.0cm, text width=2.5cm},
   key/.style={box, very thick},
   gate/.style={draw, dashed, font=\scriptsize, align=center, inner sep=2pt},
@@ -31,7 +31,7 @@ This chapter describes the data, how it was cleaned and joined, the reference th
 \draw[arr] (n03.west) -- node[lab, above] {rise episodes (reference)} (n03.west -| L) |- (n05b.west);
 \draw[arr] (n05b) -- (n06);
 \draw[arr] (n05b) -- node[lab, right] {alerts} (n07);
-\end{tikzpicture}
+\end{tikzpicture}\end{adjustbox}
 \caption[Workflow of Food Price Watch]{Workflow of Food Price Watch. Each box is one notebook. The dashed labels are commits: a setting chosen on 2024 was written into the settings file and pushed before the notebook that scores 2025-26 was run.}
 \label{fig:workflow}
 \end{figure}
@@ -45,7 +45,7 @@ Figure~\ref{fig:dataraw} shows the first rows of the converted TCB price file.
 
 \begin{figure}[H]
 \centering
-\optfig{dataset_raw.png}{0.95\linewidth}
+\optfig[110 121 25 175]{dataset_raw.png}{\linewidth}
 \caption[The converted TCB price file]{The converted TCB price file: one row per item, unit and report day with TCB's lowest and highest Dhaka price.}
 \label{fig:dataraw}
 \end{figure}
@@ -57,7 +57,7 @@ The study covers eight everyday items (Table~\ref{tab:items}). They were chosen 
 
 \begin{table}[H]\centering\small
 \caption[The eight items]{The eight items, their units, groups, the cost drivers used for each, and the share of report days on which the price is missing.}\label{tab:items}
-\input{tables/items}
+\fittab{\input{tables/items}}
 \source{\path{reports/tables/report/R1_data.csv} (notebook 02).}
 \end{table}
 
@@ -66,15 +66,15 @@ Everything is joined into one table, \texttt{data\_8.csv}, in long format: one r
 
 \begin{table}[H]\centering\small
 \caption[Columns of the data table]{Columns of \texttt{data\_8.csv}.}\label{tab:columns}
-\input{tables/columns}
+\fittab{\input{tables/columns}}
 \end{table}
 
 Figure~\ref{fig:datatable} shows the table as it is loaded in a notebook.
 
 \begin{figure}[H]
 \centering
-\optfig{dataset_sample.png}{0.95\linewidth}
-\caption[The data table in the notebook]{The data table \texttt{data\_8.csv} loaded in Colab (first rows; 11,296 rows $\times$ 20 columns).}
+\optfig[110 174 25 205]{dataset_sample.png}{\linewidth}
+\caption[The data table in the notebook]{The data table \texttt{data\_8.csv} loaded in Colab: the 8 items on 4 November 2025 (11,296 rows $\times$ 20 columns; 10 columns shown). An empty driver is shown as NaN and is never set to 0.}
 \label{fig:datatable}
 \end{figure}
 
@@ -140,7 +140,7 @@ Origins are 7 report days apart. LightGBM is refitted every 8 origins and reused
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[x=2.3cm, y=0.55cm, font=\footnotesize]
+\begin{adjustbox}{max width=\linewidth}\begin{tikzpicture}[x=2.3cm, y=0.55cm, font=\footnotesize]
 \foreach \yr/\x in {2022/0.63, 2023/1.63, 2024/2.63, 2025/3.63, 2026/4.63}{
   \draw[gray!50] (\x,-0.4) -- (\x,5.6); \node[below] at (\x,-0.4) {\yr};}
 \node[below left] at (0,-0.4) {May 2021};
@@ -157,7 +157,7 @@ Origins are 7 report days apart. LightGBM is refitted every 8 origins and reused
   \fill[black] (\e,\yy) rectangle (\e+0.12,\yy+0.45);}
 \node[right] at (5.1,1.9) {grey: fit on the past};
 \node[right] at (5.1,1.2) {black: forecast};
-\end{tikzpicture}
+\end{tikzpicture}\end{adjustbox}
 \caption[Training, validation and test periods]{Training, validation and test periods. The grey bars show three example forecast origins: the model is fitted on everything before the origin and forecasts the next 1 to 30 report days. The 2022 gap is never crossed.}
 \label{fig:splits}
 \end{figure}
@@ -176,7 +176,7 @@ The three rules differ only in how the upper bound is drawn (Table~\ref{tab:rule
 
 \begin{table}[H]\centering\small
 \caption[The three alert rules]{The three alert rules and their candidate settings.}\label{tab:rules}
-\input{tables/rules}
+\fittab{\input{tables/rules}}
 \end{table}
 
 \subsection{From exceedance to alert}
@@ -184,7 +184,7 @@ A day is an \emph{exceedance} when the price is above the upper bound. A single 
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[x=0.5cm, y=0.5cm, font=\footnotesize]
+\begin{adjustbox}{max width=\linewidth}\begin{tikzpicture}[x=0.5cm, y=0.5cm, font=\footnotesize]
 % match window and rise episode (hindsight)
 \fill[gray!18] (11,0) rectangle (21,9);
 \node[align=center] at (16,9.6) {sustained rise (hindsight)};
@@ -201,7 +201,7 @@ A day is an \emph{exceedance} when the price is above the upper bound. A single 
 \node[align=left, anchor=west] at (0,10.6) {dots: price above the bound};
 \draw[gray!60] (0,0) -- (26,0);
 \node[below right] at (0,0) {report days $\rightarrow$};
-\end{tikzpicture}
+\end{tikzpicture}\end{adjustbox}
 \caption[How an alert is raised and matched]{How an alert is raised and matched (schematic, not real prices). The bound for each day comes from information known 7 report days earlier. The price must be above it on 3 of the last 5 report days to start an alert run. In scoring, the run counts for a sustained rise if it starts inside the match window.}
 \label{fig:alertmech}
 \end{figure}
@@ -214,7 +214,7 @@ Table~\ref{tab:config} lists the final configuration of the forecasts and the al
 
 \begin{table}[H]\centering\small
 \caption[Configuration of the forecasts and the alert engine]{Configuration of the forecasts and the alert engine.}\label{tab:config}
-\begin{tabular}{lll}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lll}
 \toprule
 \textbf{Part} & \textbf{Parameter} & \textbf{Value} \\
 \midrule
@@ -237,7 +237,7 @@ Scoring & match window & 14 report days before onset to 7 after the end \\
  & random-date draws & 300 \\
  & unmatched-run target & $\leq 2$ per item-year (250 report days) \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table}
 
 \section{Evaluation}\label{sec:eval}
@@ -266,7 +266,7 @@ Figure~\ref{fig:arch} shows the system as it runs, in four layers. The data laye
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
+\begin{adjustbox}{max width=\linewidth}\begin{tikzpicture}[
   layer/.style={draw, rounded corners=3pt, minimum width=13.2cm, minimum height=1.55cm},
   comp/.style={draw, fill=white, rounded corners=2pt, align=center, font=\scriptsize, minimum height=0.85cm, text width=2.3cm},
   lname/.style={font=\scriptsize\bfseries, anchor=west, align=left},
@@ -301,7 +301,7 @@ Figure~\ref{fig:arch} shows the system as it runs, in four layers. The data laye
 \draw[arr] (bnd) -- (t2);
 \draw[arr] (per.north west) -- (t1.south east);
 \draw[arr, dashed] (per) -- (ev);
-\end{tikzpicture}
+\end{tikzpicture}\end{adjustbox}
 \caption[System architecture]{System architecture of Food Price Watch. Rule B uses \naive{} and rule C uses no forecast; only rule A needs the LightGBM model. The dashed arrow leads to the evaluation used in this study.}
 \label{fig:arch}
 \end{figure}

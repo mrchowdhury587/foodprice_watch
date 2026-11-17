@@ -505,3 +505,7 @@ Identical to the LOCAL run (aa8c8aa): `alerts_8.csv` 25,464 rows, sha256 `613b3c
 
 Identical to the LOCAL run (4b65a2f): checks PASS (every number traces to its source table, 2025-26 labelled retrospective, no price column, no forbidden word); the sha256 of R1-R7 equal the local files (R1 63cafc132f52, R2 0173d0cbf9c4, R3 a546f2a0fce4, R4 06e1da492e2a, R5 a43f64a65f06, R5b 0815c5e2510e, R6 9ef3ef6cec3e, R7 81fb52ace0ec). Register and plan-claim verdicts unchanged. F3-F5 are now on Drive (F5 shows prices: Drive only).
 
+
+## 07_monitor, Colab run (2026-11-17, code ff329b1, account mhpcoder) — 2025-26 RETROSPECTIVE
+
+Inputs `forecasts_h7.csv` sha256 `6449ec4dbf7b5a5c` and `alerts_8.csv` sha256 `613b3c4595a68cf5` (same as 04b/05b). Checks PASS: `alerts_equal_05b`, `exceed_equals_price_above_bound`, `exceed_C_equals_change`, `runs_equal_R5` all True; `monitor_8.csv` 8,432 rows (2023-06-13 to 2026-10-24), sha256 `25915ebe968474c7`. Status on 2026-10-24: 0 of 8 items in alert under the ML range and the simple range, 1 of 8 under the fixed 7 % rise. The app (trimmed text) was opened through a temporary share link and the four report screenshots were taken from it (Overleaf only, never git).

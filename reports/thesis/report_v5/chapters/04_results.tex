@@ -7,12 +7,12 @@ The results are given in the order of the research questions: how the prices beh
 \subsection{Hardware and software}
 \begin{table}[H]\centering\small
 \caption[Hardware]{Hardware used.}\label{tab:hardware}
-\input{tables/hardware}
+\fittab{\input{tables/hardware}}
 \end{table}
 
 \begin{table}[H]\centering\small
 \caption[Software]{Software used.}\label{tab:software}
-\input{tables/software}
+\fittab{\input{tables/software}}
 \end{table}
 
 \subsection{Implementation details}
@@ -22,17 +22,17 @@ The system is written in Python as a small package, \texttt{foodwatch}, that the
 \caption[Code modules and notebooks]{Code modules and notebooks.}\label{tab:modules}
 \begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{4.3cm}X}
 \toprule
-\textbf{File} & \textbf{Role} \
+\textbf{File} & \textbf{Role} \\
 \midrule
-\texttt{paths.py}, \texttt{load.py} & data folder, settings, readers for the four raw files, hashing \
-\texttt{panel.py}, \texttt{features.py}, \texttt{checks.py} & item $\times$ report-day rows, drivers joined on availability date, data checks \
-\texttt{behaviour.py} & price-change measures and sustained rise episodes \
-\texttt{forecast.py}, \texttt{metrics.py} & naive, ETS and LightGBM on an expanding window; MAE, relative MAE, Diebold--Mariano with Holm \
-\texttt{alerts.py} & ranges from known errors, the three rules, persistence, matching, random-date control, Kupiec test \
-\texttt{monitor.py}, \texttt{app/monitor\_app.py} & day-by-day monitor table and the Gradio app \
-\texttt{report.py} & report tables, figures and the results register \
-notebooks 01--07 & intake, processing, price behaviour, forecast choice and test, alert choice and scoring, report tables, monitor \
-\texttt{tools/} & notebook generator; TCB conversion and audit scripts; thesis files with prices for Overleaf \
+\texttt{paths.py}, \texttt{load.py} & data folder, settings, readers for the four raw files, hashing \\
+\texttt{panel.py}, \texttt{features.py}, \texttt{checks.py} & item $\times$ report-day rows, drivers joined on availability date, data checks \\
+\texttt{behaviour.py} & price-change measures and sustained rise episodes \\
+\texttt{forecast.py}, \texttt{metrics.py} & naive, ETS and LightGBM on an expanding window; MAE, relative MAE, Diebold--Mariano with Holm \\
+\texttt{alerts.py} & ranges from known errors, the three rules, persistence, matching, random-date control, Kupiec test \\
+\texttt{monitor.py}, \texttt{app/monitor\_app.py} & day-by-day monitor table and the Gradio app \\
+\texttt{report.py} & report tables, figures and the results register \\
+notebooks 01--07 & intake, processing, price behaviour, forecast choice and test, alert choice and scoring, report tables, monitor \\
+\texttt{tools/} & notebook generator; TCB conversion and audit scripts; thesis files with prices for Overleaf \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -45,17 +45,17 @@ The data table has 11,296 rows: 8 items on 1,412 report days from 17 May 2021 to
 
 \begin{table}[H]\centering\small
 \caption[Distribution of the data over the periods]{Distribution of the data over the periods. Forecasts are per model and horizon; rises are sustained 10\,\% rises by onset date.}\label{tab:periods}
-\begin{tabular}{lrrrrr}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrrr}
 \toprule
-\textbf{Period} & \textbf{Report days} & \textbf{Item-days} & \textbf{Origins} & \textbf{Forecasts} & \textbf{Rises} \
+\textbf{Period} & \textbf{Report days} & \textbf{Item-days} & \textbf{Origins} & \textbf{Forecasts} & \textbf{Rises} \\
 \midrule
-History (May 2021 -- 2023), training only & 480 & 3,840 & -- & -- & 36 \
-2024 validation & 329 & 2,632 & 43 & 344 & 11 \
-2025 -- Oct 2026 test \retro & 603 & 4,824 & 82 & 656 & 23 \
+History (May 2021 -- 2023), training only & 480 & 3,840 & -- & -- & 36 \\
+2024 validation & 329 & 2,632 & 43 & 344 & 11 \\
+2025 -- Oct 2026 test \retro & 603 & 4,824 & 82 & 656 & 23 \\
 \midrule
-All & 1,412 & 11,296 & 125 & 1,000 & 70 \
+All & 1,412 & 11,296 & 125 & 1,000 & 70 \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table}
 
 
@@ -66,7 +66,7 @@ On most report days an item's price is the same as on the previous report day: f
 
 \begin{table}[H]\centering\small
 \caption[How often and how much prices change]{How often and how much prices change. Change sizes are on days the price changed; unchanged runs are in report days; the last column counts sustained 10\,\% rises in 2021-26.}\label{tab:behaviour}
-\input{tables/behaviour}
+\fittab{\input{tables/behaviour}}
 \source{\path{reports/tables/report/R2_behaviour.csv} (notebook 03).}
 \end{table}
 
@@ -93,7 +93,7 @@ Using the rule of Section~\ref{sec:rise}, the eight items had 70 sustained 10\,\
 
 \begin{table}[H]\centering\small
 \caption[Sustained rise episodes]{Sustained rise episodes by period (onset date), with the 7\,\% and 15\,\% thresholds as a sensitivity check.}\label{tab:episodes}
-\input{tables/episodes}
+\fittab{\input{tables/episodes}}
 \source{\path{reports/tables/B5_rise_episodes_by_item_year.csv} (notebook 03).}
 \end{table}
 
@@ -102,7 +102,7 @@ Table~\ref{tab:ramadan} compares the 30 days before each of the five Ramadans in
 
 \begin{table}[H]\centering\small
 \caption[Changes before Ramadan]{Price changes in the 30 days before Ramadan against other days (five Ramadans, about 112 report days per item).}\label{tab:ramadan}
-\input{tables/ramadan}
+\fittab{\input{tables/ramadan}}
 \source{\path{reports/tables/report/R3_ramadan.csv} (notebook 03).}
 \end{table}
 
@@ -113,7 +113,7 @@ All 16 LightGBM configurations were worse than \naive{} on 2024 (relative MAE 1.
 
 \begin{table}[H]\centering\small
 \caption[LightGBM configurations on 2024]{LightGBM configurations on 2024 (eight of the sixteen shown, including the best of each feature set; the full grid is in \texttt{M1\_validation\_grid.csv}). Relative MAE is the geometric mean over items of MAE / MAE of \naive{}; above 1 is worse than \naive{}.}\label{tab:grid}
-\input{tables/grid}
+\fittab{\input{tables/grid}}
 \source{\path{reports/tables/M1_validation_grid.csv} (notebook 04a, setting committed in \texttt{8d7c145}).}
 \end{table}
 
@@ -124,7 +124,7 @@ The accuracy column shows why accuracy alone would mislead. LightGBM is 99.4\,\%
 
 \begin{table}[H]\centering\small
 \caption[Forecast benchmark]{Forecast benchmark: MAE of the log change at horizon $h$ (report days), next to \naive{}; relative MAE is the geometric mean over items; Holm $p$ is the corrected Diebold--Mariano $p$-value (``--'': the loss difference has no variance to test).}\label{tab:forecast}
-\input{tables/forecast}
+\fittab{\input{tables/forecast}}
 \source{\path{reports/tables/report/R4_forecast.csv} (notebooks 04a, 04b).}
 \end{table}
 
@@ -143,7 +143,7 @@ Table~\ref{tab:alertchoice} lists every candidate on 2024. For the ML range (A) 
 
 \begin{table}[H]\centering\small
 \caption[Alert settings on 2024]{Alert settings on 2024 (11 sustained rises, 10.53 item-years). The chosen setting is the most sensitive one with at most 2 unmatched alert runs per item-year.}\label{tab:alertchoice}
-\input{tables/alert_choice}
+\fittab{\input{tables/alert_choice}}
 \source{\path{reports/tables/A1_alert_choice.csv} (notebook 05a, committed in \texttt{e0cfa06}).}
 \end{table}
 
@@ -156,7 +156,7 @@ About 6 of every 10 alert runs of the two ranges do not match a sustained 10\,\%
 
 \begin{table}[H]\centering\small
 \caption[Alert rules scored against sustained rises]{Alert rules scored against sustained 10\,\% rises. Random = mean recall of the same alert runs on random dates (300 draws); $p$ = random-date $p$-value; Runs = alert runs; Delay = median report days from onset to the matched alert.}\label{tab:alertrules}
-\input{tables/alert_rules}
+\fittab{\input{tables/alert_rules}}
 \source{\path{reports/tables/report/R5_alert_rules.csv} (notebook 05b).}
 \end{table}
 
@@ -173,7 +173,7 @@ The ML range and the simple range catch almost the same rises (Table~\ref{tab:ov
 
 \begin{table}[H]\centering\small
 \caption[Rises caught by the ML range and the simple range]{Sustained rises caught by the ML range and the simple range.}\label{tab:overlap}
-\input{tables/overlap}
+\fittab{\input{tables/overlap}}
 \source{\path{reports/tables/report/R5b_rule_overlap.csv} (notebook 05b).}
 \end{table}
 
@@ -185,7 +185,7 @@ Table~\ref{tab:byitem} shows each item. Onion, potato and garlic hold most of th
 
 \begin{table}[H]\centering\small
 \caption[Alerts by item]{Rises caught / rises (alert runs) by item and rule. ``--'': no sustained rise in the period, so the alerts cannot be judged.}\label{tab:byitem}
-\input{tables/by_item}
+\fittab{\input{tables/by_item}}
 \source{\path{reports/tables/report/R6_focus_items.csv} (notebook 05b).}
 \end{table}
 
@@ -194,7 +194,7 @@ A 95\,\% upper bound should hold the price on about 95\,\% of days. In 2024 it d
 
 \begin{table}[H]\centering\small
 \caption[Coverage of the expected range]{Share of days at or below the upper bound, against the nominal 95\,\%, with Kupiec's test.}\label{tab:coverage}
-\input{tables/coverage}
+\fittab{\input{tables/coverage}}
 \source{\path{reports/tables/report/R7_range_coverage.csv} (notebook 05b).}
 \end{table}
 
@@ -221,28 +221,28 @@ Figures~\ref{fig:app-status} to \ref{fig:app-how} show the four tabs of the app 
 
 \begin{figure}[H]
 \centering
-\optfig{monitor_status.png}{0.95\linewidth}
+\optfig[245 30 245 0]{monitor_status.png}{\linewidth}
 \caption[App: status on a day]{App, ``Status on a day'': all eight items on 4 November 2025 under the ML range; onion is in alert.}
 \label{fig:app-status}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\optfig{monitor_item.png}{0.95\linewidth}
+\optfig[240 10 255 0]{monitor_item.png}{\linewidth}
 \caption[App: item chart]{App, ``Item'': onion from October to November 2025 with the upper bound, the sustained rise shaded and the start of the alert run.}
 \label{fig:app-item}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\optfig{monitor_log.png}{0.95\linewidth}
+\optfig[310 45 310 0]{monitor_log.png}{\linewidth}
 \caption[App: alert log]{App, ``Alert log'': alert runs of the ML range in 2025-26 with the hindsight match.}
 \label{fig:app-log}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\optfig{monitor_how.png}{0.95\linewidth}
+\optfig{monitor_how.png}{\linewidth}
 \caption[App: how it works]{App, ``How it works'': the three rules and their scores.}
 \label{fig:app-how}
 \end{figure}

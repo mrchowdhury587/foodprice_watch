@@ -3,20 +3,20 @@ The code is in the public repository \url{https://github.com/mrchowdhury587/food
 
 \begin{table}[H]\centering\small
 \caption[Output files and their hashes]{Main output files and the first eight characters of their sha256 hash, identical in the local and the Colab runs.}\label{tab:repro}
-\input{tables/repro}
+\fittab{\input{tables/repro}}
 \source{\path{reports/RUN_LOG.md}.}
 \end{table}
 
 \begin{table}[H]\centering\small
 \caption[Commits that fixed the settings]{Commits that fixed the settings before scoring.}\label{tab:commits}
-\begin{tabular}{lll}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lll}
 \toprule
 \textbf{Commit} & \textbf{What was fixed} & \textbf{Before} \\
 \midrule
 \texttt{8d7c145} & LightGBM: price only, 7 leaves, rate 0.03, absolute-error loss & notebook 04b (forecast test) \\
 \texttt{e0cfa06} & alert settings: ML range 0.95, simple range 0.95, fixed rise 7\,\% & notebook 05b (alert scoring) \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table}
 
 \chapter{Results Register}\label{app:register}

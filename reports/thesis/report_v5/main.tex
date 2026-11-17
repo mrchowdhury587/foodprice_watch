@@ -30,6 +30,7 @@
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf}
 \usepackage{tikz}
+\usepackage{adjustbox}
 \usetikzlibrary{arrows.meta,positioning,fit,calc}
 
 \usepackage[parfill]{parskip}
@@ -48,6 +49,7 @@ footskip=1.5cm,
 headsep=0.75cm,
 }
 \linespread{1.5}
+\emergencystretch=3em
 
 % ---------------------------------------------------------------------------
 % Visible reminder for anything still to be filled in. Search the project for TODO before submitting.
@@ -56,9 +58,12 @@ headsep=0.75cm,
 \newcommand{\naive}{``tomorrow = today''}
 \newcommand{\retro}{\emph{(retrospective)}}
 % A figure that is uploaded separately (prices or screenshots): placeholder until the file exists.
-\newcommand{\optfig}[2]{\IfFileExists{figures/#1}{\includegraphics[width=#2]{#1}}{\fbox{\parbox[c][4cm][c]{#2}{\centering\textcolor{red}{Upload \texttt{figures/\detokenize{#1}} from Drive}}}}}
+% Optional first argument: trim (left bottom right top, in image pixels) to crop blank margins of a screenshot.
+\newcommand{\optfig}[3][0 0 0 0]{\IfFileExists{figures/#2}{\includegraphics[width=#3,trim=#1,clip]{#2}}{\fbox{\parbox[c][4cm][c]{#3}{\centering\textcolor{red}{Upload \texttt{figures/\detokenize{#2}} from Drive}}}}}
+% Shrinks a table to the text width only if it is wider.
+\newcommand{\fittab}[1]{\begin{adjustbox}{max width=\linewidth}#1\end{adjustbox}}
 % A table that contains prices (built by tools/thesis_upload.py, uploaded to Overleaf, never in git): placeholder until it exists.
-\newcommand{\opttab}[1]{\IfFileExists{tables/#1.tex}{\input{tables/#1}}{\fbox{\parbox[c][2.5cm][c]{0.8\linewidth}{\centering\textcolor{red}{Upload \texttt{tables/\detokenize{#1}.tex} (made by \texttt{tools/thesis\_upload.py})}}}}}
+\newcommand{\opttab}[1]{\IfFileExists{tables/#1.tex}{\fittab{\input{tables/#1}}}{\fbox{\parbox[c][2.5cm][c]{0.8\linewidth}{\centering\textcolor{red}{Upload \texttt{tables/\detokenize{#1}.tex} (made by \texttt{tools/thesis\_upload.py})}}}}}
 % Source line under a table or figure.
 \newcommand{\source}[1]{\par\smallskip{\footnotesize Source: #1}}
 % ---------------------------------------------------------------------------
