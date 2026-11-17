@@ -18,6 +18,7 @@ Plan: [docs/PROJECT_PLAN_2026-11-17.md](docs/PROJECT_PLAN_2026-11-17.md). Settin
 | [05a_alert_choice](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/05a_alert_choice.ipynb) | Settings of the three alert rules (ML range, simple range, fixed threshold) chosen on 2024 (table A1) | ready |
 | [05b_alert_scoring](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/05b_alert_scoring.ipynb) | The three rules scored against sustained rises, 2024 and 2025-26 (retrospective); overlap, range coverage, per item (tables A2-A5) | ready |
 | [06_report_tables](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/06_report_tables.ipynb) | Thesis tables R1-R7 (CSV and LaTeX), figures F3-F5 and `reports/RESULTS_REGISTER.md` (every headline number with its table, notebook and commit) | ready |
+| [07_monitor](https://colab.research.google.com/github/mrchowdhury587/foodprice_watch/blob/main/notebooks/07_monitor.ipynb) | The monitor: builds `processed/monitor_8.csv`, checks it against 05b, opens the Gradio app (status on a day, item chart, alert log, how it works). A replay of the data to 2026-10-24. `SHARE = True` gives a temporary public link: anyone with it sees TCB prices | ready |
 
 Code comes from GitHub `main` each session; Google Drive holds data and outputs only.
 

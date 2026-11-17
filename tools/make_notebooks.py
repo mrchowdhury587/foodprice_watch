@@ -1,4 +1,4 @@
-"""Writes notebooks/01-06 as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
+"""Writes notebooks/01-07 as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
 import json, sys
 from pathlib import Path
 
@@ -715,8 +715,60 @@ print('\\nfigures:', [p.name for p in sorted(FIG.glob('F[345]_*.png'))], '(F5 co
 """),
 ]
 
+monitor_nb = [
+    ("markdown", """
+# Food Price Watch 07: the monitor (Gradio app)
+Builds `processed/monitor_8.csv` (per item and report day: price, the upper bound of each rule in Tk, and the alert flags of notebook 05b), checks it against 05b, then opens the monitor app.
+The app is a replay of TCB prices to 24 Oct 2026: abnormal-rise detection, not early warning. Main rule: ML range; simple range and fixed rise can be switched on.
+**`SHARE = True` makes a temporary public link (about 72 hours): anyone with it sees TCB prices** (approved by the user, DEVIATIONS.md). Set `AUTH = ('name', 'password')` to protect it, or `SHARE = False` to open it inside Colab only.
+Paste the output of the check cell (the one before the app) back.
+"""),
+    *SETUP,
+    ("code", """
+%pip install -q "gradio>=5.40,<6"
+import gradio
+print('gradio', gradio.__version__)
+"""),
+    ("code", """
+import numpy as np
+import pandas as pd
+from foodwatch import monitor as mo
+from foodwatch.paths import REPO
+choice = SETTINGS['alert_choice']
+D = pd.read_csv(data('data'), parse_dates=['Date'])
+F7 = pd.read_csv(data('forecasts_h7'))
+M, EP = mo.build(F7, D, SETTINGS, choice)
+AL = pd.read_csv(data('alerts'))
+R5 = pd.read_csv(REPO / 'reports/tables/report/R5_alert_rules.csv')
+chk = mo.checks(M, AL, R5, SETTINGS, choice)
+assert chk['ok'], chk
+h_m = write_csv(M, data('monitor'))
+"""),
+    ("code", """
+pd.set_option('display.width', 250); pd.set_option('display.max_columns', 30)
+print('=== 07 monitor data ===')
+print('code commit:', CODE_COMMIT, '| forecasts_h7.csv sha256', sha256(data('forecasts_h7'))[:16], '| alerts_8.csv sha256', sha256(data('alerts'))[:16])
+print('checks:', 'PASS' if chk['ok'] else 'FAIL', {k_: v_ for k_, v_ in chk.items() if k_ != 'ok'})
+print('monitor file:', SETTINGS['files']['monitor'], '| rows', len(M), '| sha256', h_m[:16])
+last = M.date.max().strftime('%Y-%m-%d')
+for r_ in 'ABC':
+    T = mo.status_on(M, last, r_)
+    print(f"status on {last}, {mo.RULES[r_]}: {int((T.Status == 'ALERT: abnormal rise').sum())} of {len(T)} items in alert")
+print(mo.status_on(M, last, SETTINGS['monitor']['main_rule']).drop(columns=['Price (Tk)', 'Upper bound (Tk)']).to_string(index=False))
+"""),
+    ("code", """
+# Opens the app. SHARE = True prints a public *.gradio.live link (about 72 hours); anyone with the link sees TCB prices.
+SHARE = True
+AUTH = None          # e.g. ('supervisor', 'a password you choose') to require a login
+sys.path.insert(0, str(REPO / 'app'))
+from monitor_app import make_app, load
+app = make_app(*load(DATA_ROOT, REPO))
+app.launch(share=SHARE, auth=AUTH)
+"""),
+]
+
 OUT.mkdir(parents=True, exist_ok=True)
 for name, cells in [("01_data_intake.ipynb", intake), ("02_data_processing.ipynb", processing), ("03_price_behaviour.ipynb", behaviour_nb),
-                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb), ("05b_alert_scoring.ipynb", alert_scoring_nb), ("06_report_tables.ipynb", report_nb)]:
+                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb), ("05b_alert_scoring.ipynb", alert_scoring_nb), ("06_report_tables.ipynb", report_nb), ("07_monitor.ipynb", monitor_nb)]:
     (OUT / name).write_text(json.dumps(nb(cells), indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print("wrote", OUT / name)

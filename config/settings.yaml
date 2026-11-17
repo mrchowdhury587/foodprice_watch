@@ -98,12 +98,17 @@ report:
   figure_period: ["2024-01-01", "2026-10-24"]
   forbidden_words: [hoarding, syndicate, collusion, cartel, manipulation, early warning, cause, caused, causes]
 
+# Monitor (notebook 07, app/monitor_app.py): a replay of the data to 2026-10-24; no new prices are fetched.
+monitor:
+  main_rule: A               # user, 2026-11-17: ML range shown first; simple range and fixed rise switchable
+
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
   rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)
   forecasts_test: processed/forecasts_test.csv   # 04b: weekly-origin test forecasts, naive / ETS / LightGBM (contains prices)
   forecasts_h7: processed/forecasts_h7.csv       # 04b: 7-day forecasts from every report day since 2023-06-01 (contains prices)
   alerts: processed/alerts_8.csv                 # 05b: exceedance and alert flags per item, target day and rule
+  monitor: processed/monitor_8.csv               # 07: per item and report day: price, bounds in Tk, exceed / alert / run start per rule (contains prices)
   checks: processed/checks.json
   figures: reports/figures
   manifest: raw/MANIFEST.csv
