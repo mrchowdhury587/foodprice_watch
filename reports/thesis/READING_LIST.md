@@ -31,3 +31,5 @@ Every paper cited in `report_v5/ref.bib`. The bibliographic details were checked
 | openmeteo | Zippenfenig (2023), Open-Meteo | Weather data source | [ ] |
 
 Not found or dropped: a "Uganda food price, Springer 2024" study named in the project plan could not be found (only bachelor's projects and a 2025 IMF working paper turned up); it is not cited.
+
+Checked on 2026-11-17 against the publisher pages (the report text now follows them; reading the full papers is still needed): cpd2026 ("59 per cent of the consumer price index basket"; food inflation "around 14 per cent at its peaks", no date given); onionnardl (monthly wholesale and retail prices of local and imported onion 2006-2020, NARDL, imported prices lead local prices); jubayer2024 (production 1970-2022, CV 71.10 %, SARIMA(1,0,2)(1,1,1)12 for monthly prices, peak in October-November).
