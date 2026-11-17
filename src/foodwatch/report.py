@@ -149,6 +149,7 @@ def build_all(T, items):
 
 def to_tex(df, path, caption, label):
     fmt = {c: (lambda x: f"{x:.3f}") if df[c].dtype.kind == "f" else None for c in df.columns}
+    caption = caption.replace("%", r"\%").replace("_", r"\_")   # captions are not escaped by pandas
     tex = df.to_latex(index=False, escape=True, caption=caption, label=label, na_rep="",
                       formatters={c: f for c, f in fmt.items() if f}, column_format="l" * len(df.columns))
     Path(path).write_text(tex, encoding="utf-8", newline="\n")
