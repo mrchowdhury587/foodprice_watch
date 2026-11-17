@@ -60,6 +60,14 @@ Everything is joined into one table, \texttt{data\_8.csv}, in long format: one r
 \input{tables/columns}
 \end{table}
 
+Table~\ref{tab:datasample} shows the eight rows of the first report day of the test period, 1 January 2025, with a selection of columns. The exchange-rate column is empty for items that do not use it, and the weather column for items other than onion and potato.
+
+\begin{table}[H]\centering\footnotesize
+\caption[A sample of the data table]{A sample of the data table: the eight items on 1 January 2025 (prices in Tk; ``--'' = not used for this item).}\label{tab:datasample}
+\opttab{data_sample}
+\source{\texttt{processed/data\_8.csv} on Drive (contains prices; not in the public repository).}
+\end{table}
+
 \subsection{Cleaning rules}
 The cleaning follows a small set of fixed rules. None of them invents a price, removes a real one, or uses a value before it was known.
 \begin{enumerate}[leftmargin=*,itemsep=2pt]
@@ -154,10 +162,65 @@ The three rules differ only in how the upper bound is drawn (Table~\ref{tab:rule
 \end{table}
 
 \subsection{From exceedance to alert}
-A day is an \emph{exceedance} when the price is above the upper bound. A single exceedance is not an alert: one-day jumps are common and often reverse. An item is in \emph{alert} on day $t$ when it exceeded the bound on at least 3 of its last 5 report days. Consecutive alert days form one \emph{alert run}, and the first day of the run is the day the monitor would report.
+A day is an \emph{exceedance} when the price is above the upper bound. A single exceedance is not an alert: one-day jumps are common and often reverse. An item is in \emph{alert} on day $t$ when it exceeded the bound on at least 3 of its last 5 report days. Consecutive alert days form one \emph{alert run}, and the first day of the run is the day the monitor would report. Figure~\ref{fig:alertmech} shows the mechanism.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.5cm, y=0.5cm, font=\footnotesize]
+% match window and rise episode (hindsight)
+\fill[gray!18] (11,0) rectangle (21,9);
+\node[align=center] at (16,9.6) {sustained rise (hindsight)};
+\draw[|-|, thick] (7,-1.2) -- node[below] {match window: onset $-14$ to end $+7$ report days} (23,-1.2);
+% upper bound (step) and price
+\draw[thick, dashed] (0,3) -- (5,3) -- (5,3.2) -- (9,3.2) -- (9,3.4) -- (12,3.4) -- (12,4.2) -- (14,4.2) -- (14,5.3) -- (17,5.3) -- (17,6.2) -- (26,6.2);
+\node[right] at (26,6.2) {upper bound};
+\draw[very thick] (0,2) -- (4,2) -- (4,2.2) -- (8,2.2) -- (8,2) -- (11,2) -- (11,3.9) -- (12,3.9) -- (12,5) -- (13,5) -- (13,5.6) -- (15,5.6) -- (15,7) -- (17,7) -- (17,7.6) -- (20,7.6) -- (20,7.3) -- (26,7.3);
+\node[right] at (26,7.3) {price};
+% exceedances
+\foreach \x/\y in {11.5/3.9, 12.5/5, 13.5/5.6, 14.5/5.6, 15.5/7, 16.5/7} \fill (\x,\y) circle (2.5pt);
+\draw[-{Stealth}, thick] (12.5,11.2) -- (12.5,9.9);
+\node[align=center] at (12.5,12) {alert run starts: 3rd day above the bound in the last 5};
+\node[align=left, anchor=west] at (0,10.6) {dots: price above the bound};
+\draw[gray!60] (0,0) -- (26,0);
+\node[below right] at (0,0) {report days $\rightarrow$};
+\end{tikzpicture}
+\caption[How an alert is raised and matched]{How an alert is raised and matched (schematic, not real prices). The bound for each day comes from information known 7 report days earlier. The price must be above it on 3 of the last 5 report days to start an alert run. In scoring, the run counts for a sustained rise if it starts inside the match window.}
+\label{fig:alertmech}
+\end{figure}
 
 \subsection{Choosing the settings on 2024}
 For each rule, the candidate settings were scored on 2024. The chosen setting is the most sensitive one whose alert runs that match no sustained rise stay at or below 2 per item-year, where an item-year is 250 report days. The three settings were committed (commit \texttt{e0cfa06}) before the scoring notebook was written.
+
+\subsection{Configuration}
+Table~\ref{tab:config} lists the final configuration of the forecasts and the alert engine. All values are in \path{config/settings.yaml}.
+
+\begin{table}[H]\centering\small
+\caption[Configuration of the forecasts and the alert engine]{Configuration of the forecasts and the alert engine.}\label{tab:config}
+\begin{tabular}{lll}
+\toprule
+\textbf{Part} & \textbf{Parameter} & \textbf{Value} \\
+\midrule
+LightGBM & feature set & price history only \\
+ & leaves, learning rate, loss & 7, 0.03, absolute error (l1) \\
+ & boosting rounds & 300 \\
+ & model & one global model, all items and horizons \\
+ & refit (benchmark) & every 8 weekly origins \\
+ & refit (daily 7-day forecasts) & every 30 report days, from 1 June 2023 \\
+ETS & model & AutoETS on the log price, after the 2022 gap \\
+ & refit & every origin \\
+Benchmark & horizons & 1, 7, 14, 30 report days \\
+ & origins & every 7 report days \\
+Range & horizon & 7 report days \\
+ & errors used & last 120 known, at least 30 \\
+ & level (rules A, B) & 0.95 \\
+ & threshold (rule C) & 7\,\% \\
+Alert & persistence & above the bound on 3 of the last 5 report days \\
+Scoring & match window & 14 report days before onset to 7 after the end \\
+ & random-date draws & 300 \\
+ & unmatched-run target & $\leq 2$ per item-year (250 report days) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Evaluation}\label{sec:eval}
 
@@ -180,8 +243,90 @@ An alert run is \emph{matched} to a sustained rise of the same item if it starts
 \item \textbf{Range coverage:} share of days on which the price was at or below the upper bound, against the nominal level, with Kupiec's test \cite{kupiec}.
 \end{itemize}
 
-\section{The monitoring app}\label{sec:method-monitor}
-Notebook 07 builds one row per item and report day from 13 June 2023 to 24 October 2026 (8,432 rows): the price, the upper bound of each rule in taka, and the exceedance, alert and run-start flags. A check confirms that its alert flags are identical to those scored in notebook 05b. A Gradio app \cite{gradio} then shows four views: the status of every item on a chosen day, a chart of one item with its bounds and alerts, a log of every alert run, and a page that explains the rules and the results. Everything shown for a day uses only information known on that day. The app replays the data to 24 October 2026; it does not fetch new prices.
+\section{System Architecture}\label{sec:arch}
+Figure~\ref{fig:arch} shows the system as it runs, in four layers. The data layer reads and checks the TCB sheets and the drivers. The forecast layer produces, for every item and report day, a 7-day-ahead forecast. The alert engine turns forecasts and past errors into an upper bound, compares the price with it, and applies the persistence rule. The presentation layer shows the result in a web app. The evaluation block is used only for this study: it scores the alerts against sustained rises, random dates and coverage, and is not needed to run the monitor.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  layer/.style={draw, rounded corners=3pt, minimum width=13.2cm, minimum height=1.55cm},
+  comp/.style={draw, fill=white, rounded corners=2pt, align=center, font=\scriptsize, minimum height=0.85cm, text width=2.3cm},
+  lname/.style={font=\scriptsize\bfseries, anchor=west, align=left},
+  arr/.style={-{Stealth[length=2mm]}, thick}]
+\node[layer] (L4) at (0,0) {};
+\node[layer] (L3) at (0,-2.1) {};
+\node[layer] (L2) at (0,-4.2) {};
+\node[layer] (L1) at (0,-6.3) {};
+\node[lname] at ($(L4.west)+(0.15,0)$) {Presentation};
+\node[lname] at ($(L3.west)+(0.15,0)$) {Alert\\engine};
+\node[lname] at ($(L2.west)+(0.15,0)$) {Forecast};
+\node[lname] at ($(L1.west)+(0.15,0)$) {Data};
+\node[comp] (raw) at (-3.2,-6.3) {TCB sheets, weather,\\exchange rate, calendar};
+\node[comp] (chk) at (-0.4,-6.3) {clean, join on\\availability date, check};
+\node[comp] (tab) at (2.4,-6.3) {\texttt{data\_8.csv}\\one row per item-day};
+\node[comp] (nai) at (-3.2,-4.2) {\naive{}};
+\node[comp] (lgb) at (-0.4,-4.2) {LightGBM\\(global model)};
+\node[comp] (h7) at (2.4,-4.2) {7-day forecasts,\\every report day};
+\node[comp] (err) at (-3.2,-2.1) {last 120 known\\errors per item};
+\node[comp] (bnd) at (-0.4,-2.1) {upper bound\\rules A, B, C};
+\node[comp] (per) at (2.4,-2.1) {above on 3 of 5\\$\Rightarrow$ alert run};
+\node[comp] (t1) at (-3.2,0) {Status on a day};
+\node[comp] (t2) at (-0.4,0) {Item chart};
+\node[comp] (t3) at (2.4,0) {Alert log, How it works};
+\node[comp, text width=2.0cm] (ev) at (5.6,-3.15) {Evaluation\\(study only): rises, random dates, coverage};
+\draw[arr] (raw) -- (chk); \draw[arr] (chk) -- (tab);
+\draw[arr] (tab) -- (h7);
+\draw[arr] (lgb) -- (h7); \draw[arr] (nai.south) to[bend right=14] (h7.south);
+\draw[arr] (h7) -- (per);
+\draw[arr] (err) -- (bnd); \draw[arr] (bnd) -- (per);
+\draw[arr] (per) -- (t3);
+\draw[arr] (bnd) -- (t2);
+\draw[arr] (per.north west) -- (t1.south east);
+\draw[arr, dashed] (per) -- (ev);
+\end{tikzpicture}
+\caption[System architecture]{System architecture of Food Price Watch. Rule B uses \naive{} and rule C uses no forecast; only rule A needs the LightGBM model. The dashed arrow leads to the evaluation used in this study.}
+\label{fig:arch}
+\end{figure}
+
+\section{The Monitoring App and User Interface}\label{sec:method-monitor}
+Notebook 07 builds one row per item and report day from 13 June 2023 to 24 October 2026 (8,432 rows): the price, the upper bound of each rule in taka, and the exceedance, alert and run-start flags. A check confirms that its alert flags are identical to those scored in notebook 05b. A Gradio app \cite{gradio} then serves four tabs (Table~\ref{tab:tabs}, Figure~\ref{fig:wireframe}). Everything shown for a day uses only information known on that day. The app replays the data to 24 October 2026; it does not fetch new prices. In Colab it can be opened through a temporary share link; because the app shows TCB prices, a login can be set in the notebook.
+
+\begin{table}[H]\centering\small
+\caption[Tabs of the monitoring app]{Tabs of the monitoring app: what the user chooses and what the app shows.}\label{tab:tabs}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.2cm}X}
+\toprule
+\textbf{Tab} & \textbf{User input} & \textbf{Output} \\
+\midrule
+Status on a day & report day; alert rule (ML range shown first) & one row per item: price, change over 7 report days, upper bound, status (normal / above range on $n$ of the last 5 days / ALERT) and the date the alert started \\
+Item & item; rules to show; from and to dates & chart of price and bounds with sustained rises shaded and alert starts marked; table of alert runs in the period \\
+Alert log & rules; item; period & every alert run with start, end, price and change at the start, and whether it matched a sustained rise (in hindsight) \\
+How it works & -- & the three rules, the scores of Table~\ref{tab:alertrules}, the main finding and the limits \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\scriptsize]
+\draw[rounded corners=3pt, thick] (0,0) rectangle (14,8.2);
+\node[anchor=west, font=\normalsize\bfseries] at (0.3,7.7) {Food Price Watch};
+\node[anchor=west, text width=13cm] at (0.3,7.1) {Replay of TCB Dhaka daily retail prices to 24 Oct 2026. Abnormal-rise detection, not early warning.};
+\foreach \x/\t/\w in {0.3/Status on a day/2.6, 3.0/Item/1.4, 4.5/Alert log/1.8, 6.4/How it works/2.2}
+  \draw (\x,6.2) rectangle ++(\w,0.5) node[midway] {\t};
+\draw[very thick] (0.3,6.2) -- (2.9,6.2);
+\draw (0.3,5.1) rectangle (4.3,5.8) node[midway] {Report day \quad $\blacktriangledown$};
+\draw (4.6,5.1) rectangle (13.7,5.8);
+\node[anchor=west] at (4.7,5.45) {Alert rule: \quad $\odot$ ML range \quad $\circ$ simple range \quad $\circ$ fixed 7-report rise};
+\draw (0.3,0.4) rectangle (13.7,4.7);
+\foreach \x/\t in {0.4/Item, 2.3/Unit, 3.9/Report day, 5.6/Price (Tk), 7.1/Change 7 (\%), 8.9/Upper bound (Tk), 10.7/Status, 12.4/Alert since}
+  \node[anchor=west, font=\scriptsize\bfseries] at (\x,4.35) {\t};
+\draw (0.3,4.05) -- (13.7,4.05);
+\foreach \y/\s in {3.7/ALERT: abnormal rise, 3.2/above range on 2 of the last 5 days, 2.7/normal, 2.2/normal, 1.7/normal, 1.2/normal, 0.7/normal}
+  {\node[anchor=west] at (0.4,\y) {item}; \node[anchor=west] at (10.7,\y) {\s};}
+\end{tikzpicture}
+\caption[Layout of the ``Status on a day'' tab]{Layout of the ``Status on a day'' tab (wireframe; items in alert are listed first). Screenshots of the running app are in Section~\ref{sec:res-monitor}.}
+\label{fig:wireframe}
+\end{figure}
 
 \section{Reproducibility}
 Each notebook starts by cloning the code from GitHub and prints the code commit and the sha256 hashes of its inputs and outputs. Tables in the repository contain only rates and counts; files that contain prices stay on Drive because TCB states no reuse terms. Every headline number in this report is listed with its table, notebook and commit in a results register (Appendix~\ref{app:register}).

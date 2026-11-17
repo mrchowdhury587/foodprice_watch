@@ -57,6 +57,8 @@ headsep=0.75cm,
 \newcommand{\retro}{\emph{(retrospective)}}
 % A figure that is uploaded separately (prices or screenshots): placeholder until the file exists.
 \newcommand{\optfig}[2]{\IfFileExists{figures/#1}{\includegraphics[width=#2]{#1}}{\fbox{\parbox[c][4cm][c]{#2}{\centering\textcolor{red}{Upload \texttt{figures/\detokenize{#1}} from Drive}}}}}
+% A table that contains prices (built by tools/thesis_upload.py, uploaded to Overleaf, never in git): placeholder until it exists.
+\newcommand{\opttab}[1]{\IfFileExists{tables/#1.tex}{\input{tables/#1}}{\fbox{\parbox[c][2.5cm][c]{0.8\linewidth}{\centering\textcolor{red}{Upload \texttt{tables/\detokenize{#1}.tex} (made by \texttt{tools/thesis\_upload.py})}}}}}
 % Source line under a table or figure.
 \newcommand{\source}[1]{\par\smallskip{\footnotesize Source: #1}}
 % ---------------------------------------------------------------------------
