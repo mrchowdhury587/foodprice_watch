@@ -477,3 +477,11 @@ Six forecast models compared; none beat tomorrow = today  three models (naive, E
 figures: ['F3_forecast_vs_naive.png', 'F4_alert_recall.png', 'F5_prices_with_alerts.png'] (F5 contains prices: Drive only)
 ```
 
+## 02_data_processing, Colab rerun (2026-11-17, code 7eba9a6, account mhpcoder) — Drive mounts again
+
+Same result as the earlier Colab run (2a93d78): `data_8.csv` 11,296 rows, 20 columns, sha256 `381ef71d10092bde`, checks PASS, regression vs earlier run PASS (fx_lvl offset 0.01499 before the switch, fx_ch30 mismatches 0, 624 values filled where the old file was empty). D1 table unchanged.
+
+## 03_price_behaviour, Colab rerun (2026-11-17, code e0e131b, account mhpcoder) — replaces the LOCAL run as the run of record
+
+Identical to the LOCAL run (e8853d5): input `data_8.csv` sha256 `381ef71d10092bde`; `rise_episodes_8.csv` 70 rows, sha256 `48d529fceedeae9b` (same as local); checks PASS (11,074 changes counted, none inside or across the gap, no rise window touching the gap, no episode onset in the gap). Tables B1-B6 print the same values as the committed tables. Validation 2024: 17 / 11 / 8 episodes at 7 / 10 / 15 %; retrospective 2025-26: 26 / 23 / 15. F1 and F2 are now on Drive.
+
