@@ -1,0 +1,9 @@
+item,unit,group,first_day,last_day,report_days,pct_not_reported,pct_unchanged,drivers
+Chicken - Broiler,per kg,volatile_perishable,2021-05-17,2026-10-24,1412,0,62.44,none
+Egg - Farm,per hali (4 pcs),volatile_perishable,2021-05-17,2026-10-24,1412,0.07,77.06,none
+Garlic - Imported,per kg,imported_staple,2021-05-17,2026-10-24,1412,0.07,76.48,exchange rate
+Onion - Local,per kg,volatile_perishable,2021-05-17,2026-10-24,1412,0.07,68.18,weather
+Palm Oil - Loose,per litre,administered,2021-05-17,2026-10-24,1412,0,81.11,exchange rate
+Potato,per kg,domestic_staple,2021-05-17,2026-10-24,1412,0.07,78.21,weather
+Soybean Oil - Loose,per litre,administered,2021-05-17,2026-10-24,1412,0.28,80.48,exchange rate
+Sugar,per kg,administered,2021-05-17,2026-10-24,1412,0,87.38,exchange rate

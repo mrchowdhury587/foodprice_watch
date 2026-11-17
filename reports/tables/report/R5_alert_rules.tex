@@ -1,0 +1,16 @@
+\begin{table}
+\caption{Alert rules scored against sustained 10 \% rises (abnormal-rise detection, not early warning). Settings fixed on 2024; 2025-26 is retrospective.}
+\label{tab:r5}
+\begin{tabular}{llllllllllll}
+\toprule
+period & rule & setting & episodes & caught & recall & recall\_random\_dates & p & alert\_runs & precision & median\_delay\_reports & unmatched\_per\_item\_year \\
+\midrule
+2024 validation & ML range & 0.950 & 11 & 6 & 0.545 & 0.197 & 0.003 & 17 & 0.353 & 1.500 & 1.045 \\
+2024 validation & simple range & 0.950 & 11 & 8 & 0.727 & 0.296 & 0.003 & 20 & 0.400 & 2.000 & 1.140 \\
+2024 validation & fixed 7-report rise & 0.070 & 11 & 10 & 0.909 & 0.491 & 0.003 & 27 & 0.370 & 0.500 & 1.615 \\
+2025-26 retrospective & ML range & 0.950 & 23 & 17 & 0.739 & 0.285 & 0.003 & 42 & 0.405 & 2.000 & 1.296 \\
+2025-26 retrospective & simple range & 0.950 & 23 & 15 & 0.652 & 0.251 & 0.003 & 39 & 0.385 & 2.000 & 1.244 \\
+2025-26 retrospective & fixed 7-report rise & 0.070 & 23 & 22 & 0.957 & 0.312 & 0.003 & 30 & 0.733 & 2.000 & 0.415 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,5 @@
+period,rule,days,nominal,coverage,kupiec_p
+2024 validation,ML range,2632,0.95,0.9445,0.2053
+2024 validation,simple range,2632,0.95,0.946,0.3582
+2025-26 retrospective,ML range,4824,0.95,0.9345,0
+2025-26 retrospective,simple range,4824,0.95,0.9391,0.0007

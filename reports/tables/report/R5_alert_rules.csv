@@ -1,0 +1,7 @@
+period,rule,setting,episodes,caught,recall,recall_random_dates,p,alert_runs,precision,median_delay_reports,unmatched_per_item_year
+2024 validation,ML range,0.95,11,6,0.5455,0.197,0.0033,17,0.3529,1.5,1.0448
+2024 validation,simple range,0.95,11,8,0.7273,0.2961,0.0033,20,0.4,2,1.1398
+2024 validation,fixed 7-report rise,0.07,11,10,0.9091,0.4909,0.0033,27,0.3704,0.5,1.6147
+2025-26 retrospective,ML range,0.95,23,17,0.7391,0.2849,0.0033,42,0.4048,2,1.2956
+2025-26 retrospective,simple range,0.95,23,15,0.6522,0.2506,0.0033,39,0.3846,2,1.2438
+2025-26 retrospective,fixed 7-report rise,0.07,23,22,0.9565,0.3123,0.0033,30,0.7333,2,0.4146

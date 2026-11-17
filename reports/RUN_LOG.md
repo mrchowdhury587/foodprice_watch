@@ -347,3 +347,133 @@ Sugar                       0/0 (2)  0/0 (2)   0/0 (0)               0/0 (5)  0/
 
 alerts file: processed/alerts_8.csv | rows 25464 | sha256 613b3c4595a68cf5
 ```
+
+## 06_report_tables (2026-11-17, LOCAL run on the work PC, code 4b65a2f) — 2025-26 rows RETROSPECTIVE, not a Colab run
+
+Run locally against `E:\msc_project\FoodPriceWatch_v2_local` (Drive does not mount in Colab). Built only from the committed tables (D1, B1-B6, M2-M4, A2-A5); nothing fitted or chosen. Outputs in git: `reports/tables/report/R1-R7` (CSV and LaTeX), `reports/figures/F3_forecast_vs_naive.png`, `F4_alert_recall.png`, `reports/RESULTS_REGISTER.md`. `F5_prices_with_alerts.png` shows prices and is in the local data folder only.
+
+Plan claims checked: range coverage and alert delay as planned; "65-75 % of rises caught" only partly (ML range 55 % in 2024); "about three times random dates" is 2.5-2.8 times; three forecast models instead of six.
+
+```
+=== 06 report tables, figures and results register (2025-26 RETROSPECTIVE) ===
+code commit: 4b65a2f (local run, work PC) | alert settings committed in e0cfa06
+checks: PASS {'trace': {'R1': True, 'R2': True, 'R3': True, 'R4_M2': True, 'R4_M3': True, 'R5': True, 'R6': True, 'R7': True}, 'retro_labelled': True, 'no_price_columns': True, 'forbidden_words': []}
+source tables and their commits: {'D1_panel_summary': 'fea827f', 'B1_change_frequency': '15f2d02', 'B2_change_size': '15f2d02', 'B3_unchanged_runs': '15f2d02', 'B5_rise_episodes_by_item_year': '15f2d02', 'B6_ramadan': '15f2d02', 'M2_validation_models': '8d7c145', 'M3_test_accuracy': '6af92a6', 'M4_test_by_item': '6af92a6', 'A2_rule_comparison': '7eba9a6', 'A3_rule_overlap': '7eba9a6', 'A4_range_coverage': '7eba9a6', 'A5_alerts_by_item': '7eba9a6'}
+
+R1_data (8 rows, sha256 63cafc132f52): The eight items: TCB Dhaka daily retail prices, 17 May 2021 to 24 October 2026 (the sparse 2022 period is kept as not reported).
+               item             unit               group  first_day   last_day  report_days  pct_not_reported  pct_unchanged       drivers
+  Chicken - Broiler           per kg volatile_perishable 2021-05-17 2026-10-24         1412              0.00          62.44          none
+         Egg - Farm per hali (4 pcs) volatile_perishable 2021-05-17 2026-10-24         1412              0.07          77.06          none
+  Garlic - Imported           per kg     imported_staple 2021-05-17 2026-10-24         1412              0.07          76.48 exchange rate
+      Onion - Local           per kg volatile_perishable 2021-05-17 2026-10-24         1412              0.07          68.18       weather
+   Palm Oil - Loose        per litre        administered 2021-05-17 2026-10-24         1412              0.00          81.11 exchange rate
+             Potato           per kg     domestic_staple 2021-05-17 2026-10-24         1412              0.07          78.21       weather
+Soybean Oil - Loose        per litre        administered 2021-05-17 2026-10-24         1412              0.28          80.48 exchange rate
+              Sugar           per kg        administered 2021-05-17 2026-10-24         1412              0.00          87.38 exchange rate
+
+R2_behaviour (8 rows, sha256 0173d0cbf9c4): How often and how much prices move. Change sizes are on days the price changed; runs are in report days; sustained rises use the 14-report rule (10 % main, 7 % and 15 % sensitivity).
+               item  pct_days_changed_2021_26  pct_days_changed_2024_26  median_change_pct  p95_change_pct  median_unchanged_run  longest_unchanged_run  rises_7pct  rises_10pct  rises_15pct
+  Chicken - Broiler                     37.52                    32.402               2.70            7.58                     2                     40          14            8            5
+         Egg - Farm                     22.90                    17.491               2.35            6.90                     3                     44          13            8            2
+  Garlic - Imported                     23.55                    17.703               4.00           12.91                     3                     40          13           12            7
+      Onion - Local                     31.79                    27.040               5.00           16.72                     2                     32          19           19           17
+   Palm Oil - Loose                     18.83                    14.165               1.02            3.74                     3                    102           2            1            0
+             Potato                     21.82                    17.379               6.25           18.18                     3                     75          18           18           13
+Soybean Oil - Loose                     19.42                    16.630               0.88            3.01                     3                     50           4            1            0
+              Sugar                     12.55                     9.014               1.85            4.76                     4                    104           3            3            1
+
+R3_ramadan (8 rows, sha256 a546f2a0fce4): Changes in the 30 days before Ramadan against other days (descriptive: associated with the season; says nothing about why).
+               item  ramadans  days_before_ramadan  median_change_before_pct  median_change_other_pct  pct_rise_days_before  pct_rise_days_other
+  Chicken - Broiler         5                  112                      2.94                        0                 16.07                11.14
+         Egg - Farm         5                  112                     -2.47                        0                  0.00                 7.30
+  Garlic - Imported         5                  112                      0.00                        0                  2.68                12.67
+      Onion - Local         5                  112                     -4.55                        0                 17.86                25.18
+   Palm Oil - Loose         5                  112                      0.00                        0                  3.57                 0.40
+             Potato         5                  112                     -9.76                        0                  8.93                24.46
+Soybean Oil - Loose         5                  110                      0.00                        0                  0.91                 0.64
+              Sugar         5                  112                      0.00                        0                  0.00                 2.40
+
+R4_forecast (16 rows, sha256 06e1da492e2a): Forecast benchmark: error of the 1- to 30-report-day log change next to tomorrow = today (geometric mean over items). Relative MAE above 1 means worse than tomorrow = today. 2025-26 is retrospective.
+               period    model  horizon  mae_log  mae_log_naive  rel_mae_gmean  accuracy  accuracy_naive  p_holm
+      2024 validation      ETS        1    0.009          0.009          1.060     0.991           0.991   0.003
+      2024 validation      ETS        7    0.032          0.032          1.010     0.968           0.968   0.027
+      2024 validation      ETS       14    0.051          0.051          1.004     0.948           0.949   0.146
+      2024 validation      ETS       30    0.083          0.083          1.002     0.914           0.914   0.281
+      2024 validation LightGBM        1    0.009          0.009          1.114     0.991           0.991   0.002
+      2024 validation LightGBM        7    0.032          0.032          1.029     0.967           0.968   0.411
+      2024 validation LightGBM       14    0.052          0.051          1.035     0.947           0.949   0.434
+      2024 validation LightGBM       30    0.082          0.083          1.014     0.913           0.914     NaN
+2025-26 retrospective      ETS        1    0.006          0.005          1.127     0.994           0.995   0.000
+2025-26 retrospective      ETS        7    0.026          0.025          1.028     0.974           0.975   0.042
+2025-26 retrospective      ETS       14    0.042          0.041          1.019     0.958           0.959   0.079
+2025-26 retrospective      ETS       30    0.065          0.063          1.020     0.933           0.934   0.001
+2025-26 retrospective LightGBM        1    0.006          0.005          1.213     0.994           0.995   0.000
+2025-26 retrospective LightGBM        7    0.026          0.025          1.033     0.973           0.975   0.000
+2025-26 retrospective LightGBM       14    0.042          0.041          1.014     0.958           0.959   0.042
+2025-26 retrospective LightGBM       30    0.065          0.063          1.022     0.932           0.934   0.275
+
+R5_alert_rules (6 rows, sha256 a43f64a65f06): Alert rules scored against sustained 10 % rises (abnormal-rise detection, not early warning). Settings fixed on 2024; 2025-26 is retrospective.
+               period                rule  setting  episodes  caught  recall  recall_random_dates     p  alert_runs  precision  median_delay_reports  unmatched_per_item_year
+      2024 validation            ML range     0.95        11       6   0.546                0.197 0.003          17      0.353                   1.5                    1.045
+      2024 validation        simple range     0.95        11       8   0.727                0.296 0.003          20      0.400                   2.0                    1.140
+      2024 validation fixed 7-report rise     0.07        11      10   0.909                0.491 0.003          27      0.370                   0.5                    1.615
+2025-26 retrospective            ML range     0.95        23      17   0.739                0.285 0.003          42      0.405                   2.0                    1.296
+2025-26 retrospective        simple range     0.95        23      15   0.652                0.251 0.003          39      0.385                   2.0                    1.244
+2025-26 retrospective fixed 7-report rise     0.07        23      22   0.956                0.312 0.003          30      0.733                   2.0                    0.415
+
+R5b_rule_overlap (2 rows, sha256 0815c5e2510e): Sustained rises caught by the ML range and the simple range.
+               period  episodes  caught_by_both  ML_range_only  simple_range_only  caught_by_neither
+      2024 validation        11               6              0                  2                  3
+2025-26 retrospective        23              15              2                  0                  6
+
+R6_focus_items (8 rows, sha256 9ef3ef6cec3e): Per item: rises caught / episodes (alert runs) for each rule, and relative MAE at 7 days in 2025-26 (retrospective).
+               item   2024_A   2024_B   2024_C 2025_26_A 2025_26_B 2025_26_C  rel_mae_h7_lightgbm_2025_26  rel_mae_h7_ets_2025_26                                       note
+  Chicken - Broiler  1/1 (3)  1/1 (4)  1/1 (5)   1/3 (4)   1/3 (4)   2/3 (3)                        1.003                   1.000                                           
+         Egg - Farm  1/1 (1)  1/1 (1)  1/1 (3)   3/3 (7)   3/3 (6)   3/3 (4)                        1.030                   1.001                                           
+  Garlic - Imported  1/2 (1)  1/2 (1)  1/2 (1)   4/4 (7)   4/4 (8)   4/4 (7)                        1.015                   1.004                                           
+      Onion - Local  2/4 (2)  3/4 (3) 4/4 (10)   5/7 (6)   5/7 (6)   7/7 (9)                        1.020                   1.006                                           
+   Palm Oil - Loose none (3) none (3) none (0)  none (4)  none (4)  none (0)                        1.045                   1.007 no sustained rise: alerts cannot be judged
+             Potato  1/3 (2)  2/3 (3)  3/3 (8)   4/6 (5)   2/6 (3)   6/6 (6)                        1.116                   1.096                                           
+Soybean Oil - Loose none (3) none (3) none (0)  none (4)  none (3)  none (0)                        0.996                   1.094 no sustained rise: alerts cannot be judged
+              Sugar none (2) none (2) none (0)  none (5)  none (5)  none (1)                        1.047                   1.023 no sustained rise: alerts cannot be judged
+
+R7_range_coverage (4 rows, sha256 81fb52ace0ec): Share of days at or below the upper bound of the range against the nominal level; Kupiec test p.
+               period         rule  days  nominal  coverage  kupiec_p
+      2024 validation     ML range  2632     0.95     0.944     0.205
+      2024 validation simple range  2632     0.95     0.946     0.358
+2025-26 retrospective     ML range  4824     0.95     0.934     0.000
+2025-26 retrospective simple range  4824     0.95     0.939     0.001
+
+RESULTS REGISTER
+                                                   claim                                                                                  value                                                     source_table         label
+                                   Items and report days                                  8 items x 1,412 report days, 2021-05-17 to 2026-10-24                                                 D1_panel_summary              
+            Price unchanged from the previous report day                                                                 62-87 % of report days                                                 D1_panel_summary              
+               Sustained 10 % rise episodes (onset year)                                               70 in 2021-26; 11 in 2024; 23 in 2025-26                                    B5_rise_episodes_by_item_year              
+                 Items with no sustained rise in 2024-26                                           Palm Oil - Loose, Soybean Oil - Loose, Sugar                                    B5_rise_episodes_by_item_year              
+         Forecast relative MAE vs tomorrow = today, 2024                               1.00-1.11 (LightGBM and ETS, all horizons; none below 1)                                             M2_validation_models              
+            Significant differences (DM, Holm 5 %), 2024                                                      3 of 8; 3 favour tomorrow = today                                             M2_validation_models              
+      Forecast relative MAE vs tomorrow = today, 2025-26                               1.01-1.21 (LightGBM and ETS, all horizons; none below 1)                                                 M3_test_accuracy retrospective
+         Significant differences (DM, Holm 5 %), 2025-26                                                      6 of 8; 6 favour tomorrow = today                                                 M3_test_accuracy retrospective
+                            Alert settings fixed on 2024                    ML range 0.95, simple range 0.95, fixed rise 7% (committed e0cfa06)                                                  A1_alert_choice              
+                 ML range: rises caught, 2024 validation  6/11 = 55%; random dates 20% (p = 0.003); 17 alert runs; median delay 1.5 report days                                               A2_rule_comparison              
+             simple range: rises caught, 2024 validation    8/11 = 73%; random dates 30% (p = 0.003); 20 alert runs; median delay 2 report days                                               A2_rule_comparison              
+      fixed 7-report rise: rises caught, 2024 validation 10/11 = 91%; random dates 49% (p = 0.003); 27 alert runs; median delay 0.5 report days                                               A2_rule_comparison              
+           ML range: rises caught, 2025-26 retrospective   17/23 = 74%; random dates 28% (p = 0.003); 42 alert runs; median delay 2 report days                                               A2_rule_comparison retrospective
+       simple range: rises caught, 2025-26 retrospective   15/23 = 65%; random dates 25% (p = 0.003); 39 alert runs; median delay 2 report days                                               A2_rule_comparison retrospective
+fixed 7-report rise: rises caught, 2025-26 retrospective   22/23 = 96%; random dates 31% (p = 0.003); 30 alert runs; median delay 2 report days                                               A2_rule_comparison retrospective
+               ML range vs simple range, 2024 validation                                      both 6, ML only 0, simple only 2, neither 3 of 11                                                  A3_rule_overlap              
+         ML range vs simple range, 2025-26 retrospective                                     both 15, ML only 2, simple only 0, neither 6 of 23                                                  A3_rule_overlap retrospective
+                           Range coverage (nominal 95 %)                                  0.934-0.946; Kupiec p < 0.05 in 2025-26 retrospective                                                A4_range_coverage retrospective
+           Data audit (earlier pipeline, not recomputed)                                                         3060 price cells, 0 mismatches archive/old_pipeline/reports/project/tables/P2_audit_summary.csv              
+
+PLAN CLAIMS CHECKED
+                                              plan claim                                              result                                                          verdict
+  Ranges hold about 94 % of prices against a 95 % target                                coverage 0.934-0.946                                                        supported
+         Alerts catch 65 to 75 % of sustained 10 % rises                         ML and simple range 55%-74% partly supported: ML range 2024 validation 55% outside the range
+               About three times what random dates catch                   ML and simple range 2.5-2.8 times                     roughly: 2.5-2.8 times, a little under three
+Six forecast models compared; none beat tomorrow = today  three models (naive, ETS, LightGBM); none beats it                    changed: three models (DEVIATIONS 2026-11-17)
+            Alerts start about 2 report days after onset ML and simple range: median delay 1.5-2 report days                                                        supported
+
+figures: ['F3_forecast_vs_naive.png', 'F4_alert_recall.png', 'F5_prices_with_alerts.png'] (F5 contains prices: Drive only)
+```
+
