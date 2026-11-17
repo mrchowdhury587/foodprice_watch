@@ -92,6 +92,12 @@ alert_choice:
   B: {setting: 0.95, target_met: true}    # simple range ("tomorrow = today"): same on the 7-report change
   C: {setting: 0.07, target_met: true}    # fixed threshold: 7-report rise of at least 7 %
 
+# Report tables and figures (notebook 06). Built only from finished outputs; nothing is chosen here.
+report:
+  figure_items: ["Onion - Local | per kg", "Potato | per kg", "Egg - Farm | per hali (4 pcs)"]   # price series with alerts (F5, data folder only)
+  figure_period: ["2024-01-01", "2026-10-24"]
+  forbidden_words: [hoarding, syndicate, collusion, cartel, manipulation, early warning, cause, caused, causes]
+
 files:
   data: processed/data_8.csv       # the one data table: prices and drivers, one row per item and report day
   rise_episodes: processed/rise_episodes_8.csv   # one row per sustained rise episode (dates and rise size, no prices)
@@ -102,3 +108,5 @@ files:
   figures: reports/figures
   manifest: raw/MANIFEST.csv
   tables: reports/tables
+  report_tables: reports/tables/report
+  register: reports/RESULTS_REGISTER.md

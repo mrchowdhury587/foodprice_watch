@@ -1,4 +1,4 @@
-"""Writes notebooks/01-05b as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
+"""Writes notebooks/01-06 as plain JSON (no outputs). Usage: python tools/make_notebooks.py notebooks"""
 import json, sys
 from pathlib import Path
 
@@ -652,8 +652,71 @@ print('\\nalerts file:', SETTINGS['files']['alerts'], '| rows', len(alerts_long)
 """),
 ]
 
+report_nb = [
+    ("markdown", """
+# Food Price Watch 06: report tables, figures and results register
+Turns the finished tables of notebooks 02-05b into the thesis tables (R1-R7, CSV and LaTeX for Overleaf), figures F3-F5 and `reports/RESULTS_REGISTER.md`, which ties every headline number to its table, notebook and commit.
+Nothing is fitted, chosen or tuned here. 2025-26 results are labelled retrospective. F5 shows prices, so it stays on Drive. Run top to bottom and paste the last cell's output back.
+"""),
+    *SETUP,
+    ("code", """
+import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+from foodwatch import report as rp
+from foodwatch.paths import REPO
+T, commit = rp.load_sources(REPO)
+choice = SETTINGS['alert_choice']
+fixed = rp.git(REPO, 'log', '--reverse', '--format=%h', '-S', 'A: {setting:', '--', 'config/settings.yaml').splitlines()
+choice_commit = fixed[0] if fixed else 'not found'
+audit_p = REPO / 'archive/old_pipeline/reports/project/tables/P2_audit_summary.csv'
+audit = pd.read_csv(audit_p) if audit_p.exists() else None
+R = rp.build_all(T, SETTINGS['items'])
+"""),
+    ("code", """
+# Checks: numbers trace back to the source tables; 2025-26 labelled retrospective; no price column; wording.
+reg, planT, md = rp.register(T, commit, choice, choice_commit, audit, CODE_COMMIT)
+texts = [md] + list(rp.CAPTIONS.values()) + [str(v) for df in R.values() for c in df.columns if df[c].dtype == object for v in df[c].unique()]
+chk = dict(trace=rp.trace_checks(T, R), retro_labelled=rp.retro_labelled(R), no_price_columns=rp.no_prices(R),
+           forbidden_words=rp.wording_check(texts, SETTINGS['report']['forbidden_words']), source_commits=commit)
+chk['ok'] = all(chk['trace'].values()) and chk['retro_labelled'] and chk['no_price_columns'] and not chk['forbidden_words']
+assert chk['ok'], chk
+"""),
+    ("code", """
+OUTT = DATA_ROOT / SETTINGS['files']['report_tables']; OUTT.mkdir(parents=True, exist_ok=True)
+FIG = DATA_ROOT / SETTINGS['files']['figures']; FIG.mkdir(parents=True, exist_ok=True)
+hashes = {}
+for name, df in R.items():
+    hashes[name] = write_csv(df, OUTT / f'{name}.csv')
+    rp.to_tex(df, OUTT / f'{name}.tex', rp.CAPTIONS[name], 'tab:' + name.split('_')[0].lower())
+(DATA_ROOT / SETTINGS['files']['register']).write_text(md + '\\n', encoding='utf-8', newline='\\n')
+rp.fig_forecast(R['R4_forecast'], FIG / 'F3_forecast_vs_naive.png')
+rp.fig_recall(R['R5_alert_rules'], FIG / 'F4_alert_recall.png')
+# F5 shows prices: data folder only
+D = pd.read_csv(data('data'), parse_dates=['Date'])
+AL = pd.read_csv(data('alerts')).assign(tdate=lambda d: pd.to_datetime(d.target_date))
+EPS = pd.read_csv(data('rise_episodes'))
+s, e = (pd.Timestamp(x) for x in SETTINGS['report']['figure_period'])
+rp.fig_prices_alerts(D, AL, EPS, SETTINGS['report']['figure_items'], s, e, FIG / 'F5_prices_with_alerts.png')
+"""),
+    ("code", """
+pd.set_option('display.width', 250); pd.set_option('display.max_columns', 30); pd.set_option('display.max_colwidth', 120)
+print('=== 06 report tables, figures and results register (2025-26 RETROSPECTIVE) ===')
+print('code commit:', CODE_COMMIT, '| alert settings committed in', choice_commit)
+print('checks:', 'PASS' if chk['ok'] else 'FAIL', {k_: v_ for k_, v_ in chk.items() if k_ not in ('ok', 'source_commits')})
+print('source tables and their commits:', chk['source_commits'])
+for name, df in R.items():
+    print(f'\\n{name} ({len(df)} rows, sha256 {hashes[name][:12]}): {rp.CAPTIONS[name]}')
+    print(df.round(3).to_string(index=False))
+print('\\nRESULTS REGISTER'); print(reg[['claim', 'value', 'source_table', 'label']].to_string(index=False))
+print('\\nPLAN CLAIMS CHECKED'); print(planT.to_string(index=False))
+print('\\nfigures:', [p.name for p in sorted(FIG.glob('F[345]_*.png'))], '(F5 contains prices: Drive only)')
+"""),
+]
+
 OUT.mkdir(parents=True, exist_ok=True)
 for name, cells in [("01_data_intake.ipynb", intake), ("02_data_processing.ipynb", processing), ("03_price_behaviour.ipynb", behaviour_nb),
-                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb), ("05b_alert_scoring.ipynb", alert_scoring_nb)]:
+                    ("04a_forecast_choice.ipynb", choice_nb), ("04b_forecast_test.ipynb", test_nb), ("05a_alert_choice.ipynb", alert_choice_nb), ("05b_alert_scoring.ipynb", alert_scoring_nb), ("06_report_tables.ipynb", report_nb)]:
     (OUT / name).write_text(json.dumps(nb(cells), indent=1, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print("wrote", OUT / name)
