@@ -633,13 +633,236 @@ def build(data_root: Path, out: Path, keep=None):
     print(f"saved {out} ({d.n} slides)")
 
 
+# ----------------------------------------------------------------------------- simple version
+def stat(slide, x, y, w, big, small, big_size=40):
+    """A light card with a big number and a short label under it."""
+    box(slide, x, y, w, 1.75, "", fill=LIGHT)
+    text_box(slide, x, y + 0.12, w, 0.95, big, big_size, bold=True, color=DARK, align=PP_ALIGN.CENTER,
+             anchor=MSO_ANCHOR.MIDDLE)
+    text_box(slide, x + 0.15, y + 1.05, w - 0.3, 0.65, small, 15, color=TEXT, align=PP_ALIGN.CENTER)
+
+
+def white_label(shape):
+    shape.text_frame.paragraphs[0].runs[0].font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+
+
+def build_simple(data_root: Path, out: Path):
+    """Plain-language version for a general audience: few numbers, no statistical tests."""
+    local_figs = data_root / "reports" / "figures"
+    d = Deck()
+    same = "\u201ctomorrow's price = today's price\u201d"
+
+    # 1 Title
+    s = d.slide(notes="This project checks Dhaka food prices every day and warns when a price rises in an "
+                      "unusual way. It also tests whether machine learning makes those warnings better.")
+    picture(s, REPORT / "unilogo.png", W / 2 - 0.65, 0.45, w=1.3)
+    text_box(s, 0.8, 1.9, W - 1.6, 1.4,
+             ["Food Price Watch",
+              ("Spotting unusual rises in daily food prices in Dhaka", {"size": 24, "bold": False, "color": TEXT})],
+             40, bold=True, color=DARK, align=PP_ALIGN.CENTER)
+    text_box(s, 0.8, 3.75, W - 1.6, 2.9,
+             [("Md. Romjan Chowdhury  |  ID: 22408024", {"bold": True, "size": 20}),
+              ("Research Project, Master of Science (Engineering)", {"size": 18}),
+              ("Department of Computer Science and Engineering, Comilla University", {"size": 18}),
+              ("Supervisor: Dr. Mahmudul Hasan, Associate Professor", {"size": 18, "after": 10}),
+              ("November 2026", {"size": 16, "color": MUTED})],
+             18, align=PP_ALIGN.CENTER)
+
+    # 2 Problem
+    s = d.slide("The problem",
+                "The government agency TCB writes down Dhaka market prices every working day. But a long list of "
+                "daily prices does not answer the question people care about: is today's price unusually high?")
+    bullets(s, 0.6, 1.5, 7.4, 5.0, [
+        "Food prices in Dhaka can jump within a few weeks: onion, potato, eggs, chicken",
+        "Food is more than half of what the consumer price index measures",
+        "TCB (Trading Corporation of Bangladesh) publishes market prices every working day",
+        "But each day is a separate sheet: it does not say whether today's price is unusual",
+    ], 20)
+    box(s, 8.5, 2.0, 4.2, 2.6, "The question\n\n\u201cIs today's price unusually high for this item?\u201d", 20)
+
+    # 3 What the project does
+    s = d.slide("What this project does",
+                "Two things: a working monitor, and a fair test of whether machine learning helps it.")
+    for i, (head, body) in enumerate([
+            ("1. A daily price monitor", "For 8 everyday foods, it sets an expected highest price for each day "
+                                         "and raises an alert when the price stays above it."),
+            ("2. A fair test of machine learning", "Does a machine-learning model give better predictions or "
+                                                   f"better alerts than a very simple rule: {same}?")]):
+        x = 0.6 + i * 6.2
+        box(s, x, 1.6, 5.9, 3.3, "", fill=LIGHT)
+        text_box(s, x + 0.3, 1.8, 5.3, 0.6, head, 22, bold=True, color=DARK)
+        text_box(s, x + 0.3, 2.55, 5.3, 2.2, body, 18)
+    text_box(s, 0.6, 5.4, W - 1.2, 0.8,
+             "An alert means a rise is unusual for that item. It does not say why the price rose, "
+             "and it is not a forecast of future rises.", 16, italic=True, color=MUTED)
+
+    # 4 Data
+    s = d.slide("The data",
+                "All prices come from TCB's daily sheets, about five and a half years of them. We checked our copy "
+                "of the sheets against the originals and found no copying errors.")
+    for i, (big, small) in enumerate([("8", "everyday foods"), ("1,412", "days of TCB price sheets"),
+                                      ("5\u00bd years", "May 2021 to October 2026")]):
+        stat(s, 0.6 + i * 4.1, 1.5, 3.85, big, small)
+    text_box(s, 0.6, 3.6, W - 1.2, 0.5, "The eight foods", 20, bold=True, color=DARK)
+    foods = ["Broiler chicken", "Farm eggs", "Local onion", "Potato",
+             "Imported garlic", "Palm oil", "Soybean oil", "Sugar"]
+    for i, f in enumerate(foods):
+        col, row = i % 4, i // 4
+        box(s, 0.6 + col * 3.07, 4.2 + row * 0.85, 2.85, 0.65, f, 17)
+    text_box(s, 0.6, 6.0, W - 1.2, 0.5,
+             "Check: 3,060 prices compared with the original sheets, no mistakes found. "
+             "Missing prices are rare and are never filled in with guesses.", 15, color=MUTED)
+
+    # 5 How an alert is raised
+    s = d.slide("How an alert is raised",
+                "Every day each item gets an upper limit, set a week in advance from how that item's price has "
+                "moved before. One day above the limit is not enough, because one-day jumps often go away. "
+                "Three days out of the last five is an alert.")
+    steps = [("1", "Look back", "How much does this item's price usually move in a week?"),
+             ("2", "Set a limit", "An expected highest price for each day, fixed one week before"),
+             ("3", "Compare", "Is today's price above the limit?"),
+             ("4", "Alert", "Above the limit on 3 of the last 5 days \u2192 alert")]
+    for i, (n, head, body) in enumerate(steps):
+        x = 0.6 + i * 3.1
+        white_label(box(s, x + 1.05, 1.5, 0.7, 0.7, n, 20, fill=DARK, bold=True))
+        text_box(s, x, 2.35, 2.8, 0.5, head, 20, bold=True, color=DARK, align=PP_ALIGN.CENTER)
+        text_box(s, x, 2.9, 2.8, 1.4, body, 16, align=PP_ALIGN.CENTER)
+        if i < 3:
+            arrow(s, x + 1.95, 1.85, x + 4.05, 1.85)
+    text_box(s, 0.6, 4.45, W - 1.2, 0.5, "Three ways of setting the limit were compared", 20, bold=True, color=DARK)
+    for i, (head, body) in enumerate([("Machine learning", "A LightGBM model predicts the price"),
+                                      ("Simple", "Assume the price stays the same"),
+                                      ("Fixed", "Any rise of more than 7 % in a week")]):
+        box(s, 0.6 + i * 4.1, 5.05, 3.85, 1.2, f"{head}\n{body}", 16)
+
+    # 6 Testing it fairly
+    s = d.slide("Testing it fairly",
+                "To avoid fooling ourselves, every setting was chosen using 2024 only and saved before the later "
+                "data was scored. The later period had been looked at in an earlier version of the project, so we "
+                "call those results retrospective. We also compared the alerts with alerts placed on random days.")
+    for t, x, w, f in [("2021 - 2023\nlearn from the past", 0.6, 4.1, LIGHT),
+                       ("2024\nchoose the settings", 4.9, 3.6, RGBColor(0xD6, 0xE4, 0xF5)),
+                       ("2025 - Oct 2026\ntest (retrospective)", 8.7, 4.0, RGBColor(0xFF, 0xF4, 0xD6))]:
+        box(s, x, 1.6, w, 1.2, t, 18)
+    bullets(s, 0.6, 3.3, W - 1.2, 3.4, [
+        "Settings were chosen on 2024 and saved before the test period was scored",
+        "A \u201cbig rise\u201d is defined from prices only: up 10 % or more on the price 14 report days "
+        "earlier, for at least 5 report days in a row",
+        "Each method is compared with the same number of alerts placed on random days",
+    ], 19)
+
+    # 7 Finding 1
+    s = d.slide("Finding 1: prices rarely change",
+                "On most days the price is exactly the same as the day before. Even so, there were 70 big rises "
+                "over the five and a half years, mostly in onion, potato and garlic.")
+    stat(s, 0.6, 1.6, 5.8, "62 - 87 %", "of days, an item's price is the same as the day before", 44)
+    stat(s, 6.9, 1.6, 5.8, "70", "big rises (10 % or more, lasting) in 2021-26", 44)
+    bullets(s, 0.6, 3.85, W - 1.2, 2.8, [
+        "Most big rises were in onion, potato and imported garlic",
+        "Palm oil, soybean oil and sugar had no big rise in 2024 or 2025-26",
+    ], 19)
+
+    # 8 Finding 2
+    s = d.slide("Finding 2: machine learning did not predict better",
+                "We tried two forecasting models. Neither one predicted prices better than simply saying "
+                "tomorrow's price will be today's price. On prices that hardly move, today's price is the best guess.")
+    box(s, 0.6, 1.6, W - 1.2, 1.5,
+        f"Neither model beat {same}\nfor any time ahead, from 1 to 30 report days", 22)
+    bullets(s, 0.6, 3.5, W - 1.2, 3.2, [
+        "Models tried: ETS (a standard statistical method) and LightGBM (machine learning)",
+        "Both were slightly worse than the simple guess, in 2024 and in 2025-26",
+        "Why: the price is unchanged on most days, so a model that predicts small moves is usually wrong",
+        "Adding weather and the exchange rate did not improve the predictions",
+    ], 19)
+
+    # 9 Finding 3
+    s = d.slide("Finding 3: the alerts do catch big rises",
+                "In 2025-26 there were 23 big rises. The machine-learning limit caught 17 and the simple limit 15, "
+                "about two and a half times more than the same alerts on random days. Alerts usually came about "
+                "2 report days after a rise started.")
+    stat(s, 0.6, 1.6, 3.85, "17 of 23", "big rises caught: machine-learning limit (2025-26)")
+    stat(s, 4.7, 1.6, 3.85, "15 of 23", "big rises caught: simple limit (2025-26)")
+    stat(s, 8.8, 1.6, 3.85, "~2 days", "typical delay after a rise starts")
+    bullets(s, 0.6, 3.8, W - 1.2, 3.0, [
+        "About 2.5 to 2.8 times better than the same number of alerts on random days",
+        "The fixed 7 % rule caught 22 of 23, but it is almost the same as the definition of a big rise, "
+        "so it is not a fair winner",
+        "Alerts flag rises not explained by measured cost drivers; they are not early warnings",
+    ], 18)
+
+    # 10 Finding 4
+    s = d.slide("Finding 4: the simple method is enough",
+                "Both limits caught almost the same rises: 15 of the 23 were caught by both. The machine-learning "
+                "model adds training and upkeep but no real benefit, so the simple method is the better choice.")
+    box(s, 0.6, 1.6, W - 1.2, 1.5,
+        "The machine-learning limit and the simple limit caught almost the same rises\n"
+        "(15 of 23 caught by both in 2025-26)", 21)
+    for i, (head, body) in enumerate([("Same results", "Nearly the same rises caught"),
+                                      ("No model to train", "Nothing to retrain or maintain"),
+                                      ("Easy to explain", "\u201cHigher than this item usually moves in a week\u201d")]):
+        box(s, 0.6 + i * 4.1, 3.5, 3.85, 1.6, f"{head}\n{body}", 17)
+
+    # 11 App
+    s = d.slide("The monitoring app",
+                "A simple web app shows the result. Example: onion's price started a big rise on 2 November 2025; "
+                "the app raised the alert on 4 November, two report days later.")
+    bullets(s, 0.6, 1.5, 5.9, 2.6, [
+        "Status on a day: all 8 items, normal or alert",
+        "Item: price chart with the limit and alerts",
+        "Alert log: every alert raised",
+        "How it works: the methods and their scores",
+    ], 17)
+    text_box(s, 0.6, 4.05, 5.9, 0.5, "Example: onion, November 2025", 19, bold=True, color=DARK)
+    for i, (day, t) in enumerate([("2 Nov", "Rise starts; price above the limit"),
+                                  ("3 Nov", "Above again: no alert yet"),
+                                  ("4 Nov", "3rd day above: alert")]):
+        y = 4.6 + i * 0.7
+        box(s, 0.6, y, 1.2, 0.55, day, 14, bold=True)
+        text_box(s, 1.95, y, 4.6, 0.55, t, 16, anchor=MSO_ANCHOR.MIDDLE)
+    picture(s, local_figs / "F5_prices_with_alerts.png", 6.9, 1.3, h=5.1)
+    text_box(s, 6.9, 6.45, 5.9, 0.3, "Onion, potato and egg prices 2024-26: big rises shaded, alerts marked.",
+             11, color=MUTED)
+
+    # 12 Summary and limits
+    s = d.slide("Summary and limits",
+                "The main message: a daily food price monitor works, and it does not need machine learning. Be "
+                "clear about the limits: the test period had been seen before, and there are few big rises.")
+    text_box(s, 0.6, 1.4, 6.0, 0.5, "What we learned", 22, bold=True, color=DARK)
+    bullets(s, 0.6, 2.0, 6.0, 4.7, [
+        "Daily food prices in Dhaka rarely change, but big rises do happen",
+        "Machine learning did not predict prices better than \u201ctomorrow = today\u201d",
+        "The alerts catch most big rises, far better than chance",
+        "A simple limit works as well as machine learning",
+    ], 18)
+    text_box(s, 7.0, 1.4, 5.7, 0.5, "Limits", 22, bold=True, color=DARK)
+    bullets(s, 7.0, 2.0, 5.75, 4.7, [
+        "The 2025-26 test period had been looked at in an earlier run",
+        "Few big rises to test on (23 in 2025-26)",
+        "Only Dhaka, only rises, past data replayed",
+        "Next: connect to new TCB sheets and run it on new days",
+    ], 18)
+
+    # 13 Thank you
+    s = d.slide(notes="Invite questions.")
+    text_box(s, 0.8, 2.5, W - 1.6, 1.2, "Thank you", 48, bold=True, color=DARK, align=PP_ALIGN.CENTER)
+    text_box(s, 0.8, 3.8, W - 1.6, 0.8, "Questions?", 28, color=TEXT, align=PP_ALIGN.CENTER)
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    d.prs.save(out)
+    print(f"saved {out} ({d.n} slides)")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", default=os.environ.get("FW_DATA_ROOT", "E:/msc_project/FoodPriceWatch_v2_local"))
     ap.add_argument("--out", default=None)
     ap.add_argument("--short", action="store_true", help="13-slide version for a shorter talk")
+    ap.add_argument("--simple", action="store_true", help="plain-language version for a general audience")
     a = ap.parse_args()
     root = Path(a.data_root)
-    name = "FoodPriceWatch_presentation_short.pptx" if a.short else "FoodPriceWatch_presentation.pptx"
-    out = Path(a.out) if a.out else root / "reports" / "presentation" / name
-    build(root, out, SHORT if a.short else None)
+    folder = root / "reports" / "presentation"
+    if a.simple:
+        build_simple(root, Path(a.out) if a.out else folder / "FoodPriceWatch_presentation_simple.pptx")
+    else:
+        name = "FoodPriceWatch_presentation_short.pptx" if a.short else "FoodPriceWatch_presentation.pptx"
+        build(root, Path(a.out) if a.out else folder / name, SHORT if a.short else None)
