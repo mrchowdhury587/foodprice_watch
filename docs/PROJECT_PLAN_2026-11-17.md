@@ -12,6 +12,10 @@ The project stops presenting itself as a price prediction system. It becomes a m
 
 Nothing is rebuilt. The data pipeline, the model, the ranges, the alerts, the driver breakdown, the dashboard and every existing result table stay exactly as they are. Three analysis stages and a new report are added.
 
+
+
+
+
 | Part | Source | Status |
 |---|---|---|
 | Dataset and audit | S22 | done, kept |
